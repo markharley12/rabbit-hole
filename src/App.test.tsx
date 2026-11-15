@@ -127,6 +127,15 @@ describe('App', () => {
     expect(screen.getByRole('link', { name: /MSC2020/ })).toBeTruthy()
   })
 
+  it('says which build is running, so an update can be confirmed on the phone', async () => {
+    serveMap()
+    render(<App />)
+    await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
+    fireEvent.click(screen.getByRole('button', { name: 'Show more' }))
+    expect(screen.getByRole('heading', { name: 'This version' })).toBeTruthy()
+    expect(screen.getByText(new RegExp(`^Built \\d{1,2} \\w{3} \\d{4}, \\d{2}:\\d{2} from commit ${__APP_BUILD__.commit.replace('+', '\\+')}\\.`))).toBeTruthy()
+  })
+
   it('switches theme and remembers it', async () => {
     serveMap()
     render(<App />)

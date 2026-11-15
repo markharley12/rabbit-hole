@@ -18,6 +18,15 @@ interface Props {
   onOpenLesson: (lessonId: string) => void
 }
 
+// "15 Nov 2026, 19:04", in the phone's own time zone.
+const buildTime = new Date(__APP_BUILD__.time).toLocaleString('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+})
+
 const plural = (n: number, one: string, many = one + 's') => `${n.toLocaleString('en-GB')} ${n === 1 ? one : many}`
 
 /** What the children of a node are called, from their own ranks. */
@@ -220,6 +229,12 @@ export function NodeSheet({ node, document: doc, course, open, onOpenChange, onS
                 TreeQuiz
               </a>{' '}
               at commit {doc.builtFrom.commit.slice(0, 7)}.
+            </p>
+
+            <h2>This version</h2>
+            <p className="note">
+              Built {buildTime} from commit {__APP_BUILD__.commit}. A newer build arrives the second time the app is opened after it is
+              made.
             </p>
           </>
         )}

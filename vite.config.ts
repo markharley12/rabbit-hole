@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -74,9 +75,27 @@ function katexWoff2Only(): Plugin {
   }
 }
 
+/**
+ * When and from which commit this build was made, shown on the home sheet so
+ * it is easy to tell on the phone whether an update has arrived. "+changes"
+ * marks a build from uncommitted work.
+ */
+function buildStamp() {
+  const git = (args: string) => {
+    try {
+      return execSync(`git ${args}`, { cwd: here('.'), stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+    } catch {
+      return ''
+    }
+  }
+  const commit = git('rev-parse --short HEAD') || 'unknown'
+  return { time: new Date().toISOString(), commit: git('status --porcelain') ? `${commit}+changes` : commit }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [katexWoff2Only(), react(), serviceWorker()],
+  define: { __APP_BUILD__: JSON.stringify(buildStamp()) },
   // Relative, so one build works at a domain's root or under any path.
   base: './',
   server: {
