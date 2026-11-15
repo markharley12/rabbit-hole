@@ -8,8 +8,8 @@ import { TopBar } from './components/TopBar.tsx'
 import { applyTheme, initialTheme, saveTheme } from './theme.ts'
 import type { Theme } from './theme.ts'
 import type { Course, CourseIndex } from './lesson/types.ts'
-import { parseRoute } from './route.ts'
-import { countCourses } from './courses.ts'
+import { lessonHash, parseRoute, resolveLesson } from './route.ts'
+import { countCourses, groupByNode } from './courses.ts'
 import { CoursesMenu } from './components/CoursesMenu.tsx'
 import { UpdateBar } from './components/UpdateBar.tsx'
 
@@ -47,7 +47,7 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(initialTheme)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [refit, setRefit] = useState(0)
-  const [courses, setCourses] = useState<Map<string, Course>>(new Map())
+  const [courseList, setCourseList] = useState<Course[]>([])
   // Whether the open lesson was opened from the map in this page, so closing
   // it can step back through history instead of piling up entries.
   const openedHere = useRef(false)
@@ -77,7 +77,7 @@ export default function App() {
     let live = true
     fetch(`${COURSES_URL}index.json`)
       .then((response) => (response.ok ? (response.json() as Promise<CourseIndex>) : { format: 1 as const, courses: [] }))
-      .then((index) => live && setCourses(new Map(index.courses.map((course) => [course.nodeId, course]))))
+      .then((index) => live && setCourseList(Array.isArray(index.courses) ? index.courses : []))
       .catch((error: unknown) => console.warn('No course index; the map shows no courses.', error))
     return () => {
       live = false
@@ -86,8 +86,8 @@ export default function App() {
 
   const document = loaded.state === 'ready' ? loaded.document : null
   const layout = useMemo(() => (document ? layoutMap(document.root) : null), [document])
+  const courses = useMemo(() => groupByNode(courseList), [courseList])
   const counts = useMemo(() => (layout ? countCourses(layout, courses) : new Map<string, number>()), [layout, courses])
-  const courseList = useMemo(() => [...courses.values()], [courses])
   const screen = useMemo(() => {
     const [width, height] = size.split('x').map(Number)
     return { width, height }
@@ -108,8 +108,8 @@ export default function App() {
 
   const route = parseRoute(hash)
   const focus = layout.byId.get(route.nodeId) ?? layout.root
-  const course = courses.get(focus.id)
-  const lessonOpen = !!(course && route.lessonId && course.lessons.some((l) => l.id === route.lessonId))
+  const onNode = courses.get(focus.id) ?? []
+  const opened = resolveLesson(route, onNode)
   const menuOpen = !!route.menu
 
   const select = (id: string) => {
@@ -118,10 +118,10 @@ export default function App() {
     if (id === focus.id) setRefit((n) => n + 1)
     else window.location.hash = id
   }
-  const openLesson = (lessonId: string) => {
+  const openLesson = (course: Course, lessonId: string) => {
     setSheetOpen(false)
     openedHere.current = true
-    window.location.hash = `${focus.id}/learn/${lessonId}`
+    window.location.hash = lessonHash(course, lessonId)
   }
   const openMenu = () => {
     setSheetOpen(false)
@@ -130,7 +130,7 @@ export default function App() {
   }
   // From the menu, replace its address: Back from what it opens returns to
   // where the menu was opened, not to the menu.
-  const menuToLesson = (target: { nodeId: string }, lessonId: string) => window.location.replace(`#${target.nodeId}/learn/${lessonId}`)
+  const menuToLesson = (course: Course, lessonId: string) => window.location.replace(`#${lessonHash(course, lessonId)}`)
   const menuToNode = (id: string) => {
     openedHere.current = false
     window.location.replace(`#${id}`)
@@ -144,7 +144,7 @@ export default function App() {
     }
   }
   // Lesson to lesson replaces the address, so Back still goes to the map.
-  const nextLesson = (lessonId: string) => window.location.replace(`#${focus.id}/learn/${lessonId}`)
+  const nextLesson = (course: Course, lessonId: string) => window.location.replace(`#${lessonHash(course, lessonId)}`)
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark'
@@ -157,9 +157,15 @@ export default function App() {
       <MapView layout={layout} focusId={focus.id} refit={refit} screen={screen} area={area} courseIds={courses} onSelect={select} />
       {menuOpen ? (
         <CoursesMenu layout={layout} courses={courseList} onClose={closeLesson} onOpenLesson={menuToLesson} onShowNode={menuToNode} />
-      ) : lessonOpen && course ? (
+      ) : opened ? (
         <Suspense fallback={<p className="status lesson-loading">Opening the lesson…</p>}>
-          <LessonView course={course} lessonId={route.lessonId!} base={`${COURSES_URL}${course.nodeId}/`} onClose={closeLesson} onOpenLesson={nextLesson} />
+          <LessonView
+            course={opened.course}
+            lessonId={opened.lessonId}
+            base={`${COURSES_URL}${opened.course.id}/`}
+            onClose={closeLesson}
+            onOpenLesson={(lessonId) => nextLesson(opened.course, lessonId)}
+          />
         </Suspense>
       ) : (
         <>
@@ -167,7 +173,7 @@ export default function App() {
           <NodeSheet
             node={focus}
             document={document}
-            course={course}
+            courses={onNode}
             counts={counts}
             open={sheetOpen}
             onOpenChange={setSheetOpen}

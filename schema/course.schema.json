@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "rabbit-hole/schema/course.schema.json",
   "title": "Course",
-  "description": "content/<field>/courses/<node-id>/course.json: a course attached to one map node, and the order of its lessons (each in <lesson-id>.json next to it). The app joins courses to the map by nodeId; map.json is never edited.",
+  "description": "content/<field>/courses/<course-id>/course.json: a course (the folder name is its id) attached to one map node; several courses may share a node, and the order of its lessons (each in <lesson-id>.json next to it). The app joins courses to the map by nodeId; map.json is never edited.",
   "type": "object",
   "additionalProperties": false,
   "required": ["format", "id", "nodeId", "title", "summary", "written", "sources", "lessons"],

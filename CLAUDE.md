@@ -18,7 +18,8 @@ marking, no Capacitor yet. What is where:
 - **Course format.** `schema/` (course, lesson, widget catalogue). A lesson is screens; the
   main one is a `step` (define, why, prompt, answer, three hints, check-it-yourself, one
   `next`). Types in `src/lesson/types.ts`.
-- **Content** lives in `content/maths/courses/<node-id>/` (source, in git).
+- **Content** lives in `content/maths/courses/<course-id>/` (source, in git; the folder name is
+  the course's `id`, and several courses may share a `nodeId`).
   `tools/validate_courses.py` checks it (schema, widgets, links, hints, and every answer key
   re-derived with sympy) and with `--publish` copies it into `public/content/…/courses/`
   (gitignored). `npm run dev` and `npm run build` publish first, so **invalid content
@@ -26,7 +27,8 @@ marking, no Capacitor yet. What is where:
 - **Checking answers** on the phone: `src/lesson/expr.ts` (the answer grammar, mirrored in
   the validator) and `check.ts` (deterministic slip detectors). Tests use Mark's real slips.
 - **Lesson UI:** `src/lesson/LessonView.tsx`, `StepScreen.tsx`; routes are
-  `#<node>/learn/<lesson>` (`src/route.ts`). A lazy chunk with KaTeX (woff2 only).
+  `#<node>/learn/<course>/<lesson>` (`src/route.ts`; the old `#<node>/learn/<lesson>` still opens the
+  first course on the node with that lesson). A lazy chunk with KaTeX (woff2 only).
 - **Widgets:** `src/widgets/` (line fitter, dependent columns, SVD geometry), pure maths in
   `*-math.ts`, registry kept equal to `schema/widgets.json` by a test.
 - **Finding courses:** every node counts the courses under it (`src/courses.ts`), the sheet
@@ -35,6 +37,8 @@ marking, no Capacitor yet. What is where:
   (`src/components/CoursesMenu.tsx`, route `#<node>/courses`) that lists every course and
   searches courses, sections and topics. Added after Mark's first look on 15 Nov: he saw no
   course at the top level and assumed there were none.
+- **Course packs:** `tools/pack_course.py pack|unpack` (`npm run pack -- …`) turns a course into one
+  `.rhpack` file and back, treating the file as untrusted; tests in `tools/tests/test_pack_course.py`.
 - **Progress** is on the device only (`localStorage`, `rabbit-hole:progress:<course>`):
   attempts, hints, drafts, where he is. **No scores** (claimed is not scored).
 - `pwa/sw.js`: offline. A new build waits until the app is fully closed, so an update

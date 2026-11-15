@@ -9,22 +9,36 @@ import App from './App.tsx'
 import { forgetCachedProgress } from './lesson/progress-store.ts'
 import type { Course } from './lesson/types.ts'
 
-const COURSE_DIR = 'content/maths/courses/15Axx'
+const COURSE_DIR = 'content/maths/courses/least-squares-to-the-pseudo-inverse'
 const course = JSON.parse(readFileSync(`${COURSE_DIR}/course.json`, 'utf8')) as Course
 const files: Record<string, unknown> = {
   './content/maths/map.json': JSON.parse(readFileSync('public/content/maths/map.json', 'utf8')),
   './content/maths/courses/index.json': { format: 1, courses: [course] },
 }
 for (const lesson of course.lessons) {
-  files[`./content/maths/courses/15Axx/${lesson.id}.json`] = JSON.parse(readFileSync(`${COURSE_DIR}/${lesson.id}.json`, 'utf8'))
+  files[`./content/maths/courses/${course.id}/${lesson.id}.json`] = JSON.parse(readFileSync(`${COURSE_DIR}/${lesson.id}.json`, 'utf8'))
 }
 
-const serve = (missing: string[] = []) =>
+// A second course on the same node, with one lesson that has the same id as one of the first's.
+const second: Course = {
+  ...course,
+  id: 'a-second-course',
+  title: 'A second look at columns',
+  summary: 'Two columns, once more.',
+  lessons: course.lessons.filter((l) => l.id === 'dependent-columns'),
+}
+const twoCourses: Record<string, unknown> = {
+  ...files,
+  './content/maths/courses/index.json': { format: 1, courses: [course, second] },
+  [`./content/maths/courses/${second.id}/dependent-columns.json`]: files[`./content/maths/courses/${course.id}/dependent-columns.json`],
+}
+
+const serve = (missing: string[] = [], source: Record<string, unknown> = files) =>
   vi.stubGlobal(
     'fetch',
     vi.fn(async (url: string) =>
-      url in files && !missing.includes(url)
-        ? { ok: true, json: async () => files[url] }
+      url in source && !missing.includes(url)
+        ? { ok: true, json: async () => source[url] }
         : { ok: false, status: 404, statusText: 'Not Found', json: async () => ({}) },
     ),
   )
@@ -84,7 +98,7 @@ describe('the first course', () => {
     await goTo('15Axx')
     fireEvent.click(await screen.findByRole('button', { name: 'Start course' }))
     await goTo(window.location.hash.slice(1))
-    expect(window.location.hash).toBe('#15Axx/learn/normal-equations-from-your-points')
+    expect(window.location.hash).toBe(`#15Axx/learn/${course.id}/normal-equations-from-your-points`)
 
     expect(await screen.findByText('1 of 6', {}, LOAD)).toBeTruthy()
     expect(screen.getByRole('dialog', { name: 'Normal equations from your three points' })).toBeTruthy()
@@ -146,7 +160,7 @@ describe('the first course', () => {
     )
     render(<App />)
     await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
-    await goTo('15Axx/learn/normal-equations-from-your-points')
+    await goTo(`15Axx/learn/${course.id}/normal-equations-from-your-points`)
     await screen.findByText('5 of 6', {}, LOAD)
     type('entry 1', '-0.5')
     type('entry 2', '1')
@@ -160,7 +174,7 @@ describe('the first course', () => {
     serve()
     render(<App />)
     await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
-    await goTo('15Axx/learn/the-smallest-best-fit')
+    await goTo(`15Axx/learn/${course.id}/the-smallest-best-fit`)
     await screen.findByText('1 of 7', {}, LOAD)
     for (let i = 0; i < 3; i++) {
       expect(screen.queryByRole('button', { name: 'Show the answer' })).toBeNull()
@@ -178,14 +192,14 @@ describe('the first course', () => {
 
   it('finishes a lesson and recommends exactly the next one', async () => {
     serve()
-    const blocks = (files['./content/maths/courses/15Axx/dependent-columns.json'] as { blocks: unknown[] }).blocks
+    const blocks = (files[`./content/maths/courses/${course.id}/dependent-columns.json`] as { blocks: unknown[] }).blocks
     localStorage.setItem(
       `rabbit-hole:progress:${course.id}`,
       JSON.stringify({ format: 1, lessons: { 'dependent-columns': { at: blocks.length - 1, done: false, started: '', steps: {} } } }),
     )
     render(<App />)
     await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
-    await goTo('15Axx/learn/dependent-columns')
+    await goTo(`15Axx/learn/${course.id}/dependent-columns`)
     fireEvent.click(await screen.findByRole('button', { name: 'Finish the lesson' }, LOAD))
     expect(screen.getByRole('heading', { name: 'Lesson done' })).toBeTruthy()
     const next = screen.getAllByRole('button').filter((b) => b.classList.contains('primary'))
@@ -230,7 +244,7 @@ describe('the first course', () => {
     await goTo(window.location.hash.slice(1))
     fireEvent.click(screen.getByRole('button', { name: /^Least squares to the pseudo-inverse/ }))
     await goTo(window.location.hash.slice(1))
-    expect(window.location.hash).toBe('#15Axx/learn/normal-equations-from-your-points')
+    expect(window.location.hash).toBe(`#15Axx/learn/${course.id}/normal-equations-from-your-points`)
     expect(await screen.findByText('1 of 6', {}, LOAD)).toBeTruthy()
   })
 
@@ -240,5 +254,70 @@ describe('the first course', () => {
     await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
     await goTo('15Axx')
     expect(screen.getByText('No course yet')).toBeTruthy()
+  })
+
+  it('still opens the old address, without a course id', async () => {
+    serve()
+    render(<App />)
+    await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
+    await goTo('15Axx/learn/the-smallest-best-fit')
+    expect(await screen.findByText('1 of 7', {}, LOAD)).toBeTruthy()
+  })
+})
+
+describe('two courses on one node', () => {
+  it('counts both, rings the node once, and lists each with its own button', async () => {
+    serve([], twoCourses)
+    render(<App />)
+    await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
+    expect(await screen.findByRole('button', { name: '2 courses inside' })).toBeTruthy()
+    expect(document.querySelectorAll('.course-pin')).toHaveLength(1)
+
+    await goTo('15Axx')
+    expect(await screen.findByRole('button', { name: '2 courses here' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Show more' }))
+    expect(screen.getByRole('heading', { name: 'Courses' })).toBeTruthy()
+    expect(screen.getByText(course.title)).toBeTruthy()
+    expect(screen.getByText(second.title)).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: 'Start course' })).toHaveLength(2)
+  })
+
+  it('opens each course on its own lessons', async () => {
+    serve([], twoCourses)
+    render(<App />)
+    await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
+    await goTo('15Axx')
+    fireEvent.click(await screen.findByRole('button', { name: 'Show more' }))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Start course' })[1])
+    await goTo(window.location.hash.slice(1))
+    expect(window.location.hash).toBe(`#15Axx/learn/${second.id}/dependent-columns`)
+    expect(await screen.findByRole('dialog', { name: 'Dependent columns: many best fits' }, LOAD)).toBeTruthy()
+    const urls = (fetch as unknown as { mock: { calls: string[][] } }).mock.calls.map((c) => c[0])
+    expect(urls).toContain(`./content/maths/courses/${second.id}/dependent-columns.json`)
+    expect(urls).not.toContain(`./content/maths/courses/${course.id}/dependent-columns.json`)
+  })
+
+  it('lists and opens both from the courses menu', async () => {
+    serve([], twoCourses)
+    render(<App />)
+    await screen.findByRole('button', { name: '2 courses inside' })
+    fireEvent.click(screen.getByRole('button', { name: 'Courses and search' }))
+    await goTo(window.location.hash.slice(1))
+    const menu = within(screen.getByRole('dialog', { name: 'Courses' }))
+    expect(menu.getByText('2 in the app')).toBeTruthy()
+    fireEvent.click(menu.getByRole('button', { name: new RegExp(`^${second.title}`) }))
+    await goTo(window.location.hash.slice(1))
+    expect(window.location.hash).toBe(`#15Axx/learn/${second.id}/dependent-columns`)
+    expect(await screen.findByRole('dialog', { name: 'Dependent columns: many best fits' }, LOAD)).toBeTruthy()
+  })
+
+  it('opens the old address on the first course that has the lesson', async () => {
+    serve([], twoCourses)
+    render(<App />)
+    await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
+    await goTo('15Axx/learn/dependent-columns')
+    await screen.findByRole('dialog', { name: 'Dependent columns: many best fits' }, LOAD)
+    const urls = (fetch as unknown as { mock: { calls: string[][] } }).mock.calls.map((c) => c[0])
+    expect(urls).toContain(`./content/maths/courses/${course.id}/dependent-columns.json`)
   })
 })

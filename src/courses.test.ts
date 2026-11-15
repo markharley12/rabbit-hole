@@ -1,14 +1,14 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { countCourses, fold, searchCourses, searchNodes } from './courses.ts'
+import { countCourses, fold, groupByNode, searchCourses, searchNodes } from './courses.ts'
 import type { Course } from './lesson/types.ts'
 import { layoutMap } from './map/layout.ts'
 import type { MapDocument } from './map/types.ts'
 
 const MAP = JSON.parse(readFileSync('public/content/maths/map.json', 'utf8')) as MapDocument
 const layout = layoutMap(MAP.root)
-const course = JSON.parse(readFileSync('content/maths/courses/15Axx/course.json', 'utf8')) as Course
-const courses = new Map([[course.nodeId, course]])
+const course = JSON.parse(readFileSync('content/maths/courses/least-squares-to-the-pseudo-inverse/course.json', 'utf8')) as Course
+const courses = groupByNode([course])
 
 describe('course counts', () => {
   it('counts a course on its node and every node above it, and nowhere else', () => {
@@ -24,10 +24,21 @@ describe('course counts', () => {
 
   it('adds up two courses in one branch', () => {
     const second = { ...course, id: 'other', nodeId: '15Bxx' }
-    const counts = countCourses(layout, new Map([...courses, ['15Bxx', second]]))
+    const counts = countCourses(layout, groupByNode([course, second]))
     expect(counts.get('mathematics')).toBe(2)
     expect(counts.get('15-XX')).toBe(2)
     expect(counts.get('15Axx')).toBe(1)
+  })
+
+  it('counts two courses on one node twice', () => {
+    const counts = countCourses(layout, groupByNode([course, { ...course, id: 'other' }]))
+    expect(counts.get('15Axx')).toBe(2)
+    expect(counts.get('mathematics')).toBe(2)
+  })
+
+  it('groups by node, keeping the order', () => {
+    const other = { ...course, id: 'other' }
+    expect(groupByNode([course, other]).get('15Axx')?.map((c) => c.id)).toEqual([course.id, 'other'])
   })
 })
 
