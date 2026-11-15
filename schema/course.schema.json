@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rabbit-hole/schema/course.schema.json",
+  "title": "Course",
+  "description": "content/<field>/courses/<node-id>/course.json: a course attached to one map node, and the order of its lessons (each in <lesson-id>.json next to it). The app joins courses to the map by nodeId; map.json is never edited.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "id", "nodeId", "title", "summary", "written", "sources", "lessons"],
+  "properties": {
+    "format": { "const": 1 },
+    "id": { "$ref": "lesson.schema.json#/$defs/slug" },
+    "nodeId": { "description": "The map node this course hangs on (an id in map.json).", "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 3, "maxLength": 60 },
+    "summary": { "type": "string", "maxLength": 300 },
+    "written": { "description": "When and how the course was made.", "type": "string", "minLength": 3 },
+    "sources": {
+      "description": "Where the course's content and numbers come from. Every dataset and course records its source.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "url": { "type": "string" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "lessons": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title"],
+        "properties": {
+          "id": { "$ref": "lesson.schema.json#/$defs/slug" },
+          "title": { "type": "string", "minLength": 3, "maxLength": 60 },
+          "summary": { "type": "string", "maxLength": 200 },
+          "badge": { "description": "A short tag shown in the lesson list, e.g. \"Your open task\".", "type": "string", "maxLength": 24 }
+        }
+      }
+    }
+  }
+}

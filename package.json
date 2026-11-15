@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "npm run courses && vite",
+    "build": "npm run courses && vite build",
     "preview": "vite preview",
     "typecheck": "tsc",
     "lint": "eslint .",
@@ -13,10 +13,14 @@
     "test:watch": "vitest",
     "test:tools": "env -u PYTHONPATH python3 -m unittest discover -s tools/tests",
     "build:map": "env -u PYTHONPATH python3 tools/build_maths_map.py",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run test:tools"
+    "courses": "env -u PYTHONPATH python3 tools/validate_courses.py --publish",
+    "validate": "env -u PYTHONPATH python3 tools/validate_courses.py",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run test:tools && npm run validate"
   },
   "dependencies": {
     "d3-hierarchy": "^3.1.2",
+    "katex": "0.19.1",
+    "marked": "15.0.12",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },

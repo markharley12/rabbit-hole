@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rabbit-hole/schema/lesson.schema.json",
+  "title": "Lesson",
+  "description": "One lesson: a list of screens, shown one at a time. Most screens are steps (one task each); a text screen is for the rare thing that is only read. Checked by tools/validate_courses.py, which also re-verifies every answer key with sympy. Types in src/lesson/types.ts mirror this file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "id", "title", "blocks"],
+  "properties": {
+    "format": { "const": 1 },
+    "id": { "$ref": "#/$defs/slug" },
+    "title": { "type": "string", "minLength": 3, "maxLength": 60 },
+    "summary": { "type": "string", "maxLength": 200 },
+    "data": {
+      "description": "Named numbers, vectors and matrices the answers are verified against (verify expressions use these names). Vectors are lists, matrices are lists of rows. Entries are integers or exact strings such as \"1/2\".",
+      "type": "object",
+      "propertyNames": { "pattern": "^[A-Za-z][A-Za-z0-9]*$" },
+      "additionalProperties": { "$ref": "#/$defs/value" }
+    },
+    "blocks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "description": "Dispatched on type (not oneOf), so a mistake is reported against the right kind of block.",
+        "type": "object",
+        "required": ["type"],
+        "properties": { "type": { "enum": ["step", "text"] } },
+        "allOf": [
+          { "if": { "properties": { "type": { "const": "step" } } }, "then": { "$ref": "#/$defs/step" } },
+          { "if": { "properties": { "type": { "const": "text" } } }, "then": { "$ref": "#/$defs/text" } }
+        ]
+      }
+    },
+    "sideQuest": {
+      "description": "An optional extra, collapsed on the lesson's last screen. Code goes here and nowhere else: it is never a step.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "body"],
+      "properties": {
+        "title": { "type": "string", "maxLength": 60 },
+        "body": { "$ref": "#/$defs/markdown" }
+      }
+    }
+  },
+  "$defs": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 60 },
+    "markdown": { "description": "Markdown, with maths in $...$ or $$...$$ (KaTeX). No raw HTML.", "type": "string", "minLength": 1 },
+    "exact": { "description": "A number in the answer grammar: integers, fractions, decimals, sqrt(), ^.", "type": "string", "minLength": 1, "maxLength": 80 },
+    "entry": { "oneOf": [{ "type": "integer" }, { "$ref": "#/$defs/exact" }] },
+    "value": {
+      "oneOf": [
+        { "$ref": "#/$defs/entry" },
+        { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/entry" } },
+        { "type": "array", "minItems": 1, "items": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/entry" } } }
+      ]
+    },
+    "widget": {
+      "description": "A widget from the library. The name must be in schema/widgets.json and the params must match its schema there.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/$defs/slug" },
+        "params": { "type": "object" },
+        "caption": { "$ref": "#/$defs/markdown" }
+      }
+    },
+    "define": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["term", "meaning"],
+      "properties": {
+        "term": { "type": "string", "maxLength": 40 },
+        "meaning": { "$ref": "#/$defs/markdown" }
+      }
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "key"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z][a-z0-9]*$", "maxLength": 12 },
+        "label": { "description": "Shown before the box, e.g. \"$c$ =\". Matrix entries need none.", "type": "string", "maxLength": 40 },
+        "key": { "$ref": "#/$defs/exact" }
+      }
+    },
+    "slip": {
+      "description": "A deterministic slip detector from src/lesson/check.ts. 'known' names one specific wrong answer and what causes it.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["detect"],
+          "properties": {
+            "detect": { "enum": ["symmetric", "transpose", "scaled", "swapped", "sign"] },
+            "name": { "description": "What the answer is called in the message, e.g. \"AᵀA\".", "type": "string", "maxLength": 20 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["detect", "when", "say"],
+          "properties": {
+            "detect": { "const": "known" },
+            "when": {
+              "description": "Field name to the wrong value. Matches when every listed field has that value.",
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": { "$ref": "#/$defs/exact" }
+            },
+            "say": { "$ref": "#/$defs/markdown" }
+          }
+        }
+      ]
+    },
+    "answer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fields", "verify"],
+      "properties": {
+        "fields": { "type": "array", "minItems": 1, "maxItems": 9, "items": { "$ref": "#/$defs/field" } },
+        "matrix": {
+          "description": "Lay the fields out as a matrix of [rows, columns], row by row.",
+          "type": "array",
+          "prefixItems": [{ "type": "integer", "minimum": 1 }, { "type": "integer", "minimum": 1 }],
+          "items": false,
+          "minItems": 2
+        },
+        "vars": {
+          "description": "Single-letter variables an expression answer may use (e.g. [\"m\"] for 3 - 2m).",
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z]$" },
+          "uniqueItems": true
+        },
+        "accept": {
+          "description": "Other answers that count as right. negated: minus the key (sign conventions, eigenvector signs). multiple: any non-zero multiple (a direction).",
+          "type": "array",
+          "items": { "enum": ["negated", "multiple"] },
+          "uniqueItems": true
+        },
+        "acceptNote": { "description": "Said when an answer is right by one of the accept rules, not as the key.", "$ref": "#/$defs/markdown" },
+        "verify": {
+          "description": "An expression over the lesson's data that sympy evaluates at validation time; the keys must equal it (within the accept rules). See tools/validate_courses.py for the functions it may use.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "slips": { "type": "array", "items": { "$ref": "#/$defs/slip" } }
+      }
+    },
+    "step": {
+      "description": "The unit of teaching: one task. Define terms first, say why it matters, give hints not answers, recommend exactly one next thing.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "why", "prompt", "answer", "hints", "next"],
+      "properties": {
+        "type": { "const": "step" },
+        "id": { "$ref": "#/$defs/slug" },
+        "title": { "type": "string", "maxLength": 50 },
+        "define": { "type": "array", "maxItems": 3, "items": { "$ref": "#/$defs/define" } },
+        "why": { "$ref": "#/$defs/markdown" },
+        "prompt": { "$ref": "#/$defs/markdown" },
+        "widget": { "$ref": "#/$defs/widget" },
+        "answer": { "$ref": "#/$defs/answer" },
+        "hints": {
+          "description": "Exactly three, in order: a nudge, a narrower nudge, a worked fragment. Never the answer.",
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/markdown" }
+        },
+        "check": {
+          "description": "The 'check it yourself' panel: how to verify before sending, with a calculator and optionally a widget.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["say"],
+          "properties": {
+            "say": { "$ref": "#/$defs/markdown" },
+            "widget": { "$ref": "#/$defs/widget" }
+          }
+        },
+        "solution": { "description": "Shown once the step is right: what it means.", "$ref": "#/$defs/markdown" },
+        "next": { "description": "The one next action, as the button says it.", "type": "string", "minLength": 3, "maxLength": 50 }
+      }
+    },
+    "text": {
+      "description": "A screen that is only read. Use sparingly: steps are the main shape.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "body", "next"],
+      "properties": {
+        "type": { "const": "text" },
+        "id": { "$ref": "#/$defs/slug" },
+        "title": { "type": "string", "maxLength": 50 },
+        "body": { "$ref": "#/$defs/markdown" },
+        "widget": { "$ref": "#/$defs/widget" },
+        "next": { "type": "string", "minLength": 3, "maxLength": 50 }
+      }
+    }
+  }
+}

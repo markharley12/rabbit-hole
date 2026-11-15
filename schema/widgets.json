@@ -1,0 +1,78 @@
+{
+  "description": "The widget library: the only widgets lesson content may name. Each is ordinary, tested app code under src/widgets/; content picks one by name and sets its params. src/widgets/registry.test.ts fails if this list and the app's registry differ.",
+  "format": 1,
+  "widgets": {
+    "line-fitter": {
+      "summary": "Fit y = c + mx to a few points: drag the line or use the sliders; live residuals, ‖r‖² and r·(each column); keep guesses in a table to compare.",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["points"],
+        "properties": {
+          "points": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 8,
+            "items": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 }
+          },
+          "start": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["c", "m"],
+            "properties": { "c": { "type": "number" }, "m": { "type": "number" } }
+          },
+          "cRange": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 },
+          "mRange": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 },
+          "showDots": { "description": "Show r·(1,…,1) and r·x, which are both zero at the best fit.", "type": "boolean" },
+          "table": { "description": "Offer 'Keep this guess' and a table of kept guesses.", "type": "boolean" },
+          "revealBest": { "description": "Offer a 'Show the best line' button. Off unless the learner has already found it.", "type": "boolean" }
+        }
+      }
+    },
+    "dependent-columns": {
+      "summary": "Two dependent columns: the line of best fits in the (c, m) plane, error level lines parallel to it, a draggable p with ‖r‖² and ‖p‖², and the circle ‖x‖ = ‖p‖.",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["A", "b"],
+        "properties": {
+          "A": {
+            "description": "A matrix with two columns, the second a multiple of the first.",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 6,
+            "items": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 }
+          },
+          "b": { "type": "array", "minItems": 2, "maxItems": 6, "items": { "type": "number" } },
+          "mode": { "description": "line: p slides along the best-fit line. free: p goes anywhere.", "enum": ["line", "free"] },
+          "start": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 },
+          "circle": { "description": "Draw the circle through p centred on the origin.", "type": "boolean" },
+          "levels": { "description": "Draw error level lines.", "type": "boolean" },
+          "revealMinNorm": { "description": "Mark the minimum-norm point. Off until the learner has found it.", "type": "boolean" }
+        }
+      }
+    },
+    "svd-geometry": {
+      "summary": "A 2×2 matrix as rotate, stretch, rotate: the unit circle through Vᵀ, Σ and U to an ellipse, with sliders on σ₁, σ₂ and both angles; optional rank-1 truncation (error σ₂) and the pseudo-inverse's 1/σ rule.",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "matrix": {
+            "description": "Start from this 2×2 matrix (its SVD is computed). Otherwise from sigma and the angles.",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 }
+          },
+          "sigma": { "type": "array", "prefixItems": [{ "type": "number", "minimum": 0 }, { "type": "number", "minimum": 0 }], "items": false, "minItems": 2 },
+          "angleV": { "description": "Degrees.", "type": "number" },
+          "angleU": { "description": "Degrees.", "type": "number" },
+          "controls": { "description": "Show the sliders.", "type": "boolean" },
+          "truncate": { "description": "Offer the rank-1 truncation toggle.", "type": "boolean" },
+          "pinv": { "description": "Show what the pseudo-inverse does to each σ.", "type": "boolean" }
+        }
+      }
+    }
+  }
+}
