@@ -5,9 +5,10 @@ For the stronger model that builds this. Read [../CLAUDE.md](../CLAUDE.md), then
 
 ## Before you write code
 
-1. Check whether `docs/seed-context.md` exists. If so, read it: it is Mark's condensed
-   recent maths chats and learning profile, and should shape the first course and the
-   widgets. If not, say so and proceed with Phase 0, which doesn't need it.
+1. Read [seed-context.md](seed-context.md): Mark's learning style in his own words, where he
+   got to, his slip patterns, and the product implications (step-based lessons, slip
+   diagnosis, learner state as the resume prompt). It shapes Phases 1–2 more than Phase 0.
+   Note section 5 (a conflict with his notes repo's mastery scores) before seeding any scores.
 2. Resolve PLAN.md section 7 with Mark only where it blocks Phase 0 (name, how deep the map
    zooms). Everything else has a stated default.
 3. Pick the project's git branch policy (this repo starts on `main`; no remote yet).

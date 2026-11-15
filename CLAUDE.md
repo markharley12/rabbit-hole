@@ -14,8 +14,10 @@ model can implement it. **Read in this order:**
 1. [docs/PLAN.md](docs/PLAN.md) — vision, decisions Mark has made, architecture, phases, open questions.
 2. [docs/REUSE.md](docs/REUSE.md) — what to take from TreeQuiz and Jarvis, with paths and the traps they hit.
 3. [docs/HANDOFF.md](docs/HANDOFF.md) — the first implementation brief (Phase 0).
-4. `docs/seed-context.md` — **does not exist yet**; Mark is supplying his recent maths chats and a
-   condensed learning profile will go there. Check for it before designing content or marking.
+4. [docs/seed-context.md](docs/seed-context.md) — how Mark actually learns, condensed from his
+   claude.ai chats (one so far): his teaching-style spec in his own words, where he got to, his
+   slip patterns, and what they imply for the lesson format and widgets. Add further chats as
+   dated sections. Read it before designing lessons, widgets or marking.
 
 ## About the learner (the parts that matter here)
 

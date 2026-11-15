@@ -121,6 +121,11 @@ content/
 data/                        # gitignored: attempts (photos), marking results, progress export
 ```
 
+**Update after the first seed chat ([seed-context.md](seed-context.md) section 6):** Mark's
+real unit of learning is a *micro-step* (define → why → one task → attempt → check → one next
+step), with deterministic slip diagnosis. Treat a `step` block as the main lesson shape, ahead
+of long text pages, and make learner state a stored record, not a hand-written resume prompt.
+
 A **lesson is a list of typed blocks**, validated against a JSON Schema in `schema/`:
 `text` (Markdown + KaTeX), `widget` (name + params, from a vetted library), `problem` (auto-
 checked: numeric/symbolic answer plus checker), `paper-problem` (photographed and marked),
@@ -184,7 +189,7 @@ Each phase ends with something Mark can hold on his phone.
 | --- | --- | --- |
 | **0. The map** | PWA showing all of maths as a zoomable map; tap a node → sheet with name, MSC code, topics, "no course yet". Installed on his phone | Data from `tools/build_maths_map.py` reading TreeQuiz's `datasets/maths/`. No server, no AI. Tests for data build and layout helpers |
 | **1. Levels and prerequisites** | `level` + `prereqs` data (generated, validated), highlight a node's prerequisite chain, difficulty overlay | First real use of Claude Code to produce content; defines the validate-script pattern |
-| **2. Lesson format + one hand-made slice** | Block schema, lesson renderer (KaTeX), 3–4 widgets, auto-checked problems. **One SVD course**, because he was mid-way through it | Prove the format on content Mark will actually use. Ingest `seed-context.md` first |
+| **2. Lesson format + one hand-made slice** | Block schema, lesson renderer (KaTeX), 3–4 widgets, auto-checked problems. **One course: "Least squares to the pseudo-inverse"** (seed-context.md section 7), because it resumes exactly where he stopped | Prove the format on content Mark will actually use |
 | **3. Server and sync** | PC server: serve content, content-pack diff/download in the app, **no-APK-update** works | Adapt Jarvis server skeleton and tailnet setup |
 | **4. Generate** | "Suggest courses" → tick → background generation → validate → appears on the map | The AI-native loop. Needs 1–3 |
 | **5. Photo marking** | Camera → upload → marking → feedback and mastery update | Port of the Maths-Attempts flow |
