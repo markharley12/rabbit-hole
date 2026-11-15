@@ -1216,15 +1216,17 @@ a {
 }
 /* Room for the dock under the last line, so nothing is stuck behind it. */
 .lesson.has-tools .lesson-body {
-  /* Each round button is 44px plus an 8px gap; --tools is how many the lesson has. */
-  padding-bottom: calc(20px + var(--tools, 2) * 52px);
+  padding-bottom: 72px;
 }
+/* One row along the footer's top edge. A column of four buttons stood over the
+   answer boxes (seen on "The singular values", 15 Nov 2026); a row covers only
+   the strip the padding above keeps empty. */
 .tool-dock {
   position: absolute;
   right: max(10px, env(safe-area-inset-right));
   bottom: 10px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
 }
 .tool-round {

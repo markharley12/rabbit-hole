@@ -6,7 +6,7 @@ the app's own content files. Personal project of Mark's; public on GitHub in the
 built around his setup (Claude Code on his PC, phone over Tailscale), so it is not meant to
 be turnkey for anyone else. **"rabbit-hole" is a working name** — rename freely.
 
-## Status: Phase 2 slice built, waiting for Mark's phone test (15 Nov 2026)
+## Status: Phase 2 slice plus roadmap stages A and B built, waiting for Mark's phone test (15 Nov 2026)
 
 The map, plus one real course: **"Least squares to the pseudo-inverse"** on `15Axx` (Basic
 linear algebra), five lessons resuming where Mark's chat stopped. No server, no AI, no photo
@@ -39,7 +39,7 @@ marking, no Capacitor yet. What is where:
   course at the top level and assumed there were none.
 - **Course packs:** `tools/pack_course.py pack|unpack` (`npm run pack -- …`) turns a course into one
   `.rhpack` file and back, treating the file as untrusted; tests in `tools/tests/test_pack_course.py`.
-- **Lesson tools** (`src/tools/`): a dock of round buttons at the right edge of the lesson,
+- **Lesson tools** (`src/tools/`): a row of round buttons at the right of the lesson,
   riding on the footer's top edge (`ToolDock.tsx`; a tool is `{ id, label, icon, render(close) }`,
   so the cheat sheet and Reading are entries in `lesson-tools.tsx`, each shown only when there is
   something to show). A tool opens as an
@@ -73,7 +73,7 @@ marking, no Capacitor yet. What is where:
   KaTeX bundled; typed answers only until photo marking (Phase 5).
 
 Run everything with `npm run check` (typecheck, lint, Vitest, Python tests, course
-validation). Build and phone access are in [README.md](README.md). Open points and next
+validation). Build and phone access are in [README.md](README.md). **What to build next, and how work is delegated to subagents, is in [docs/ROADMAP.md](docs/ROADMAP.md)** (written from Mark's brain dump of 15 Nov; next are stage C, spaced review, and stage D, the PC server and AI sessions, designed in [docs/ai-sessions.md](docs/ai-sessions.md)). Course content is written to the contract in [docs/course-authoring.md](docs/course-authoring.md). Older open points and next
 steps are at the end of [docs/HANDOFF.md](docs/HANDOFF.md).
 
 The planning docs, still the reference for later phases. **Read in this order:**

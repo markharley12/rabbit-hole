@@ -162,6 +162,17 @@ Subagents (Sonnet by default) build. To make that work:
 
 Filled in as stages land (date, commit, what was not checked).
 
+- **A1 Courses by id, course packs** (15 Nov 2026). Source in `content/maths/courses/<course-id>/`,
+  many courses per node, route `#<node>/learn/<course-id>/<lesson-id>` (the old two-part form still
+  opens, checked in the built-in browser), `tools/pack_course.py` with `.rhpack` files. Not checked:
+  a node with two real courses on the phone (only in tests; there is one course); sending a pack to
+  another machine.
+- **A2 Tool dock** (15 Nov 2026). Dock, scratch pad, calculator tape, number keyboard. Looked at in
+  the built-in browser at 375x812 (mouse drawing, Escape and back close, strokes saved). The dock
+  became one row along the footer after four stacked buttons covered an answer box. Not checked:
+  two-finger pan and pinch, a palm on the screen, and whether the phone's keyboard really swaps
+  between the number pad and letters. An iPhone's decimal pad has no minus key ("abc" is the way out).
+
 - **B1 Cheat sheet** (15 Nov 2026, "Cheat sheet: cheatsheet.json per course..."). `cheatsheet.json`
   with its schema, validator rules and tests; dock tool with "this lesson" marks and his own notes
   (device only); 16 formulas in 5 sections for the first course, every one typeset in strict KaTeX by
@@ -173,5 +184,5 @@ Filled in as stages land (date, commit, what was not checked).
   pass and publish (with an index; stale files removed), `src/resources.ts`, a "Reading" dock tool and
   a "Reading" section on the node sheet; the 14 links of `15Axx` were opened by another agent on 15 Nov
   (nothing here fetched them again) and their `use` lines were rewritten for the node. Not checked: any
-  URL in this stage; the offline message with the real network off; on the phone itself; whether 14
-  links in one list is too many for Mark (the sheet shows them all, as briefed).
+  URL in this stage; the offline message with the real network off; on the phone itself; the list now
+  shows four links and a "Show 10 more" button (added by the orchestrator after review).

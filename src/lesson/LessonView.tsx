@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
 import { LinksContext } from './links-context.ts'
 import { Md } from './Md.tsx'
 import { finishLesson, goTo, openLesson, recordAttempt, revealAnswer, saveDraft, takeHint } from './progress.ts'
@@ -186,7 +185,6 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
     <LinksContext.Provider value={links}>
       <div
         className={block ? 'lesson has-tools' : 'lesson'}
-        style={{ '--tools': tools.length } as CSSProperties}
         role="dialog"
         aria-label={lesson.title}
         ref={body}
