@@ -1638,3 +1638,23 @@ a {
 .reading > .note.small {
   margin-top: 12px;
 }
+
+/* PCA scatter */
+.w-pca-foot {
+  fill: var(--surface);
+  stroke: var(--b1);
+  stroke-width: 1.5;
+}
+.w-pca-second {
+  stroke: var(--b3);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+.w-pca-mean line {
+  stroke: var(--b4);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.pca-scatter .w-table td:nth-child(2) {
+  white-space: nowrap;
+}

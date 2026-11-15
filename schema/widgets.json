@@ -73,6 +73,28 @@
           "pinv": { "description": "Show what the pseudo-inverse does to each σ.", "type": "boolean" }
         }
       }
+    },
+    "pca-scatter": {
+      "summary": "A few points and a line through their mean: turn it by a handle or a slider; projections and perpendicular drops drawn, live u, variance along u and mean squared distance to the line; keep guesses in a table; optionally show the principal direction and the perpendicular one.",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["points"],
+        "properties": {
+          "points": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 12,
+            "items": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 }
+          },
+          "centre": { "description": "Draw the points minus their mean. Otherwise the raw points, with the mean as a cross.", "type": "boolean" },
+          "start": { "description": "The line's starting angle in degrees, anticlockwise from the x-axis.", "type": "number" },
+          "denominator": { "description": "What sums of squares are divided by: n − 1 (default) or n.", "enum": ["n-1", "n"] },
+          "table": { "description": "Offer 'Keep this guess' and a table of kept angles with their variance.", "type": "boolean" },
+          "revealBest": { "description": "Offer a 'Show the best direction' button. Off unless the learner has already found it.", "type": "boolean" },
+          "showSecond": { "description": "Also draw the perpendicular direction, its variance, and that the two variances add up to the total.", "type": "boolean" }
+        }
+      }
     }
   }
 }
