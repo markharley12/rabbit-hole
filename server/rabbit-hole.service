@@ -1,0 +1,20 @@
+# rabbit-hole's server as a systemd user unit (modelled on jarvis-voice's).
+# Not installed by anything here. To use it, copy it to
+# ~/.config/systemd/user/rabbit-hole.service, check the paths, then enable it
+# (see README.md, "The AI server"). %h is the home folder.
+[Unit]
+Description=rabbit-hole: the app and its Claude Code tutor (served on the tailnet by tailscale serve)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/git/rabbit-hole
+# PATH for claude's own child processes; PYTHONPATH is deliberately not set.
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/python3 %h/git/rabbit-hole/server/rabbit_server.py --port 8791
+Restart=always
+RestartSec=5
+# Binds 127.0.0.1 only; `tailscale serve` proxies port 8443 to it, so it is never itself exposed.
+
+[Install]
+WantedBy=default.target

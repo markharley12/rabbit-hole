@@ -16,7 +16,9 @@
     "courses": "env -u PYTHONPATH python3 tools/validate_courses.py --publish",
     "pack": "env -u PYTHONPATH python3 tools/pack_course.py",
     "validate": "env -u PYTHONPATH python3 tools/validate_courses.py",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run test:tools && npm run validate"
+    "server": "env -u PYTHONPATH python3 server/rabbit_server.py",
+    "test:server": "env -u PYTHONPATH python3 -m unittest discover -s server/tests",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run test:tools && npm run test:server && npm run validate"
   },
   "dependencies": {
     "d3-hierarchy": "^3.1.2",
