@@ -62,7 +62,8 @@ export function SvdGeometry({ params }: { params: SvdGeometryParams }) {
           <g key={className} className={className}>
             <line x1={SIZE / 2} y1={SIZE / 2} x2={to(tip)[0]} y2={to(tip)[1]} />
             <circle cx={to(tip)[0]} cy={to(tip)[1]} r={3.5} />
-            <text x={to(tip)[0] + 6} y={to(tip)[1] - 6}>
+            {/* Labels on the right half sit left of the tip, so they never run off the edge. */}
+            <text x={to(tip)[0] + (to(tip)[0] > SIZE * 0.6 ? -6 : 6)} y={to(tip)[1] - 8} textAnchor={to(tip)[0] > SIZE * 0.6 ? 'end' : 'start'}>
               {label}
             </text>
           </g>

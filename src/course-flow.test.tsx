@@ -36,6 +36,9 @@ const goTo = async (hash: string) => {
   })
 }
 
+// The lesson screens are a lazy chunk; its first load can take over a second in a full run.
+const LOAD = { timeout: 5000 }
+
 const box = (name: string) => screen.getByRole('textbox', { name })
 const type = (name: string, value: string) => fireEvent.change(box(name), { target: { value } })
 
@@ -78,7 +81,7 @@ describe('the first course', () => {
     await goTo(window.location.hash.slice(1))
     expect(window.location.hash).toBe('#15Axx/learn/normal-equations-from-your-points')
 
-    expect(await screen.findByText('1 of 6')).toBeTruthy()
+    expect(await screen.findByText('1 of 6', {}, LOAD)).toBeTruthy()
     expect(screen.getByRole('dialog', { name: 'Normal equations from your three points' })).toBeTruthy()
 
     // One clear action: Check, disabled until there is something to check.
@@ -87,6 +90,8 @@ describe('the first course', () => {
     type('‖r‖²', '6')
     fireEvent.click(checkButton)
     expect(screen.getByText('Not yet.')).toBeTruthy()
+    // One box, so not "each box" (seen in the browser check, 15 Nov).
+    expect(screen.getByText('Check it again, or take a hint.')).toBeTruthy()
 
     // Hints come one at a time.
     fireEvent.click(screen.getByRole('button', { name: 'Hint' }))
@@ -123,7 +128,7 @@ describe('the first course', () => {
     await goTo('15Axx')
     fireEvent.click(await screen.findByRole('button', { name: 'Continue lesson 1' }))
     await goTo(window.location.hash.slice(1))
-    expect(await screen.findByText('2 of 6')).toBeTruthy()
+    expect(await screen.findByText('2 of 6', {}, LOAD)).toBeTruthy()
     // What he had typed is still there.
     expect((box('row 1, column 2') as HTMLInputElement).value).toBe('12')
   })
@@ -137,7 +142,7 @@ describe('the first course', () => {
     render(<App />)
     await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
     await goTo('15Axx/learn/normal-equations-from-your-points')
-    await screen.findByText('5 of 6')
+    await screen.findByText('5 of 6', {}, LOAD)
     type('entry 1', '-0.5')
     type('entry 2', '1')
     type('entry 3', '-1/2')
@@ -151,7 +156,7 @@ describe('the first course', () => {
     render(<App />)
     await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
     await goTo('15Axx/learn/the-smallest-best-fit')
-    await screen.findByText('1 of 7')
+    await screen.findByText('1 of 7', {}, LOAD)
     for (let i = 0; i < 3; i++) {
       expect(screen.queryByRole('button', { name: 'Show the answer' })).toBeNull()
       fireEvent.click(screen.getByRole('button', { name: i === 0 ? 'Hint' : 'Another hint' }))
@@ -176,7 +181,7 @@ describe('the first course', () => {
     render(<App />)
     await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
     await goTo('15Axx/learn/dependent-columns')
-    fireEvent.click(await screen.findByRole('button', { name: 'Finish the lesson' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Finish the lesson' }, LOAD))
     expect(screen.getByRole('heading', { name: 'Lesson done' })).toBeTruthy()
     const next = screen.getAllByRole('button').filter((b) => b.classList.contains('primary'))
     expect(next.map((b) => b.textContent)).toEqual(['Next lesson: The smallest best fit'])

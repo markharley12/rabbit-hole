@@ -43,7 +43,7 @@ function Feedback({ verdict, block }: { verdict: Verdict; block: StepBlock }) {
     return (
       <div className="feedback wrong" role="status">
         <p className="feedback-head">Not yet.</p>
-        {verdict.message ? <Md text={verdict.message} /> : <p>Check each box again, or take a hint.</p>}
+        {verdict.message ? <Md text={verdict.message} /> : <p>{block.answer.fields.length > 1 ? 'Check each box again' : 'Check it again'}, or take a hint.</p>}
       </div>
     )
   }
@@ -61,6 +61,7 @@ export function StepScreen({ block, record, onDraft, onAttempt, onHint, onReveal
   const [verdict, setVerdict] = useState<Verdict | null>(null)
   const [checking, setChecking] = useState(false)
   const feedback = useRef<HTMLDivElement>(null)
+  const selfCheck = useRef<HTMLElement>(null)
 
   const solved = record?.solved ?? false
   const revealed = record?.revealed ?? false
@@ -71,6 +72,11 @@ export function StepScreen({ block, record, onDraft, onAttempt, onHint, onReveal
   useEffect(() => {
     if (verdict) feedback.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' })
   }, [verdict])
+
+  // The panel opens below the answer; bring it into view, or the button seems to do nothing.
+  useEffect(() => {
+    if (checking) selfCheck.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' })
+  }, [checking])
 
   const change = (name: string, value: string) => {
     const next = { ...values, [name]: value }
@@ -153,7 +159,7 @@ export function StepScreen({ block, record, onDraft, onAttempt, onHint, onReveal
         )}
 
         {checking && (
-          <section className="self-check" aria-label="Check it yourself">
+          <section className="self-check" aria-label="Check it yourself" ref={selfCheck}>
             {block.check && <Md text={block.check.say} />}
             <Calculator />
             {block.check?.widget && <Widget widget={block.check.widget} />}
