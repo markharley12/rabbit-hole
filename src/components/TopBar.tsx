@@ -8,6 +8,7 @@ interface Props {
   theme: Theme
   onSelect: (id: string) => void
   onToggleTheme: () => void
+  onOpenCourses: () => void
 }
 
 const HomeIcon = () => (
@@ -15,6 +16,13 @@ const HomeIcon = () => (
     <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
     <circle cx="9" cy="13.5" r="3.2" fill="currentColor" />
     <circle cx="15.5" cy="9.5" r="2" fill="currentColor" />
+  </svg>
+)
+
+const CoursesIcon = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" strokeWidth="2" />
+    <path d="M15 15l5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 )
 
@@ -36,8 +44,8 @@ const ThemeIcon = ({ theme }: { theme: Theme }) => (
   </svg>
 )
 
-/** Home, the trail from Mathematics down to where you are, and the theme switch. */
-export function TopBar({ path, theme, onSelect, onToggleTheme }: Props) {
+/** Home, the trail from Mathematics down to where you are, courses and search, and the theme switch. */
+export function TopBar({ path, theme, onSelect, onToggleTheme, onOpenCourses }: Props) {
   const trail = useRef<HTMLOListElement>(null)
   const current = path[path.length - 1]
 
@@ -69,6 +77,9 @@ export function TopBar({ path, theme, onSelect, onToggleTheme }: Props) {
           ))}
         </ol>
       </nav>
+      <button className="icon-button" onClick={onOpenCourses} aria-label="Courses and search">
+        <CoursesIcon />
+      </button>
       <button
         className="icon-button"
         onClick={onToggleTheme}

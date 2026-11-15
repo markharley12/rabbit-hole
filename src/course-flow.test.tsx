@@ -4,7 +4,7 @@
 
 import { readFileSync } from 'node:fs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import App from './App.tsx'
 import { forgetCachedProgress } from './lesson/progress-store.ts'
 import type { Course } from './lesson/types.ts'
@@ -60,7 +60,12 @@ describe('the first course', () => {
     serve()
     render(<App />)
     await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
-    expect(screen.getByText('No course yet')).toBeTruthy()
+    // The root counts what is inside it rather than saying there is nothing.
+    expect(await screen.findByRole('button', { name: '1 course inside' })).toBeTruthy()
+    // One pin on the map, where the course is.
+    expect(document.querySelectorAll('.course-pin')).toHaveLength(1)
+    await goTo('analysis')
+    expect(screen.getByText('No courses yet')).toBeTruthy()
 
     await goTo('15Axx')
     expect(await screen.findByRole('button', { name: 'Start course' })).toBeTruthy()
@@ -185,6 +190,48 @@ describe('the first course', () => {
     expect(screen.getByRole('heading', { name: 'Lesson done' })).toBeTruthy()
     const next = screen.getAllByRole('button').filter((b) => b.classList.contains('primary'))
     expect(next.map((b) => b.textContent)).toEqual(['Next lesson: The smallest best fit'])
+  })
+
+  it('marks the branch that holds a course in the sheet', async () => {
+    serve()
+    render(<App />)
+    await screen.findByRole('button', { name: '1 course inside' })
+    fireEvent.click(screen.getByRole('button', { name: 'Show more' }))
+    expect(screen.getByRole('button', { name: /^Algebra and number theory\s*1 course/ })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /^Analysis\s*\d/ })).toBeTruthy()
+  })
+
+  it('lists and searches courses and the map from the courses menu', async () => {
+    serve()
+    render(<App />)
+    await screen.findByRole('button', { name: '1 course inside' })
+    fireEvent.click(screen.getByRole('button', { name: 'Courses and search' }))
+    await goTo(window.location.hash.slice(1))
+    expect(window.location.hash).toBe('#mathematics/courses')
+
+    const menu = within(screen.getByRole('dialog', { name: 'Courses' }))
+    expect(menu.getByText('1 in the app')).toBeTruthy()
+    expect(menu.getByText('Least squares to the pseudo-inverse')).toBeTruthy()
+    expect(menu.getByText('Not started')).toBeTruthy()
+
+    const search = menu.getByRole('searchbox', { name: 'Search courses, sections and topics' })
+    fireEvent.change(search, { target: { value: 'eckart' } })
+    expect(menu.getByText('Courses (1)')).toBeTruthy()
+    fireEvent.change(search, { target: { value: 'pseudoinverses' } })
+    expect(menu.getByText('Courses (0)')).toBeTruthy()
+    // Not a course, but a place on the map, found by one of its topics.
+    fireEvent.click(menu.getByRole('button', { name: /^Numerical linear algebra/ }))
+    await goTo(window.location.hash.slice(1))
+    expect(window.location.hash).toBe('#65Fxx')
+    expect(screen.getByRole('heading', { level: 1, name: 'Numerical linear algebra' })).toBeTruthy()
+
+    // Back to the menu, and start the course from it.
+    fireEvent.click(screen.getByRole('button', { name: 'Courses and search' }))
+    await goTo(window.location.hash.slice(1))
+    fireEvent.click(screen.getByRole('button', { name: /^Least squares to the pseudo-inverse/ }))
+    await goTo(window.location.hash.slice(1))
+    expect(window.location.hash).toBe('#15Axx/learn/normal-equations-from-your-points')
+    expect(await screen.findByText('1 of 6', {}, LOAD)).toBeTruthy()
   })
 
   it('still shows the map when there is no course index', async () => {

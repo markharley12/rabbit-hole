@@ -29,6 +29,12 @@ marking, no Capacitor yet. What is where:
   `#<node>/learn/<lesson>` (`src/route.ts`). A lazy chunk with KaTeX (woff2 only).
 - **Widgets:** `src/widgets/` (line fitter, dependent columns, SVD geometry), pure maths in
   `*-math.ts`, registry kept equal to `schema/widgets.json` by a test.
+- **Finding courses:** every node counts the courses under it (`src/courses.ts`), the sheet
+  says "1 course inside" instead of "No course yet" on any ancestor, the map rings each node
+  that has a course, and the top bar's search button opens a Courses menu
+  (`src/components/CoursesMenu.tsx`, route `#<node>/courses`) that lists every course and
+  searches courses, sections and topics. Added after Mark's first look on 15 Nov: he saw no
+  course at the top level and assumed there were none.
 - **Progress** is on the device only (`localStorage`, `rabbit-hole:progress:<course>`):
   attempts, hints, drafts, where he is. **No scores** (claimed is not scored).
 - `pwa/sw.js`: offline. A new build waits until the app is fully closed, so **an update

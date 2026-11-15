@@ -18,6 +18,8 @@ interface Props {
   screen: { width: number; height: number }
   /** The part of the screen not covered by the top bar and the sheet. */
   area: Rect
+  /** Nodes that carry a course, marked with a pin that keeps its size at any zoom. */
+  courseIds?: ReadonlyMap<string, unknown>
   onSelect: (id: string) => void
 }
 
@@ -41,7 +43,7 @@ const Circles = memo(function Circles({ layout }: { layout: Layout }) {
   )
 })
 
-export function MapView({ layout, focusId, refit, screen, area, onSelect }: Props) {
+export function MapView({ layout, focusId, refit, screen, area, courseIds, onSelect }: Props) {
   const focus = layout.byId.get(focusId) ?? layout.root
   const [view, setView] = useState<View>(() => fitView(focus, area))
   // The latest view for the event handlers and the animation, which must not
@@ -150,6 +152,23 @@ export function MapView({ layout, focusId, refit, screen, area, onSelect }: Prop
       <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
         <Circles layout={layout} />
         <circle className="focus-ring" cx={focus.x} cy={focus.y} r={focus.r} />
+      </g>
+      {/* Under the labels: a ring big enough to show around a name, which stays readable on top. */}
+      <g className="course-pins" aria-hidden="true">
+        {[...(courseIds?.keys() ?? [])].map((id) => {
+          const n = layout.byId.get(id)
+          if (!n) return null
+          const [x, y] = [n.x * view.k + view.x, n.y * view.k + view.y]
+          // Over a big circle, sit on its rim rather than on its label.
+          const r = n.r * view.k
+          const py = r > 30 ? y - r : y
+          return (
+            <g key={id}>
+              <circle className="course-pin-ring" cx={x} cy={py} r={11} />
+              <circle className="course-pin" cx={x} cy={py} r={4} />
+            </g>
+          )
+        })}
       </g>
       <g className="labels" aria-hidden="true">
         {labels.map((label) => (

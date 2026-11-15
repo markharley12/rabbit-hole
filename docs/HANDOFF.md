@@ -86,7 +86,7 @@ Suggested next, in order:
 2. Search by name or MSC code (517 sections is a lot to find by zooming alone). Not in the
    Phase 0 brief, so not built.
 3. Back button closes an open sheet before leaving the node.
-4. Phase 0.5 (Capacitor APK), then Phase 1 (levels and prerequisites).
+5. Phase 0.5 (Capacitor APK), then Phase 1 (levels and prerequisites).
 
 ## First course as built (15 Nov 2026)
 
@@ -151,7 +151,19 @@ Suggested next, in order:
 
 1. Mark's phone test of the map and the course; fix what he finds.
 2. The query-string offline failure above.
-3. Export progress to `data/` (for the notes repo and later marking), and a "where I am"
+3. An "Update ready" bar, so a new build can be taken without closing the app twice (offered
+   to Mark on 15 Nov; the "This version" line on the home sheet shows which build runs).
+4. Export progress to `data/` (for the notes repo and later marking), and a "where I am"
    view built from the progress record (seed-context.md section 6.5).
-4. Phase 0.5 (Capacitor APK), Phase 1 (levels and prerequisites), then Phase 3 (server).
+5. Phase 0.5 (Capacitor APK), Phase 1 (levels and prerequisites), then Phase 3 (server).
+
+### Finding courses (15 Nov 2026, after Mark's first look)
+
+Mark opened the app, saw "No course yet" on the home sheet and took it to mean the app had no
+courses. Now: course counts roll up every node ("1 course inside", and "1 course" against the
+branch in the Inside list), each course's node gets a ring on the map at any zoom, and the
+top bar's search button opens **Courses**: every course with its place and progress, and a
+search over courses (title, summary, lessons, place) and the map (section names, MSC codes,
+and topics, so "pseudoinverses" finds 65F). This also covers Phase 0's suggested map search.
+The course summary now says "singular value decomposition (SVD)" so it is found by either.
 

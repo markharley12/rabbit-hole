@@ -9,6 +9,8 @@ import { applyTheme, initialTheme, saveTheme } from './theme.ts'
 import type { Theme } from './theme.ts'
 import type { Course, CourseIndex } from './lesson/types.ts'
 import { parseRoute } from './route.ts'
+import { countCourses } from './courses.ts'
+import { CoursesMenu } from './components/CoursesMenu.tsx'
 
 // The lesson screens, KaTeX and the widgets load only when a lesson opens.
 const LessonView = lazy(() => import('./lesson/LessonView.tsx'))
@@ -83,6 +85,8 @@ export default function App() {
 
   const document = loaded.state === 'ready' ? loaded.document : null
   const layout = useMemo(() => (document ? layoutMap(document.root) : null), [document])
+  const counts = useMemo(() => (layout ? countCourses(layout, courses) : new Map<string, number>()), [layout, courses])
+  const courseList = useMemo(() => [...courses.values()], [courses])
   const screen = useMemo(() => {
     const [width, height] = size.split('x').map(Number)
     return { width, height }
@@ -105,6 +109,7 @@ export default function App() {
   const focus = layout.byId.get(route.nodeId) ?? layout.root
   const course = courses.get(focus.id)
   const lessonOpen = !!(course && route.lessonId && course.lessons.some((l) => l.id === route.lessonId))
+  const menuOpen = !!route.menu
 
   const select = (id: string) => {
     setSheetOpen(false)
@@ -116,6 +121,18 @@ export default function App() {
     setSheetOpen(false)
     openedHere.current = true
     window.location.hash = `${focus.id}/learn/${lessonId}`
+  }
+  const openMenu = () => {
+    setSheetOpen(false)
+    openedHere.current = true
+    window.location.hash = `${focus.id}/courses`
+  }
+  // From the menu, replace its address: Back from what it opens returns to
+  // where the menu was opened, not to the menu.
+  const menuToLesson = (target: { nodeId: string }, lessonId: string) => window.location.replace(`#${target.nodeId}/learn/${lessonId}`)
+  const menuToNode = (id: string) => {
+    openedHere.current = false
+    window.location.replace(`#${id}`)
   }
   const closeLesson = () => {
     if (openedHere.current) {
@@ -136,15 +153,27 @@ export default function App() {
 
   return (
     <>
-      <MapView layout={layout} focusId={focus.id} refit={refit} screen={screen} area={area} onSelect={select} />
-      {lessonOpen && course ? (
+      <MapView layout={layout} focusId={focus.id} refit={refit} screen={screen} area={area} courseIds={courses} onSelect={select} />
+      {menuOpen ? (
+        <CoursesMenu layout={layout} courses={courseList} onClose={closeLesson} onOpenLesson={menuToLesson} onShowNode={menuToNode} />
+      ) : lessonOpen && course ? (
         <Suspense fallback={<p className="status lesson-loading">Opening the lesson…</p>}>
           <LessonView course={course} lessonId={route.lessonId!} base={`${COURSES_URL}${course.nodeId}/`} onClose={closeLesson} onOpenLesson={nextLesson} />
         </Suspense>
       ) : (
         <>
-          <TopBar path={ancestry(focus)} theme={theme} onSelect={select} onToggleTheme={toggleTheme} />
-          <NodeSheet node={focus} document={document} course={course} open={sheetOpen} onOpenChange={setSheetOpen} onSelect={select} onOpenLesson={openLesson} />
+          <TopBar path={ancestry(focus)} theme={theme} onSelect={select} onToggleTheme={toggleTheme} onOpenCourses={openMenu} />
+          <NodeSheet
+            node={focus}
+            document={document}
+            course={course}
+            counts={counts}
+            open={sheetOpen}
+            onOpenChange={setSheetOpen}
+            onSelect={select}
+            onOpenLesson={openLesson}
+            onOpenCourses={openMenu}
+          />
         </>
       )}
     </>

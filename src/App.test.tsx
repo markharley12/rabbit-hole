@@ -37,7 +37,7 @@ describe('App', () => {
     render(<App />)
     expect(await screen.findByRole('heading', { level: 1, name: 'Mathematics' })).toBeTruthy()
     expect(screen.getByText('5 branches · 4,810 topics')).toBeTruthy()
-    expect(screen.getByText('No course yet')).toBeTruthy()
+    expect(screen.getByText('No courses yet')).toBeTruthy()
     // No button that pretends to generate one.
     expect(screen.queryByRole('button', { name: /generate/i })).toBeNull()
     // One circle per node of the map, plus the focus ring.

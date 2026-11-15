@@ -12,10 +12,13 @@ interface Props {
   document: MapDocument
   /** The course on this node, if there is one. */
   course?: Course
+  /** Courses under each node (its own included); absent means none. */
+  counts: Map<string, number>
   open: boolean
   onOpenChange: (open: boolean) => void
   onSelect: (id: string) => void
   onOpenLesson: (lessonId: string) => void
+  onOpenCourses: () => void
 }
 
 // "15 Nov 2026, 19:04", in the phone's own time zone.
@@ -96,7 +99,8 @@ function CourseSection({ course, onOpenLesson }: { course: Course; onOpenLesson:
  * is, how big, whether there is a course); opened it lists where the node sits
  * and what is in it.
  */
-export function NodeSheet({ node, document: doc, course, open, onOpenChange, onSelect, onOpenLesson }: Props) {
+export function NodeSheet({ node, document: doc, course, counts, open, onOpenChange, onSelect, onOpenLesson, onOpenCourses }: Props) {
+  const inside = counts.get(node.id) ?? 0
   const drag = useRef<number | null>(null)
   const { node: data } = node
   const leaf = node.children.length === 0
@@ -136,7 +140,16 @@ export function NodeSheet({ node, document: doc, course, open, onOpenChange, onS
         <h1 className="title">{data.name}</h1>
         <p className="meta">
           <span>{size}</span>
-          {course ? <CourseButton course={course} onOpenLesson={onOpenLesson} /> : <span className="course-none">No course yet</span>}
+          {course ? (
+            <CourseButton course={course} onOpenLesson={onOpenLesson} />
+          ) : inside > 0 ? (
+            // A count is not the thing itself: show where they are rather than pretend to start one.
+            <button className="course-count" onClick={onOpenCourses}>
+              {plural(inside, 'course')} inside
+            </button>
+          ) : (
+            <span className="course-none">{leaf ? 'No course yet' : 'No courses yet'}</span>
+          )}
         </p>
       </div>
 
@@ -177,7 +190,10 @@ export function NodeSheet({ node, document: doc, course, open, onOpenChange, onS
                 <li key={child.id}>
                   <button className={`inside-row b${child.branch}`} onClick={() => onSelect(child.id)}>
                     <span className="dot" />
-                    <span className="inside-name">{child.node.name}</span>
+                    <span className="inside-name">
+                      {child.node.name}
+                      {counts.get(child.id) ? <span className="has-courses">{plural(counts.get(child.id)!, 'course')}</span> : null}
+                    </span>
                     <span className="inside-count">{child.topics.toLocaleString('en-GB')}</span>
                   </button>
                 </li>
@@ -186,11 +202,21 @@ export function NodeSheet({ node, document: doc, course, open, onOpenChange, onS
           </>
         )}
 
-        <h2>Course</h2>
+        <h2>{leaf || course ? 'Course' : 'Courses'}</h2>
         {course ? (
           <CourseSection course={course} onOpenLesson={onOpenLesson} />
+        ) : inside > 0 ? (
+          <p className="note">
+            {plural(inside, 'course')} in here.{' '}
+            <button className="link" onClick={onOpenCourses}>
+              See {inside === 1 ? 'it' : 'them'} in Courses
+            </button>
+            , or follow the marked circles on the map.
+          </p>
         ) : (
-          <p className="note">No course yet. Generating courses is a later phase; nothing here can make one today.</p>
+          <p className="note">
+            {leaf ? 'No course yet.' : 'No courses in here yet.'} Generating courses is a later phase; nothing here can make one today.
+          </p>
         )}
 
         {data.url && (

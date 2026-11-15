@@ -3,7 +3,7 @@
   "id": "least-squares-to-the-pseudo-inverse",
   "nodeId": "15Axx",
   "title": "Least squares to the pseudo-inverse",
-  "summary": "From the normal equations you derived, through dependent columns and the smallest best fit, to the pseudo-inverse via the SVD and the hard half of Eckart–Young.",
+  "summary": "From the normal equations you derived, through dependent columns and the smallest best fit, to the pseudo-inverse via the singular value decomposition (SVD) and the hard half of Eckart–Young.",
   "written": "Written by Claude Code (Opus 5.5) on 15 Nov 2026 from docs/seed-context.md. Every answer key is re-derived with sympy by tools/validate_courses.py.",
   "sources": [
     {
