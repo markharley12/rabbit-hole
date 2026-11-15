@@ -1,0 +1,427 @@
+/* One stylesheet, no UI kit: the app is a map, a bar and a sheet. */
+
+:root {
+  --bar: 56px;
+  --peek: 150px;
+  --bg: #f6f3ec;
+  --surface: #fffdf8;
+  --fg: #1d1b18;
+  --muted: #6b655c;
+  --line: #d9d3c7;
+  --accent: #1d1b18;
+  /* One hue per branch, in the source's order: logic and discrete, algebra
+     and number theory, analysis, geometry and topology, applied. */
+  --b0: #2c6fb7;
+  --b1: #b8472d;
+  --b2: #2a8a57;
+  --b3: #8450b3;
+  --b4: #b0821a;
+  --inner-fill: 0.13;
+  --leaf-fill: 0.5;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #14161a;
+  --surface: #1d2026;
+  --fg: #ecebe7;
+  --muted: #a09c94;
+  --line: #33373f;
+  --accent: #ecebe7;
+  --b0: #5b9fe6;
+  --b1: #ea7a5e;
+  --b2: #4fbf85;
+  --b3: #b585e3;
+  --b4: #dcae3f;
+  --inner-fill: 0.14;
+  --leaf-fill: 0.42;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+  /* The map handles its own gestures; the page itself never scrolls or zooms. */
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+.status {
+  margin: 0;
+  padding: 30vh 24px 0;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* ---------- The map ---------- */
+
+.map {
+  position: fixed;
+  inset: 0;
+  display: block;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+
+.node {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 1px;
+}
+.node.root {
+  fill: none;
+  stroke: var(--line);
+}
+.node.b0 {
+  fill: var(--b0);
+  stroke: var(--b0);
+}
+.node.b1 {
+  fill: var(--b1);
+  stroke: var(--b1);
+}
+.node.b2 {
+  fill: var(--b2);
+  stroke: var(--b2);
+}
+.node.b3 {
+  fill: var(--b3);
+  stroke: var(--b3);
+}
+.node.b4 {
+  fill: var(--b4);
+  stroke: var(--b4);
+}
+/* Nested see-through circles: each level down reads a little deeper. */
+.node.inner {
+  fill-opacity: var(--inner-fill);
+  stroke-opacity: 0.45;
+}
+.node.leaf {
+  fill-opacity: var(--leaf-fill);
+  stroke-opacity: 0.7;
+}
+
+.focus-ring {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.label {
+  fill: var(--fg);
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-weight: 600;
+  pointer-events: none;
+  /* A halo in the page colour keeps text readable over any circle. */
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  stroke-opacity: 0.75;
+}
+.label.code {
+  font-weight: 500;
+  stroke-opacity: 0.55;
+}
+
+/* ---------- Top bar ---------- */
+
+.top-bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: calc(var(--bar) + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) max(6px, env(safe-area-inset-right)) 0 max(6px, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.icon-button {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.icon-button:active {
+  background: var(--line);
+}
+
+.trail-wrap {
+  flex: 1;
+  min-width: 0;
+}
+.trail {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+.trail::-webkit-scrollbar {
+  display: none;
+}
+.trail li {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+.trail li + li::before {
+  content: '›';
+  color: var(--muted);
+  padding: 0 2px;
+}
+.crumb {
+  display: block;
+  max-width: 42vw;
+  padding: 10px 6px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.crumb.here {
+  color: var(--fg);
+  font-weight: 600;
+  max-width: 62vw;
+  cursor: default;
+}
+
+/* ---------- Bottom sheet ---------- */
+
+.sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  max-width: 640px;
+  margin: 0 auto;
+  height: calc(var(--peek) + env(safe-area-inset-bottom));
+  max-height: calc(100% - var(--bar) - env(safe-area-inset-top) - 8px);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -6px 24px rgb(0 0 0 / 0.12);
+  transition: height 0.28s ease;
+}
+.sheet.open {
+  height: 78%;
+}
+
+.sheet-head {
+  flex: none;
+  padding: 0 18px 12px;
+  touch-action: none;
+}
+.sheet-handle {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.grip {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+}
+.kind {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.title {
+  margin: 2px 0 6px;
+  font-size: 19px;
+  line-height: 1.25;
+  font-weight: 650;
+  /* Two lines at most while closed, so the card keeps its height. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.sheet.open .title {
+  display: block;
+}
+.meta {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.course-none {
+  flex: none;
+  padding: 2px 10px;
+  border: 1px dashed var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 18px calc(24px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+}
+.sheet-body h2 {
+  margin: 18px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.note {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.where {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+}
+.where li {
+  padding: 3px 0 3px 14px;
+  border-left: 2px solid var(--line);
+}
+.where li[aria-current] {
+  font-weight: 600;
+  border-left-color: var(--accent);
+}
+.link {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.topics {
+  margin: 0;
+  padding: 0 0 0 20px;
+  font-size: 15px;
+}
+.topics li {
+  padding: 3px 0;
+}
+
+.inside {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.inside-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  text-align: left;
+  font-size: 15px;
+  cursor: pointer;
+}
+.inside-name {
+  flex: 1;
+}
+.inside-count {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.b0 .dot {
+  background: var(--b0);
+}
+.b1 .dot {
+  background: var(--b1);
+}
+.b2 .dot {
+  background: var(--b2);
+}
+.b3 .dot {
+  background: var(--b3);
+}
+.b4 .dot {
+  background: var(--b4);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    transition: none;
+  }
+}
