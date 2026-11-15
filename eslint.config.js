@@ -8,7 +8,8 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 // `files` must name the TypeScript extensions: TreeQuiz once shipped the stock
 // `**/*.{js,jsx}` pattern and lint passed having checked nothing under src/.
 export default defineConfig([
-  globalIgnores(['dist']),
+  // .claude holds agents' git worktrees: whole copies of this repo, with their own tsconfig.
+  globalIgnores(['dist', '.claude']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
