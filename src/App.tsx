@@ -11,6 +11,7 @@ import type { Course, CourseIndex } from './lesson/types.ts'
 import { parseRoute } from './route.ts'
 import { countCourses } from './courses.ts'
 import { CoursesMenu } from './components/CoursesMenu.tsx'
+import { UpdateBar } from './components/UpdateBar.tsx'
 
 // The lesson screens, KaTeX and the widgets load only when a lesson opens.
 const LessonView = lazy(() => import('./lesson/LessonView.tsx'))
@@ -176,6 +177,7 @@ export default function App() {
           />
         </>
       )}
+      <UpdateBar />
     </>
   )
 }

@@ -37,8 +37,9 @@ marking, no Capacitor yet. What is where:
   course at the top level and assumed there were none.
 - **Progress** is on the device only (`localStorage`, `rabbit-hole:progress:<course>`):
   attempts, hints, drafts, where he is. **No scores** (claimed is not scored).
-- `pwa/sw.js`: offline. A new build waits until the app is fully closed, so **an update
-  shows the second time the app is opened**.
+- `pwa/sw.js`: offline. A new build waits until the app is fully closed, so an update
+  shows the second time the app is opened, or at once from the **Update** bar the app shows
+  when a new build is waiting (`src/pwa-update.ts`; every open page reloads together).
 - Decided with Mark on 15 Nov: map stops at MSC sections; one tap zooms in and opens the
   sheet; name stays `rabbit-hole`; commit straight to `main`; the course hangs on `15Axx`;
   KaTeX bundled; typed answers only until photo marking (Phase 5).

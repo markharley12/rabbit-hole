@@ -8,10 +8,13 @@
 //
 // - Everything the build lists is served cache-first, index.html and the
 //   bundled map (content/maths/map.json) included.
-// - A new build installs in the background and **waits** (no skipWaiting())
-//   until every page of the old one is closed, so code is never swapped under
-//   a running page. An update therefore shows the second time the app is
-//   opened after a deploy.
+// - A new build installs in the background and **waits** until every page of
+//   the old one is closed, so code is never swapped under a running page. An
+//   update therefore shows the second time the app is opened after a deploy,
+//   unless the person taps "Update" on the bar the app shows when a new build
+//   is waiting: then the page asks this worker to take over (the message
+//   below), and **every** open page reloads on the controllerchange that
+//   follows (src/pwa-update.ts), so a page is still exactly one build.
 // - The old cache is deleted on activate, when nothing uses it any more.
 //
 // Later phases download newer content packs; those must go in a cache of
@@ -46,6 +49,12 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE).then((cache) => Promise.all(FILES.map(async (name) => cache.put(url(name), await fetchFile(name))))),
   )
+})
+
+// The app's "Update" button. Only ever sent by a page of this app, after the
+// person asked for it.
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'skip-waiting') self.skipWaiting()
 })
 
 self.addEventListener('activate', (event) => {

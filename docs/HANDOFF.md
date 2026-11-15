@@ -151,8 +151,8 @@ Suggested next, in order:
 
 1. Mark's phone test of the map and the course; fix what he finds.
 2. The query-string offline failure above.
-3. An "Update ready" bar, so a new build can be taken without closing the app twice (offered
-   to Mark on 15 Nov; the "This version" line on the home sheet shows which build runs).
+3. Built (15 Nov): an "Update" bar when a new build is waiting (`src/pwa-update.ts`). Unit-tested
+   with fakes; **not yet tested with a real update in a browser or on the phone.**
 4. Export progress to `data/` (for the notes repo and later marking), and a "where I am"
    view built from the progress record (seed-context.md section 6.5).
 5. Phase 0.5 (Capacitor APK), Phase 1 (levels and prerequisites), then Phase 3 (server).
