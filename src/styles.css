@@ -1198,3 +1198,265 @@ a {
     transition: none;
   }
 }
+
+/* Lesson tools */
+
+/* The dock's anchor is a zero-height row between the lesson body and its footer
+   (order puts the footer last), so the dock rides on the footer's top edge
+   however tall the footer is. */
+.lesson > .lesson-action {
+  order: 2;
+}
+.tool-anchor {
+  order: 1;
+  position: relative;
+  flex: none;
+  height: 0;
+  z-index: 1;
+}
+/* Room for the dock under the last line, so nothing is stuck behind it. */
+.lesson.has-tools .lesson-body {
+  padding-bottom: 120px;
+}
+.tool-dock {
+  position: absolute;
+  right: max(10px, env(safe-area-inset-right));
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tool-round {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.18);
+  cursor: pointer;
+}
+.tool-round:active {
+  background: var(--line);
+}
+
+.tool-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+.tool-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.4);
+}
+.tool-panel {
+  position: absolute;
+  inset: calc(env(safe-area-inset-top) + 36px) 0 0 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px 16px 0 0;
+  background: var(--bg);
+  box-shadow: 0 -2px 12px rgb(0 0 0 / 0.25);
+  animation: tool-up 0.18s ease-out;
+}
+@keyframes tool-up {
+  from {
+    transform: translateY(40%);
+    opacity: 0;
+  }
+}
+.tool-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 6px 2px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.tool-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.tool-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.scratch {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.scratch-canvas {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  background: var(--surface);
+  /* On the canvas only: the page around it still scrolls and zooms as usual. */
+  touch-action: none;
+  cursor: crosshair;
+}
+.scratch-bar {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px 4px;
+  padding: 6px max(8px, env(safe-area-inset-right)) 6px max(8px, env(safe-area-inset-left));
+  border-top: 1px solid var(--line);
+}
+.tool-button {
+  min-width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0 6px;
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  background: none;
+  color: var(--fg);
+  cursor: pointer;
+}
+.tool-button[aria-pressed='true'] {
+  border-color: var(--fg);
+  background: var(--surface);
+}
+.tool-button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.tool-button.armed {
+  border-color: var(--b1);
+  color: var(--b1);
+}
+.tool-sure {
+  font-size: 14px;
+  font-weight: 650;
+}
+.ink-choice {
+  display: flex;
+}
+.ink {
+  width: 44px;
+  height: 44px;
+  padding: 9px;
+  border: 0;
+  border-radius: 50%;
+  background-clip: content-box;
+  cursor: pointer;
+}
+.ink-ink {
+  background-color: var(--fg);
+}
+.ink-a {
+  background-color: var(--b0);
+}
+.ink-b {
+  background-color: var(--b1);
+}
+.ink[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 2px var(--fg);
+}
+
+.calculator-tape {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 8px 16px 12px;
+  grid-template-rows: 1fr auto auto;
+  width: 100%;
+  max-width: 640px;
+  align-self: center;
+}
+.calc-history {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  align-self: end;
+  max-height: 100%;
+  width: 100%;
+}
+.calc-history li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0;
+  border-bottom: 1px solid var(--line);
+  font: 16px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.calc-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+}
+.calc-result {
+  flex: none;
+  min-height: 44px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.calc-result:active {
+  background: var(--line);
+}
+.calc-empty {
+  align-self: end;
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+.calc-entry {
+  display: flex;
+  gap: 8px;
+}
+.calc-entry input {
+  flex: 1;
+  min-width: 0;
+}
+.calc-entry .calc-equals {
+  flex: none;
+  width: 56px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 20px;
+}
+
+.keyboard-switch {
+  display: block;
+  min-width: 56px;
+  min-height: 40px;
+  margin: 8px 0 0;
+  padding: 4px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  font: 600 15px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  cursor: pointer;
+}
+.keyboard-switch:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-panel {
+    animation: none;
+  }
+}
