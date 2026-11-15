@@ -1,0 +1,46 @@
+{
+  "format": 1,
+  "id": "least-squares-to-the-pseudo-inverse",
+  "nodeId": "15Axx",
+  "title": "Least squares to the pseudo-inverse",
+  "summary": "From the normal equations you derived, through dependent columns and the smallest best fit, to the pseudo-inverse via the SVD and the hard half of Eckart–Young.",
+  "written": "Written by Claude Code (Opus 5.5) on 15 Nov 2026 from docs/seed-context.md. Every answer key is re-derived with sympy by tools/validate_courses.py.",
+  "sources": [
+    {
+      "name": "Mark's least-squares chats (seed context)",
+      "note": "docs/seed-context.md sections 3, 4 and 7: the worked example (1,1), (2,2), (3,6), the dependent-columns example, and the task he was last set."
+    },
+    {
+      "name": "Trefethen and Bau, Numerical Linear Algebra (SIAM, 1997), Lecture 5",
+      "note": "The dimension-counting proof that no matrix of rank at most k beats the truncated SVD in the 2-norm."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "normal-equations-from-your-points",
+      "title": "Normal equations from your three points",
+      "summary": "A recap built from your own example. Skim it if it feels familiar."
+    },
+    {
+      "id": "dependent-columns",
+      "title": "Dependent columns: many best fits",
+      "summary": "When one column is a multiple of another, a whole line of fits is equally good."
+    },
+    {
+      "id": "the-smallest-best-fit",
+      "title": "The smallest best fit",
+      "summary": "The point on c + 2m = 3 with the smallest c² + m², and why it is special.",
+      "badge": "Your open task"
+    },
+    {
+      "id": "pseudo-inverse-from-the-svd",
+      "title": "The pseudo-inverse from the SVD",
+      "summary": "Build A⁺ from the SVD and see that A⁺b is the smallest best fit."
+    },
+    {
+      "id": "why-no-rank-k-matrix-does-better",
+      "title": "Why no rank-k matrix does better",
+      "summary": "The hard half of Eckart–Young: a small rank forces a null space that meets span(v₁…v_{k+1})."
+    }
+  ]
+}

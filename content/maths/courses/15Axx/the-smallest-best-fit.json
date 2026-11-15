@@ -1,0 +1,171 @@
+{
+  "format": 1,
+  "id": "the-smallest-best-fit",
+  "title": "The smallest best fit",
+  "summary": "The point on c + 2m = 3 with the smallest c² + m², and why it is special.",
+  "data": {
+    "A2": [[1, 2], [1, 2], [1, 2]],
+    "b": [1, 2, 6]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "c-in-terms-of-m",
+      "title": "Your open task",
+      "define": [
+        { "term": "minimum-norm solution", "meaning": "Of all the best fits, the one nearest the origin: the smallest $\\|p\\|^2 = c^2 + m^2$." }
+      ],
+      "why": "With a whole line of equally good fits, 'smallest' is the natural tie-break, and it is the one the pseudo-inverse returns.",
+      "prompt": "This is where you stopped: find the point on $c + 2m = 3$ with the smallest $c^2 + m^2$. First write $c$ in terms of $m$.",
+      "answer": {
+        "fields": [{ "name": "c", "label": "$c$ =", "key": "3 - 2m" }],
+        "vars": ["m"],
+        "verify": "solvefor(c + 2*m - 3, c)",
+        "slips": [
+          { "detect": "known", "when": { "c": "3 + 2m" }, "say": "Moving $2m$ to the other side flips its sign." },
+          { "detect": "known", "when": { "c": "2m - 3" }, "say": "That is $-(3 - 2m)$. Check which side the 3 ends up on." }
+        ]
+      },
+      "hints": [
+        "Get $c$ on its own on one side.",
+        "Take $2m$ away from both sides of $c + 2m = 3$.",
+        "$c = 3 \\ldots$"
+      ],
+      "next": "Substitute into c² + m²"
+    },
+    {
+      "type": "step",
+      "id": "expand-the-norm",
+      "title": "One variable",
+      "why": "With $c$ replaced, $c^2 + m^2$ becomes a parabola in $m$, and parabolas are easy to minimise.",
+      "prompt": "Put $c = 3 - 2m$ into $c^2 + m^2$ and expand. Type it as a polynomial in $m$, like `am^2 + bm + k`.",
+      "answer": {
+        "fields": [{ "name": "f", "label": "$c^2 + m^2$ =", "key": "5m^2 - 12m + 9" }],
+        "vars": ["m"],
+        "verify": "expand(solvefor(c + 2*m - 3, c)^2 + m^2)",
+        "slips": [
+          { "detect": "known", "when": { "f": "5m^2 + 9" }, "say": "$(3 - 2m)^2$ has a middle term: $(3 - 2m)(3 - 2m)$ gives $3 \\cdot (-2m)$ and $(-2m) \\cdot 3$." },
+          { "detect": "known", "when": { "f": "5m^2 - 6m + 9" }, "say": "The middle term comes twice: $3 \\cdot (-2m)$ and $(-2m) \\cdot 3$." },
+          { "detect": "known", "when": { "f": "4m^2 - 12m + 9" }, "say": "That is $c^2$ alone. Don't forget the $+\\,m^2$." }
+        ]
+      },
+      "hints": [
+        "$(3 - 2m)^2 = (3 - 2m)(3 - 2m)$. Multiply out term by term.",
+        "There are four products: $3 \\cdot 3$, $3 \\cdot (-2m)$, $(-2m) \\cdot 3$ and $(-2m)(-2m)$.",
+        "$(3 - 2m)^2 = 9 - 12m + 4m^2$. Now add the $m^2$."
+      ],
+      "check": {
+        "say": "Put $m = 0$ into your polynomial: you should get 9, which is $c^2 + m^2$ at $(3, 0)$. At $m = 1$ you should get 2, for the point $(1, 1)$."
+      },
+      "next": "Find the smallest value"
+    },
+    {
+      "type": "step",
+      "id": "minimise",
+      "title": "The bottom of the parabola",
+      "why": "A parabola that opens upwards is smallest where its slope is zero.",
+      "prompt": "Where is $5m^2 - 12m + 9$ smallest? Give $m$.",
+      "answer": {
+        "fields": [{ "name": "m", "label": "$m$ =", "key": "6/5" }],
+        "verify": "argmin(expand(solvefor(c + 2*m - 3, c)^2 + m^2), m)",
+        "slips": [
+          { "detect": "known", "when": { "m": "12/5" }, "say": "The derivative of $5m^2$ is $10m$, not $5m$." },
+          { "detect": "sign" }
+        ]
+      },
+      "hints": [
+        "Differentiate with respect to $m$ and set the result to zero.",
+        "The derivative is $10m - 12$.",
+        "Solve $10m - 12 = 0$."
+      ],
+      "next": "Now find c"
+    },
+    {
+      "type": "step",
+      "id": "find-c",
+      "title": "And c",
+      "why": "The point itself, not just one coordinate.",
+      "prompt": "With $m = 1.2$, what is $c$?",
+      "answer": {
+        "fields": [{ "name": "c", "label": "$c$ =", "key": "3/5" }],
+        "verify": "entry(pinv(A2)*b, 1)",
+        "slips": [{ "detect": "known", "when": { "c": "27/5" }, "say": "In $c = 3 - 2m$ the $2m$ is taken away, not added." }]
+      },
+      "hints": [
+        "Use $c = 3 - 2m$.",
+        "$c = 3 - 2 \\times 1.2$.",
+        "$2 \\times 1.2 = 2.4$."
+      ],
+      "solution": "So $p = (0.6, 1.2)$: the answer to the task you were set.",
+      "next": "How far is it from the origin?"
+    },
+    {
+      "type": "step",
+      "id": "its-size",
+      "title": "How small?",
+      "why": "Comparing it with other best fits shows it really is the smallest.",
+      "prompt": "What is $\\|p\\|^2 = c^2 + m^2$ at $p = (0.6, 1.2)$?",
+      "answer": {
+        "fields": [{ "name": "pp", "label": "$\\|p\\|^2$ =", "key": "9/5" }],
+        "verify": "sq(pinv(A2)*b)"
+      },
+      "hints": [
+        "$0.6^2 + 1.2^2$.",
+        "$0.6^2 = 0.36$.",
+        "$0.36 + 1.44$."
+      ],
+      "check": {
+        "say": "Slide $p$ along the line: the circle through $p$ shrinks until it just touches the line. Or put $m = 1.2$ into $5m^2 - 12m + 9$.",
+        "widget": {
+          "name": "dependent-columns",
+          "params": { "A": [[1, 2], [1, 2], [1, 2]], "b": [1, 2, 6], "mode": "line", "start": [1, 1], "circle": true }
+        }
+      },
+      "solution": "Smaller than any other best fit: $(1, 1)$ gives 2 and $(3, 0)$ gives 9.",
+      "next": "Why this point?"
+    },
+    {
+      "type": "step",
+      "id": "null-direction",
+      "title": "The direction A can't see",
+      "define": [
+        { "term": "null space", "meaning": "The vectors $d$ with $Ad = 0$. Adding one to a best fit changes nothing $A$ can see." }
+      ],
+      "why": "Moving along the line of best fits is adding multiples of one null-space direction. That direction explains which point is smallest.",
+      "prompt": "Find a non-zero $d = (d_1, d_2)$ with $Ad = 0$. Any multiple will do.",
+      "answer": {
+        "fields": [
+          { "name": "d1", "key": "2" },
+          { "name": "d2", "key": "-1" }
+        ],
+        "accept": ["multiple"],
+        "acceptNote": "Any non-zero multiple of $(2, -1)$ is the same direction.",
+        "verify": "nullvec(A2)"
+      },
+      "hints": [
+        "Each row of $Ad$ is $d_1 + 2d_2$; you need that to be 0.",
+        "Pick $d_2 = -1$ (or any non-zero number) and solve for $d_1$.",
+        "With $d_2 = -1$: $d_1 + 2(-1) = 0$."
+      ],
+      "next": "Compare p with that direction"
+    },
+    {
+      "type": "step",
+      "id": "perpendicular",
+      "title": "p and the null space",
+      "why": "This is the property the pseudo-inverse is built to have.",
+      "prompt": "Compute $p \\cdot d$ for $p = (0.6, 1.2)$ and $d = (2, -1)$.",
+      "answer": {
+        "fields": [{ "name": "pd", "label": "$p \\cdot d$ =", "key": "0" }],
+        "verify": "dot(pinv(A2)*b, nullvec(A2))"
+      },
+      "hints": [
+        "Multiply entry by entry and add.",
+        "$0.6 \\times 2$ and $1.2 \\times (-1)$.",
+        "$1.2 - 1.2$."
+      ],
+      "solution": "The smallest best fit has no part along the null space. Every best fit is $p + t\\,d$, and because $p \\perp d$, $\\|p + t\\,d\\|^2 = \\|p\\|^2 + t^2\\|d\\|^2$, smallest at $t = 0$. The pseudo-inverse builds this in: that is the next lesson.",
+      "next": "Finish the lesson"
+    }
+  ]
+}

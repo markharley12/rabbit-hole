@@ -1,0 +1,174 @@
+{
+  "format": 1,
+  "id": "normal-equations-from-your-points",
+  "title": "Normal equations from your three points",
+  "summary": "A recap built from your own example. Skim it if it feels familiar.",
+  "data": {
+    "A1": [[1, 1], [1, 2], [1, 3]],
+    "b": [1, 2, 6]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "guess-y-equals-x",
+      "title": "A guess, scored",
+      "define": [
+        { "term": "residual", "meaning": "$r = b - Ax$: data minus fit, one entry per point." }
+      ],
+      "why": "The best line is the one that makes $\\|r\\|^2$ smallest. You scored guesses this way before; this warms the numbers up.",
+      "prompt": "Your points are $(1, 1)$, $(2, 2)$, $(3, 6)$, fitted by $y = c + mx$. For the guess $y = x$ ($c = 0$, $m = 1$), what is $\\|r\\|^2$?",
+      "answer": {
+        "fields": [{ "name": "rr", "label": "$\\|r\\|^2$ =", "key": "9" }],
+        "verify": "sq(b - A1*vec(0, 1))"
+      },
+      "hints": [
+        "The line $y = x$ predicts 1, 2 and 3 at the three points.",
+        "Data minus fit: $r = (1 - 1,\\; 2 - 2,\\; 6 - 3)$. Square each entry and add.",
+        "$r = (0, 0, 3)$, so $\\|r\\|^2 = 0^2 + 0^2 + 3^2$."
+      ],
+      "check": {
+        "say": "Set the line in the picture to $c = 0$, $m = 1$ and read $\\|r\\|^2$ under it.",
+        "widget": { "name": "line-fitter", "params": { "points": [[1, 1], [2, 2], [3, 6]], "start": { "c": 0, "m": 1 } } }
+      },
+      "solution": "9, as before. Your other guesses scored 6.5 ($y = 1 + 1.5x$) and 6 ($y = 1 + x$).",
+      "next": "Set up the normal equations"
+    },
+    {
+      "type": "step",
+      "id": "build-ata",
+      "title": "AᵀA",
+      "define": [
+        { "term": "AᵀA", "meaning": "Each entry is a dot product of two columns of $A$: row $i$, column $j$ is (column $i$) · (column $j$)." }
+      ],
+      "why": "At the best fit the residual is perpendicular to every column of $A$. Written out, that is $A^\\mathsf{T}A\\,x = A^\\mathsf{T}b$: the normal equations.",
+      "prompt": "$A = \\begin{bmatrix}1&1\\\\1&2\\\\1&3\\end{bmatrix}$, one column per unknown ($c$, then $m$). Write $A^\\mathsf{T}A$.",
+      "answer": {
+        "fields": [
+          { "name": "a11", "key": "3" },
+          { "name": "a12", "key": "6" },
+          { "name": "a21", "key": "6" },
+          { "name": "a22", "key": "14" }
+        ],
+        "matrix": [2, 2],
+        "verify": "tr(A1)*A1",
+        "slips": [{ "detect": "symmetric", "name": "AᵀA" }]
+      },
+      "hints": [
+        "Row 1, column 1 is column 1 · column 1: $(1,1,1)\\cdot(1,1,1)$.",
+        "Row 1, column 2 is $(1,1,1)\\cdot(1,2,3)$. Row 2, column 2 is $(1,2,3)\\cdot(1,2,3)$.",
+        "$(1,2,3)\\cdot(1,2,3) = 1 + 4 + 9$, and $(1,1,1)\\cdot(1,2,3) = 1 + 2 + 3$."
+      ],
+      "check": {
+        "say": "$A^\\mathsf{T}A$ always equals its own transpose, so the top-right and bottom-left must match. The top-left is the number of points."
+      },
+      "solution": "Symmetric, as it must be: the same matrix you built before.",
+      "next": "Now Aᵀb"
+    },
+    {
+      "type": "step",
+      "id": "build-atb",
+      "title": "Aᵀb",
+      "why": "The right-hand side of the normal equations: how much of $b$ lies along each column.",
+      "prompt": "Each entry of $A^\\mathsf{T}b$ is a column of $A$ dotted with $b = (1, 2, 6)$. Write $A^\\mathsf{T}b$.",
+      "answer": {
+        "fields": [
+          { "name": "v1", "key": "9" },
+          { "name": "v2", "key": "23" }
+        ],
+        "verify": "tr(A1)*b"
+      },
+      "hints": [
+        "Entry 1 is $(1,1,1)\\cdot(1,2,6)$.",
+        "Entry 2 is $(1,2,3)\\cdot(1,2,6) = 1\\cdot1 + 2\\cdot2 + 3\\cdot6$.",
+        "Entry 1 is $1 + 2 + 6$; entry 2 is $1 + 4 + 18$."
+      ],
+      "check": {
+        "say": "Addition slips are the easiest ones to make here. Add the products one at a time in the calculator."
+      },
+      "next": "Solve for c and m"
+    },
+    {
+      "type": "step",
+      "id": "solve-normal-equations",
+      "title": "Solve them",
+      "why": "Two equations, two unknowns, and $A^\\mathsf{T}A$ is invertible here: exactly one best line.",
+      "prompt": "Solve $3c + 6m = 9$ and $6c + 14m = 23$.",
+      "answer": {
+        "fields": [
+          { "name": "c", "label": "$c$ =", "key": "-2" },
+          { "name": "m", "label": "$m$ =", "key": "5/2" }
+        ],
+        "verify": "(tr(A1)*A1)^(-1)*tr(A1)*b",
+        "slips": [
+          { "detect": "known", "when": { "m": "5/12" }, "say": "Look at $6(3 - 2m)$: the 6 multiplies both terms, the $3$ and the $-2m$." },
+          { "detect": "swapped" }
+        ]
+      },
+      "hints": [
+        "Divide the first equation by 3 to get $c$ on its own.",
+        "$c = 3 - 2m$. Put that into the second equation.",
+        "$6(3 - 2m) + 14m = 23$, so $18 - 12m + 14m = 23$."
+      ],
+      "check": {
+        "say": "Put your $c$ and $m$ back into both equations; both sides should match each time."
+      },
+      "solution": "A negative intercept, which no guess near the data would have found.",
+      "next": "Find the residual"
+    },
+    {
+      "type": "step",
+      "id": "best-fit-residual",
+      "title": "The residual",
+      "why": "The whole derivation rests on $r$ being perpendicular to the columns. Here you can see it.",
+      "prompt": "With $c = -2$ and $m = 2.5$, write $r = b - Ax$.",
+      "answer": {
+        "fields": [
+          { "name": "r1", "key": "1/2" },
+          { "name": "r2", "key": "-1" },
+          { "name": "r3", "key": "1/2" }
+        ],
+        "accept": ["negated"],
+        "acceptNote": "That is fit − data, the other sign convention. It's fine: it is $-r$, and everything after works the same.",
+        "verify": "b - A1*(tr(A1)*A1)^(-1)*tr(A1)*b"
+      },
+      "hints": [
+        "Predictions first: $c + mx$ at $x = 1, 2, 3$.",
+        "The prediction at $x = 1$ is $-2 + 2.5$; at $x = 2$ it is $-2 + 5$.",
+        "$r = (1 - (-2 + 2.5),\\; 2 - 3,\\; 6 - 5.5)$."
+      ],
+      "check": {
+        "say": "Dot $r$ with each column of $A$. At the best fit both come to 0: that is the condition you started from."
+      },
+      "next": "Compare with your guesses"
+    },
+    {
+      "type": "step",
+      "id": "best-fit-error",
+      "title": "How good is the best?",
+      "why": "Comparing with your guesses shows how much the derivation bought.",
+      "prompt": "What is $\\|r\\|^2$ for the best line? Your best guess scored 6.",
+      "answer": {
+        "fields": [{ "name": "rr", "label": "$\\|r\\|^2$ =", "key": "3/2" }],
+        "verify": "sq(b - A1*(tr(A1)*A1)^(-1)*tr(A1)*b)"
+      },
+      "hints": [
+        "Square each entry of $r$ and add.",
+        "Two entries are $\\pm\\tfrac12$ and one is $\\pm1$.",
+        "$\\tfrac14 + 1 + \\tfrac14$."
+      ],
+      "check": {
+        "say": "Keep a few guesses in the table, then show the best line. Its $r\\cdot(1,1,1)$ and $r\\cdot x$ are both 0.",
+        "widget": {
+          "name": "line-fitter",
+          "params": { "points": [[1, 1], [2, 2], [3, 6]], "start": { "c": 1, "m": 1 }, "table": true, "showDots": true, "revealBest": true }
+        }
+      },
+      "solution": "1.5 against 6: the best line is the one whose residual is perpendicular to both columns.",
+      "next": "Finish the recap"
+    }
+  ],
+  "sideQuest": {
+    "title": "Check it in numpy",
+    "body": "Only if you want to; nothing in the course needs it.\n\n```\nimport numpy as np\nA = np.array([[1, 1], [1, 2], [1, 3]])\nb = np.array([1, 2, 6])\nx, rr, rank, s = np.linalg.lstsq(A, b, rcond=None)\nprint(x, rr)  # [-2.  2.5] [1.5]\n```"
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "format": 1,
+  "id": "pseudo-inverse-from-the-svd",
+  "title": "The pseudo-inverse from the SVD",
+  "summary": "Build A⁺ from the SVD and see that A⁺b is the smallest best fit.",
+  "data": {
+    "A2": [[1, 2], [1, 2], [1, 2]],
+    "b": [1, 2, 6]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "eigenvalues-of-ata",
+      "title": "The singular values",
+      "define": [
+        { "term": "singular values", "meaning": "$\\sigma_i = \\sqrt{\\lambda_i}$, where the $\\lambda_i$ are the eigenvalues of $A^\\mathsf{T}A$. Its unit eigenvectors are the right singular vectors $v_i$." }
+      ],
+      "why": "The SVD is the rotate, stretch, rotate you already know. For this $A$ it shows exactly which direction $A$ can't see.",
+      "prompt": "For $A = \\begin{bmatrix}1&2\\\\1&2\\\\1&2\\end{bmatrix}$, $A^\\mathsf{T}A = \\begin{bmatrix}3&6\\\\6&12\\end{bmatrix}$. Find its eigenvalues, largest first.",
+      "answer": {
+        "fields": [
+          { "name": "l1", "label": "$\\lambda_1$ =", "key": "15" },
+          { "name": "l2", "label": "$\\lambda_2$ =", "key": "0" }
+        ],
+        "verify": "eigs(tr(A2)*A2)",
+        "slips": [{ "detect": "swapped" }]
+      },
+      "hints": [
+        "The eigenvalues add up to the trace and multiply to the determinant.",
+        "Trace $= 3 + 12$. Determinant $= 3 \\cdot 12 - 6 \\cdot 6$.",
+        "The determinant is 0, so one eigenvalue is 0."
+      ],
+      "solution": "So $\\sigma_1 = \\sqrt{15}$ and $\\sigma_2 = 0$: $A$ has rank 1.",
+      "next": "Find v₁"
+    },
+    {
+      "type": "step",
+      "id": "right-singular-vector",
+      "title": "v₁",
+      "why": "$v_1$ is the input direction $A$ stretches most; here it is the only one $A$ sees at all.",
+      "prompt": "Find $v_1$, the unit eigenvector of $A^\\mathsf{T}A$ for $\\lambda = 15$.",
+      "answer": {
+        "fields": [
+          { "name": "x1", "key": "1/sqrt(5)" },
+          { "name": "x2", "key": "2/sqrt(5)" }
+        ],
+        "accept": ["negated"],
+        "acceptNote": "Either sign is right: singular vectors are only fixed up to sign.",
+        "verify": "rsv(A2, 1)",
+        "slips": [
+          { "detect": "known", "when": { "x1": "1", "x2": "2" }, "say": "The right direction. Now make it a unit vector: divide by its length." },
+          { "detect": "scaled" }
+        ]
+      },
+      "hints": [
+        "Solve $(A^\\mathsf{T}A - 15I)\\,v = 0$.",
+        "Write $v = (x, y)$. The first row gives $-12x + 6y = 0$, so $y = 2x$.",
+        "The direction is $(1, 2)$, and its length is $\\sqrt5$."
+      ],
+      "check": { "say": "A unit vector has $x^2 + y^2 = 1$. And the first row of $A^\\mathsf{T}A\\,v_1$ should be 15 times $x$." },
+      "next": "Find u₁"
+    },
+    {
+      "type": "step",
+      "id": "left-singular-vector",
+      "title": "u₁",
+      "why": "$u_1$ is where $A$ sends $v_1$, scaled to unit length: $A v_1 = \\sigma_1 u_1$.",
+      "prompt": "Compute $u_1 = A v_1 / \\sigma_1$, with $\\sigma_1 = \\sqrt{15}$.",
+      "answer": {
+        "fields": [
+          { "name": "y1", "key": "1/sqrt(3)" },
+          { "name": "y2", "key": "1/sqrt(3)" },
+          { "name": "y3", "key": "1/sqrt(3)" }
+        ],
+        "accept": ["negated"],
+        "acceptNote": "The sign goes with $v_1$'s: if you flipped $v_1$, $u_1$ flips too.",
+        "verify": "lsv(A2, 1)",
+        "slips": [{ "detect": "scaled" }]
+      },
+      "hints": [
+        "Each row of $A$ is $(1, 2)$, so each entry of $A v_1$ is $(1 \\cdot 1 + 2 \\cdot 2)/\\sqrt5$.",
+        "$A v_1 = \\sqrt5\\,(1, 1, 1)$.",
+        "Divide by $\\sqrt{15}$, and use $\\sqrt{15} = \\sqrt5\\,\\sqrt3$."
+      ],
+      "next": "Build A⁺"
+    },
+    {
+      "type": "step",
+      "id": "build-the-pseudo-inverse",
+      "title": "A⁺",
+      "define": [
+        { "term": "pseudo-inverse", "meaning": "$A^+ = V\\,\\Sigma^+\\,U^\\mathsf{T}$. $\\Sigma^+$ turns each non-zero $\\sigma$ into $1/\\sigma$ and leaves each zero as zero." }
+      ],
+      "why": "Undo the stretch where $A$ stretches, and send the invisible direction to zero rather than infinity. That rule is what makes $A^+b$ the smallest best fit.",
+      "prompt": "$A$ has rank 1, so $A^+ = \\frac{1}{\\sigma_1}\\,v_1 u_1^\\mathsf{T}$. Write it as a $2 \\times 3$ matrix.",
+      "widget": {
+        "name": "svd-geometry",
+        "params": { "sigma": [3, 1], "angleV": 30, "angleU": -20, "controls": true, "pinv": true },
+        "caption": "A $2 \\times 2$ example. Drag $\\sigma_2$ down to 0: the ellipse flattens, and $A^+$ uses $1/\\sigma$ where it can and 0 where $\\sigma = 0$."
+      },
+      "answer": {
+        "fields": [
+          { "name": "a11", "key": "1/15" },
+          { "name": "a12", "key": "1/15" },
+          { "name": "a13", "key": "1/15" },
+          { "name": "a21", "key": "2/15" },
+          { "name": "a22", "key": "2/15" },
+          { "name": "a23", "key": "2/15" }
+        ],
+        "matrix": [2, 3],
+        "verify": "pinv(A2)",
+        "slips": [{ "detect": "scaled" }]
+      },
+      "hints": [
+        "$v_1 u_1^\\mathsf{T}$ is a column times a row: a $2 \\times 3$ matrix.",
+        "$v_1 u_1^\\mathsf{T} = \\frac{1}{\\sqrt5\\,\\sqrt3}\\begin{bmatrix}1&1&1\\\\2&2&2\\end{bmatrix}$.",
+        "Now multiply by $1/\\sigma_1 = 1/\\sqrt{15}$, and note $\\sqrt5\\,\\sqrt3 = \\sqrt{15}$."
+      ],
+      "check": { "say": "Row 2 should be twice row 1. And $A A^+ A$ gives back $A$: try its top-left entry." },
+      "next": "Apply A⁺ to b"
+    },
+    {
+      "type": "step",
+      "id": "pseudo-inverse-times-b",
+      "title": "A⁺b",
+      "why": "This is the pseudo-inverse's answer to the least-squares problem.",
+      "prompt": "Compute $A^+ b$ with $b = (1, 2, 6)$.",
+      "answer": {
+        "fields": [
+          { "name": "c", "label": "$c$ =", "key": "3/5" },
+          { "name": "m", "label": "$m$ =", "key": "6/5" }
+        ],
+        "verify": "pinv(A2)*b",
+        "slips": [{ "detect": "swapped" }]
+      },
+      "hints": [
+        "Row 1 of $A^+$ dotted with $b$, then row 2.",
+        "Row 1 gives $\\frac{1}{15}(1 + 2 + 6)$.",
+        "Row 2 of $A^+$ is twice row 1, so its answer is twice as big."
+      ],
+      "solution": "Your answer from the last lesson. The pseudo-inverse returns the smallest best fit.",
+      "next": "See why"
+    },
+    {
+      "type": "step",
+      "id": "v2-spans-the-null-space",
+      "title": "v₂",
+      "why": "$v_2$ is the direction with $\\sigma_2 = 0$. What $A^+$ does to it explains the whole lesson.",
+      "prompt": "Find $v_2$, the unit eigenvector of $A^\\mathsf{T}A$ for $\\lambda = 0$.",
+      "answer": {
+        "fields": [
+          { "name": "x1", "key": "2/sqrt(5)" },
+          { "name": "x2", "key": "-1/sqrt(5)" }
+        ],
+        "accept": ["negated"],
+        "acceptNote": "Either sign is right.",
+        "verify": "rsv(A2, 2)",
+        "slips": [
+          { "detect": "known", "when": { "x1": "2", "x2": "-1" }, "say": "The right direction. Now make it a unit vector." },
+          { "detect": "scaled" }
+        ]
+      },
+      "hints": [
+        "It is perpendicular to $v_1 = (1, 2)/\\sqrt5$.",
+        "A vector perpendicular to $(1, 2)$ is $(2, -1)$.",
+        "Its length is $\\sqrt5$."
+      ],
+      "solution": "$v_2$ is your null direction $d$, made unit length. $A^+b = \\frac{1}{\\sigma_1}(u_1 \\cdot b)\\,v_1$ has no $v_2$ part at all, because $\\Sigma^+$ puts a 0 there. No null-space part is exactly what made $p$ the smallest best fit.",
+      "next": "Finish the lesson"
+    }
+  ],
+  "sideQuest": {
+    "title": "Check it in numpy",
+    "body": "Only if you want to.\n\n```\nimport numpy as np\nA = np.array([[1, 2], [1, 2], [1, 2]])\nb = np.array([1, 2, 6])\nprint(np.linalg.pinv(A))      # rows 1/15 and 2/15\nprint(np.linalg.pinv(A) @ b)  # [0.6 1.2]\n```"
+  }
+}

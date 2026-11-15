@@ -8,3 +8,6 @@ node_modules/
 __pycache__/
 *.pyc
 /.venv/
+# Courses are published here by tools/validate_courses.py --publish (npm run courses)
+# only after they pass; the source is content/.
+/public/content/*/courses/

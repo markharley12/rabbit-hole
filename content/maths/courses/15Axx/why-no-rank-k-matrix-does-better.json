@@ -1,0 +1,164 @@
+{
+  "format": 1,
+  "id": "why-no-rank-k-matrix-does-better",
+  "title": "Why no rank-k matrix does better",
+  "summary": "The hard half of Eckart–Young: a small rank forces a null space that meets span(v₁…v_{k+1}).",
+  "data": {
+    "A5": [[3, 0, 0], [0, 2, 0], [0, 0, 1]],
+    "B5": [[3, 1, 0], [0, 0, 0], [0, 0, 0]],
+    "C5": [[3, 1, 0], [0, 0, 1]]
+  },
+  "blocks": [
+    {
+      "type": "text",
+      "id": "the-claim",
+      "title": "The half that is left",
+      "body": "You proved the easy half: $A_k$, the SVD cut to $k$ terms, has $\\|A - A_k\\|_2 = \\sigma_{k+1}$.\n\nThe hard half: **no** matrix $B$ of rank at most $k$ does better, so $\\|A - B\\|_2 \\ge \\sigma_{k+1}$.\n\nYour idea is the proof: $B$'s null space is big, so it must meet span$(v_1, \\ldots, v_{k+1})$. This lesson builds it, first in $\\mathbb{R}^3$ with $k = 1$. The picture is the easy half, for a $2 \\times 2$ matrix.",
+      "widget": {
+        "name": "svd-geometry",
+        "params": { "sigma": [3, 1.5], "angleV": 35, "angleU": 15, "controls": true, "truncate": true }
+      },
+      "next": "Start with dimensions"
+    },
+    {
+      "type": "step",
+      "id": "null-space-dimension",
+      "title": "How big is B's null space?",
+      "define": [
+        { "term": "rank–nullity", "meaning": "For a matrix with $n$ columns, rank + dimension of the null space $= n$." }
+      ],
+      "why": "A small rank forces a big null space. That is the lever the proof pulls.",
+      "prompt": "$B$ is $3 \\times 3$ with rank 1. What is the dimension of its null space?",
+      "answer": {
+        "fields": [{ "name": "n", "label": "dim =", "key": "2" }],
+        "verify": "3 - rank(B5)"
+      },
+      "hints": [
+        "Use rank + nullity = number of columns.",
+        "$1 + \\dim N(B) = 3$.",
+        "Take 1 from 3."
+      ],
+      "next": "Count the overlap"
+    },
+    {
+      "type": "step",
+      "id": "they-must-meet",
+      "title": "Two planes in ℝ³",
+      "define": [
+        { "term": "span(v₁, v₂)", "meaning": "All combinations of the first two right singular vectors of $A$: the directions $A$ stretches most." }
+      ],
+      "why": "If the two subspaces must share a non-zero vector, that vector is the witness the proof needs.",
+      "prompt": "In $\\mathbb{R}^3$, $B$'s null space (dimension 2) and span$(v_1, v_2)$ (dimension 2) meet in a subspace. What is the smallest dimension that meeting can have?",
+      "answer": {
+        "fields": [{ "name": "n", "label": "dim ≥", "key": "1" }],
+        "verify": "(3 - rank(B5)) + 2 - 3"
+      },
+      "hints": [
+        "$\\dim(U \\cap W) \\ge \\dim U + \\dim W - n$, in $\\mathbb{R}^n$.",
+        "Picture two planes through the origin in $\\mathbb{R}^3$.",
+        "$2 + 2 - 3$."
+      ],
+      "solution": "At least 1: two planes through the origin always share a line. So there is a unit $w$ with $Bw = 0$ and $w$ in span$(v_1, v_2)$.",
+      "next": "Do it for any n and k"
+    },
+    {
+      "type": "step",
+      "id": "general-count",
+      "title": "Any n, any k",
+      "why": "This is the step that makes it a proof for every matrix, not just this one.",
+      "prompt": "In $\\mathbb{R}^n$ with rank$(B) \\le k$: $\\dim N(B) \\ge n - k$, and span$(v_1, \\ldots, v_{k+1})$ has dimension $k + 1$. Add the two dimensions. Type the result in terms of $n$ (and $k$, if any is left).",
+      "answer": {
+        "fields": [{ "name": "s", "label": "sum =", "key": "n + 1" }],
+        "vars": ["n", "k"],
+        "verify": "(n - k) + (k + 1)"
+      },
+      "hints": [
+        "Add $(n - k)$ and $(k + 1)$.",
+        "The $k$s cancel.",
+        "$(n - k) + (k + 1) = n + \\ldots$"
+      ],
+      "solution": "$n + 1 > n$, so the two subspaces of $\\mathbb{R}^n$ share a non-zero vector. Scale it to a unit vector $w$: $Bw = 0$ and $w \\in$ span$(v_1, \\ldots, v_{k+1})$.",
+      "next": "Use the witness w"
+    },
+    {
+      "type": "step",
+      "id": "witness-lower-bound",
+      "title": "What w forces",
+      "define": [
+        { "term": "spectral norm", "meaning": "$\\|M\\|_2$ is the largest $\\|Mx\\|$ over unit vectors $x$. So $\\|M\\|_2 \\ge \\|Mw\\|$ for any one unit $w$." }
+      ],
+      "why": "Since $Bw = 0$, $(A - B)w = Aw$. So the error is at least $\\|Aw\\|$, and $\\|Aw\\|$ can't be small.",
+      "prompt": "Take $A = \\mathrm{diag}(3, 2, 1)$, so $\\sigma = 3, 2, 1$ and $v_i = e_i$. A unit $w$ in span$(e_1, e_2)$ is $(a, b, 0)$ with $a^2 + b^2 = 1$. What is the smallest $\\|Aw\\|^2$ can be?",
+      "answer": {
+        "fields": [{ "name": "q", "label": "smallest $\\|Aw\\|^2$ =", "key": "4" }],
+        "verify": "sv(A5, 2)^2"
+      },
+      "hints": [
+        "$Aw = (3a, 2b, 0)$.",
+        "$\\|Aw\\|^2 = 9a^2 + 4b^2$, with $a^2 + b^2 = 1$.",
+        "Replace $b^2$ by $1 - a^2$: $9a^2 + 4b^2 = 4 + 5a^2$."
+      ],
+      "solution": "4, at $w = e_2$. In general $\\|Aw\\|^2 = \\sum_i \\sigma_i^2 (v_i \\cdot w)^2 \\ge \\sigma_{k+1}^2$ for any unit $w$ in span$(v_1, \\ldots, v_{k+1})$. So $\\|A - B\\|_2 \\ge \\|Aw\\| \\ge \\sigma_{k+1}$.",
+      "next": "Try a challenger B"
+    },
+    {
+      "type": "step",
+      "id": "challenger-witness",
+      "title": "A challenger",
+      "why": "Running the argument on one real $B$ shows where the witness comes from.",
+      "prompt": "Challenge it with the rank-1 $B = \\begin{bmatrix}3&1&0\\\\0&0&0\\\\0&0&0\\end{bmatrix}$. Find a non-zero $w$ with $Bw = 0$ and $w$ in span$(e_1, e_2)$, so its third entry is 0. Any multiple will do.",
+      "answer": {
+        "fields": [
+          { "name": "w1", "key": "1" },
+          { "name": "w2", "key": "-3" },
+          { "name": "w3", "key": "0" }
+        ],
+        "accept": ["multiple"],
+        "acceptNote": "Any non-zero multiple of $(1, -3, 0)$ is the same witness.",
+        "verify": "nullvec(C5)"
+      },
+      "hints": [
+        "$Bw = 0$ says $3w_1 + w_2 = 0$.",
+        "Choose $w_1 = 1$.",
+        "With $w_1 = 1$, solve $3 + w_2 = 0$. The third entry is 0 because $w$ is in span$(e_1, e_2)$."
+      ],
+      "next": "Measure the error at w"
+    },
+    {
+      "type": "step",
+      "id": "challenger-error",
+      "title": "How the challenger does",
+      "why": "The bound says this has to come out at least $\\sigma_2^2 = 4$.",
+      "prompt": "For $w = (1, -3, 0)$, compute $\\|(A - B)w\\|^2 / \\|w\\|^2$: the squared stretch along $w$.",
+      "answer": {
+        "fields": [{ "name": "q", "label": "ratio =", "key": "9/2" }],
+        "verify": "sq((A5 - B5)*vec(1, -3, 0)) / sq(vec(1, -3, 0))"
+      },
+      "hints": [
+        "$Bw = 0$, so $(A - B)w = Aw$.",
+        "$Aw = (3, -6, 0)$ and $\\|w\\|^2 = 10$.",
+        "$\\|Aw\\|^2 = 9 + 36$."
+      ],
+      "solution": "4.5, at least 4 as promised. So $\\|A - B\\|_2 \\ge \\sqrt{4.5} > 2 = \\|A - A_1\\|_2$: this $B$ loses, as every rank-1 $B$ must.",
+      "next": "State the bound"
+    },
+    {
+      "type": "step",
+      "id": "the-bound",
+      "title": "The bound",
+      "why": "Together with your easy half, this is the whole theorem.",
+      "prompt": "So for every $B$ of rank at most 1, $\\|A - B\\|_2$ is at least what number, for $A = \\mathrm{diag}(3, 2, 1)$?",
+      "answer": {
+        "fields": [{ "name": "q", "label": "at least", "key": "2" }],
+        "verify": "sv(A5, 2)"
+      },
+      "hints": [
+        "It is one of the singular values of $A$.",
+        "Which one: $\\sigma_k$ or $\\sigma_{k+1}$, with $k = 1$?",
+        "$\\sigma_2$ of diag$(3, 2, 1)$."
+      ],
+      "solution": "$\\sigma_2 = 2$, and $A_1$ reaches it. With your easy half, that is Eckart–Young in the 2-norm: the smallest $\\|A - B\\|_2$ over rank$(B) \\le k$ is $\\sigma_{k+1}$, reached by $A_k$.",
+      "next": "Finish the course"
+    }
+  ]
+}
