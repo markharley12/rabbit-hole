@@ -5,6 +5,8 @@ import { finishLesson, goTo, openLesson, recordAttempt, revealAnswer, saveDraft,
 import { useProgress } from './progress-store.ts'
 import { StepScreen } from './StepScreen.tsx'
 import type { Course, Lesson, TextBlock } from './types.ts'
+import { useLessonTools } from '../tools/lesson-tools.tsx'
+import { ToolDock } from '../tools/ToolDock.tsx'
 import { Widget } from '../widgets/Widget.tsx'
 import 'katex/dist/katex.min.css'
 
@@ -78,6 +80,7 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
   }, [at, lessonId])
 
   const links = useMemo(() => ({ nodeId: course.nodeId }), [course.nodeId])
+  const tools = useLessonTools(course.id, lessonId)
 
   const header = (subtitle: string) => (
     <header className="lesson-bar">
@@ -175,7 +178,7 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
 
   return (
     <LinksContext.Provider value={links}>
-      <div className="lesson" role="dialog" aria-label={lesson.title} ref={body}>
+      <div className={block ? 'lesson has-tools' : 'lesson'} role="dialog" aria-label={lesson.title} ref={body}>
         {header(block ? `${at + 1} of ${total}` : 'Done')}
         <div className="lesson-progress" aria-hidden="true">
           {lesson.blocks.map((b, i) => (
@@ -183,6 +186,7 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
           ))}
         </div>
         {screen}
+        {block && <ToolDock tools={tools} />}
       </div>
     </LinksContext.Provider>
   )

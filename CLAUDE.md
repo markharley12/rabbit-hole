@@ -39,6 +39,17 @@ marking, no Capacitor yet. What is where:
   course at the top level and assumed there were none.
 - **Course packs:** `tools/pack_course.py pack|unpack` (`npm run pack -- …`) turns a course into one
   `.rhpack` file and back, treating the file as untrusted; tests in `tools/tests/test_pack_course.py`.
+- **Lesson tools** (`src/tools/`): a dock of round buttons at the right edge of the lesson,
+  riding on the footer's top edge (`ToolDock.tsx`; a tool is `{ id, label, icon, render(close) }`,
+  so a cheat sheet or reading links are one more entry in `lesson-tools.tsx`). A tool opens as an
+  overlay over the lesson, never unmounting the step; Escape, a tap outside, or the phone's back
+  button (a `pushState` entry plus `popstate`) closes it. **Scratch pad** (`ScratchPad.tsx`, pure
+  `scratch-pad.ts`): one finger draws, two pan and pinch; pen, eraser (whole strokes), undo, redo,
+  clear (tap twice), fit; saved per lesson in `rabbit-hole:scratch:<course>:<lesson>`, capped.
+  **Calculator** keeps a tape of the last 20 lines (`calculator.ts`); tap a result to reuse it.
+  **Number keyboard**: a box gets `inputMode="decimal"` only when the answer has no `vars` and
+  that field's key is a plain number (`src/lesson/input-mode.ts`); an "abc"/"123" switch under the
+  boxes changes every box's keyboard without clearing anything.
 - **Progress** is on the device only (`localStorage`, `rabbit-hole:progress:<course>`):
   attempts, hints, drafts, where he is. **No scores** (claimed is not scored).
 - `pwa/sw.js`: offline. A new build waits until the app is fully closed, so an update
