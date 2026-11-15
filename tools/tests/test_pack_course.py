@@ -66,6 +66,23 @@ class Packs(unittest.TestCase):
         self.assertEqual(self.unpack(file), self.course)
         self.assertEqual({p.name: p.read_bytes() for p in self.course.iterdir()}, before)
 
+    def test_the_cheat_sheet_travels_with_the_course(self):
+        file = self.pack()
+        with zipfile.ZipFile(file) as archive:
+            self.assertIn("course/cheatsheet.json", archive.namelist())
+            self.assertIn("cheatsheet.json", json.loads(archive.read("manifest.json"))["files"])
+        original = (self.course / "cheatsheet.json").read_bytes()
+        shutil.rmtree(self.course)
+        self.unpack(file)
+        self.assertEqual((self.course / "cheatsheet.json").read_bytes(), original)
+
+    def test_a_pack_with_a_broken_cheat_sheet_is_refused(self):
+        sheet = json.loads((self.course / "cheatsheet.json").read_text())
+        sheet["sections"][0]["items"][0]["lesson"] = "no-such-lesson"
+        (self.course / "cheatsheet.json").write_text(json.dumps(sheet))
+        with self.assertRaises(pc.PackError):
+            self.pack()
+
     def test_packing_is_repeatable(self):
         first = self.pack().read_bytes()
         self.assertEqual(self.pack().read_bytes(), first)

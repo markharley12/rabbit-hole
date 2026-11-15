@@ -202,6 +202,86 @@ class Content(unittest.TestCase):
         self.edit("dependent-columns", lambda d: d["blocks"][0].update(why="See [it](lesson:the-smallest-best-fit) on [the map](node:15Axx)."))
         self.assertEqual(self.errors(), [])
 
+    # ---- the cheat sheet (cheatsheet.json beside course.json)
+
+    def sheet(self, change):
+        path = self.course / "cheatsheet.json"
+        document = json.loads(path.read_text())
+        change(document)
+        path.write_text(json.dumps(document, ensure_ascii=False))
+
+    def first_item(self, **fields):
+        return lambda d: d["sections"][0]["items"][0].update(fields)
+
+    def test_the_real_cheat_sheet_is_in_range(self):
+        sheet = json.loads((COURSE / "cheatsheet.json").read_text())
+        items = [i for s in sheet["sections"] for i in s["items"]]
+        self.assertTrue(3 <= len(sheet["sections"]) <= 5)
+        self.assertTrue(10 <= len(items) <= 16, len(items))
+
+    def test_a_course_without_a_cheat_sheet_is_fine(self):
+        (self.course / "cheatsheet.json").unlink()
+        self.assertEqual(self.errors(), [])
+
+    def test_cheat_sheet_schema_errors_are_reported(self):
+        self.sheet(lambda d: d["sections"][0]["items"][0].pop("formula"))
+        self.assertFails("'formula' is a required property")
+        self.sheet(self.first_item(formula="$x$", extra=1))
+        self.assertFails("cheatsheet.json")
+        self.sheet(self.first_item(name="N" * 51))
+        self.assertFails("is too long")
+
+    def test_cheat_sheet_limits(self):
+        cases = [
+            (lambda d: d.update(sections=[]), "is too short"),
+            (lambda d: d.update(sections=d["sections"][:1] * 9), "is too long"),
+            (lambda d: d["sections"][0].update(items=[]), "is too short"),
+            (lambda d: d["sections"][0].update(items=d["sections"][0]["items"][:1] * 11), "is too long"),
+            (self.first_item(when="w" * 201), "is too long"),
+        ]
+        for change, message in cases:
+            with self.subTest(message=message):
+                shutil.copyfile(COURSE / "cheatsheet.json", self.course / "cheatsheet.json")
+                self.sheet(change)
+                self.assertFails(message)
+
+    def test_cheat_sheet_item_ids_must_be_unique(self):
+        self.sheet(lambda d: d["sections"][1]["items"][0].update(id=d["sections"][0]["items"][0]["id"]))
+        self.assertFails("item id repeats")
+
+    def test_cheat_sheet_lesson_must_be_one_of_the_courses(self):
+        self.sheet(self.first_item(lesson="no-such-lesson"))
+        self.assertFails("lesson 'no-such-lesson' is not a lesson of this course")
+
+    def test_cheat_sheet_markdown_is_checked_like_a_lesson(self):
+        self.sheet(self.first_item(formula="<b>r</b>"))
+        self.assertFails("raw HTML")
+        self.sheet(self.first_item(formula="$r = b - Ax"))
+        self.assertFails("an unmatched $")
+        self.sheet(self.first_item(when="See [it](lesson:nowhere)."))
+        self.assertFails("link 'lesson:nowhere' does not resolve")
+        self.sheet(self.first_item(formula="$r$", when="See [it](lesson:dependent-columns)."))
+        self.assertEqual(self.errors(), [])
+
+    def test_a_broken_cheat_sheet_stops_publishing(self):
+        self.sheet(self.first_item(lesson="no-such-lesson"))
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(vc.main(["--publish", "--content", str(self.content), "--public", str(self.public)]), 1)
+        self.assertFalse((self.public / "content" / "maths" / "courses").exists())
+
+    def test_publish_copies_the_cheat_sheet_and_flags_it_in_the_index(self):
+        self.copy_course("a-second-course")
+        (self.content / "maths" / "courses" / "a-second-course" / "cheatsheet.json").unlink()
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(vc.main(["--publish", "--content", str(self.content), "--public", str(self.public)]), 0)
+        published = self.public / "content" / "maths" / "courses"
+        self.assertEqual((published / COURSE_ID / "cheatsheet.json").read_bytes(), (self.course / "cheatsheet.json").read_bytes())
+        self.assertFalse((published / "a-second-course" / "cheatsheet.json").exists())
+        flags = {c["id"]: c.get("cheatsheet") for c in json.loads((published / "index.json").read_text())["courses"]}
+        self.assertEqual(flags, {COURSE_ID: True, "a-second-course": None})
+        # The flag belongs to the index only; course.json stays as written.
+        self.assertNotIn("cheatsheet", json.loads((published / COURSE_ID / "course.json").read_text()))
+
     def test_publish_only_when_valid(self):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):

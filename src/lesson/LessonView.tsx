@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { LinksContext } from './links-context.ts'
 import { Md } from './Md.tsx'
 import { finishLesson, goTo, openLesson, recordAttempt, revealAnswer, saveDraft, takeHint } from './progress.ts'
@@ -80,7 +81,7 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
   }, [at, lessonId])
 
   const links = useMemo(() => ({ nodeId: course.nodeId }), [course.nodeId])
-  const tools = useLessonTools(course.id, lessonId)
+  const tools = useLessonTools({ course, lessonId, base })
 
   const header = (subtitle: string) => (
     <header className="lesson-bar">
@@ -178,7 +179,13 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
 
   return (
     <LinksContext.Provider value={links}>
-      <div className={block ? 'lesson has-tools' : 'lesson'} role="dialog" aria-label={lesson.title} ref={body}>
+      <div
+        className={block ? 'lesson has-tools' : 'lesson'}
+        style={{ '--tools': tools.length } as CSSProperties}
+        role="dialog"
+        aria-label={lesson.title}
+        ref={body}
+      >
         {header(block ? `${at + 1} of ${total}` : 'Done')}
         <div className="lesson-progress" aria-hidden="true">
           {lesson.blocks.map((b, i) => (

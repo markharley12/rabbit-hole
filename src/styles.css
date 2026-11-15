@@ -1216,7 +1216,8 @@ a {
 }
 /* Room for the dock under the last line, so nothing is stuck behind it. */
 .lesson.has-tools .lesson-body {
-  padding-bottom: 120px;
+  /* Each round button is 44px plus an 8px gap; --tools is how many the lesson has. */
+  padding-bottom: calc(20px + var(--tools, 2) * 52px);
 }
 .tool-dock {
   position: absolute;
@@ -1459,4 +1460,113 @@ a {
   .tool-panel {
     animation: none;
   }
+}
+
+/* Cheat sheet and reading */
+
+.cheat {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 4px 16px 24px;
+}
+.cheat-section h3 {
+  margin: 20px 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.cheat-items,
+.cheat-notes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cheat-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.cheat-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.cheat-here {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.cheat-formula {
+  margin: 6px 0 2px;
+  font-size: 17px;
+  /* A long formula scrolls sideways; the hidden MathML must not add a vertical scrollbar. */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.cheat-when {
+  font-size: 14px;
+  color: var(--muted);
+}
+.cheat-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.cheat-note-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.cheat-remove,
+.cheat-add-button {
+  flex: none;
+  min-width: 64px;
+  min-height: 44px;
+  padding: 4px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.cheat-remove.armed {
+  border-color: var(--b1);
+  color: var(--b1);
+  font-weight: 650;
+}
+.cheat-add-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.cheat-add {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 8px;
+}
+.cheat-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 4px 10px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--fg);
+  /* 16px: a smaller field makes a phone zoom the page when it is focused. */
+  font: inherit;
+  font-size: 16px;
 }

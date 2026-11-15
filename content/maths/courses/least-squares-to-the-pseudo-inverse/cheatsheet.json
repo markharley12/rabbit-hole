@@ -1,0 +1,142 @@
+{
+  "format": 1,
+  "sections": [
+    {
+      "title": "Least squares",
+      "items": [
+        {
+          "id": "residual",
+          "name": "Residual",
+          "formula": "$r = b - Ax$",
+          "when": "Data minus fit, one entry per point. A fit is scored by $\\|r\\|^2$; the best fit makes it smallest.",
+          "lesson": "normal-equations-from-your-points"
+        },
+        {
+          "id": "normal-equations",
+          "name": "Normal equations",
+          "formula": "$A^\\mathsf{T}A\\,x = A^\\mathsf{T}b$",
+          "when": "To find the best fit. There is exactly one best line when $A^\\mathsf{T}A$ is invertible.",
+          "lesson": "normal-equations-from-your-points"
+        },
+        {
+          "id": "perpendicular-check",
+          "name": "Perpendicular check",
+          "formula": "$r \\perp$ every column of $A$",
+          "when": "To check a fit: dot $r$ with each column of $A$. At the best fit every one comes to 0.",
+          "lesson": "normal-equations-from-your-points"
+        },
+        {
+          "id": "ata-entries",
+          "name": "Entries of AᵀA",
+          "formula": "Row $i$, column $j$ of $A^\\mathsf{T}A$ is (column $i$) · (column $j$).",
+          "when": "To build $A^\\mathsf{T}A$. It equals its own transpose, and its top-left entry is the number of points.",
+          "lesson": "normal-equations-from-your-points"
+        },
+        {
+          "id": "atb-entries",
+          "name": "Entries of Aᵀb",
+          "formula": "Entry $i$ of $A^\\mathsf{T}b$ is (column $i$ of $A$) · $b$.",
+          "when": "To build the right-hand side. Add the products one at a time; addition slips are easy here.",
+          "lesson": "normal-equations-from-your-points"
+        }
+      ]
+    },
+    {
+      "title": "Dependent columns",
+      "items": [
+        {
+          "id": "line-of-best-fits",
+          "name": "A line of best fits",
+          "formula": "$c + 2m = 3$",
+          "when": "In the course's example (column 2 is $2 \\times$ column 1) the normal equations say this twice. Every point on it is a best fit, all with $\\|r\\|^2 = 14$.",
+          "lesson": "dependent-columns"
+        },
+        {
+          "id": "null-space",
+          "name": "Null space",
+          "formula": "$Ad = 0$",
+          "when": "The directions $A$ can't see. Adding one to a best fit changes nothing $A$ can see.",
+          "lesson": "the-smallest-best-fit"
+        },
+        {
+          "id": "smallest-best-fit",
+          "name": "Smallest best fit",
+          "formula": "$\\|p + t\\,d\\|^2 = \\|p\\|^2 + t^2\\|d\\|^2$ when $p \\perp d$",
+          "when": "Every best fit is $p + t\\,d$ with $Ad = 0$. If $p \\perp d$, the smallest one is at $t = 0$.",
+          "lesson": "the-smallest-best-fit"
+        }
+      ]
+    },
+    {
+      "title": "Singular value decomposition",
+      "items": [
+        {
+          "id": "singular-values",
+          "name": "Singular values",
+          "formula": "$\\sigma_i = \\sqrt{\\lambda_i}$",
+          "when": "The $\\lambda_i$ are the eigenvalues of $A^\\mathsf{T}A$, largest first. Its unit eigenvectors are the right singular vectors $v_i$.",
+          "lesson": "pseudo-inverse-from-the-svd"
+        },
+        {
+          "id": "left-singular-vector",
+          "name": "Left singular vector",
+          "formula": "$u_1 = A v_1 / \\sigma_1$",
+          "when": "Where $A$ sends $v_1$, scaled to unit length: $A v_1 = \\sigma_1 u_1$.",
+          "lesson": "pseudo-inverse-from-the-svd"
+        }
+      ]
+    },
+    {
+      "title": "Pseudo-inverse",
+      "items": [
+        {
+          "id": "pseudo-inverse",
+          "name": "Pseudo-inverse from the SVD",
+          "formula": "$A^+ = V\\,\\Sigma^+\\,U^\\mathsf{T}$",
+          "when": "To undo $A$ where it stretches, and send the direction it can't see to zero.",
+          "lesson": "pseudo-inverse-from-the-svd"
+        },
+        {
+          "id": "reciprocal-rule",
+          "name": "The 1/σ rule",
+          "formula": "In $\\Sigma^+$, each non-zero $\\sigma$ becomes $1/\\sigma$ and each zero stays $0$.",
+          "when": "A zero singular value goes to zero, not to infinity.",
+          "lesson": "pseudo-inverse-from-the-svd"
+        },
+        {
+          "id": "pseudo-inverse-times-b",
+          "name": "The smallest best fit from A⁺",
+          "formula": "$A^+ b$ is the smallest best fit. At rank 1: $A^+ b = \\frac{1}{\\sigma_1}(u_1 \\cdot b)\\,v_1$.",
+          "when": "It has no part along a direction with $\\sigma = 0$, and that is what makes it the smallest.",
+          "lesson": "pseudo-inverse-from-the-svd"
+        }
+      ]
+    },
+    {
+      "title": "Eckart–Young",
+      "items": [
+        {
+          "id": "easy-half",
+          "name": "The easy half",
+          "formula": "$\\|A - A_k\\|_2 = \\sigma_{k+1}$",
+          "when": "$A_k$ is the SVD cut to $k$ terms. It reaches this error.",
+          "lesson": "why-no-rank-k-matrix-does-better"
+        },
+        {
+          "id": "hard-half",
+          "name": "The hard half",
+          "formula": "$\\|A - B\\|_2 \\ge \\sigma_{k+1}$ for every $B$ of rank at most $k$",
+          "when": "So no matrix of rank at most $k$ does better than $A_k$ in the 2-norm.",
+          "lesson": "why-no-rank-k-matrix-does-better"
+        },
+        {
+          "id": "witness",
+          "name": "The witness behind it",
+          "formula": "$Bw = 0$, so $\\|A - B\\|_2 \\ge \\|Aw\\| \\ge \\sigma_{k+1}$",
+          "when": "$w$ is a unit vector in both $N(B)$ and span$(v_1, \\ldots, v_{k+1})$. Their dimensions add to $n + 1 > n$, so one exists.",
+          "lesson": "why-no-rank-k-matrix-does-better"
+        }
+      ]
+    }
+  ]
+}

@@ -3,18 +3,20 @@
 // the same way, that every known slip is named, and that all the maths
 // typesets. Together they are what lets content into public/.
 
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { check } from './check.ts'
 import { plainLabel, renderMarkdown } from './markdown.ts'
-import type { Block, Course, Lesson, WidgetRef } from './types.ts'
+import type { Block, CheatSheet, Course, Lesson, WidgetRef } from './types.ts'
 import { registry } from '../widgets/registry.ts'
 
 const ROOT = 'content/maths/courses'
 const courses = readdirSync(ROOT).map((dir) => {
   const course = JSON.parse(readFileSync(`${ROOT}/${dir}/course.json`, 'utf8')) as Course
   const lessons = course.lessons.map((entry) => JSON.parse(readFileSync(`${ROOT}/${dir}/${entry.id}.json`, 'utf8')) as Lesson)
-  return { course, lessons }
+  const sheetPath = `${ROOT}/${dir}/cheatsheet.json`
+  const sheet = existsSync(sheetPath) ? (JSON.parse(readFileSync(sheetPath, 'utf8')) as CheatSheet) : undefined
+  return { course, lessons, sheet }
 })
 
 function markdownOf(block: Block): string[] {
@@ -37,7 +39,7 @@ function markdownOf(block: Block): string[] {
   return texts
 }
 
-describe.each(courses)('course $course.id', ({ course, lessons }) => {
+describe.each(courses)('course $course.id', ({ course, lessons, sheet }) => {
   const steps = lessons.flatMap((lesson) => lesson.blocks.filter((b) => b.type === 'step').map((step) => ({ lesson: lesson.id, step })))
 
   it.each(steps)('$lesson / $step.id: the app accepts its own key', ({ step }) => {
@@ -63,6 +65,17 @@ describe.each(courses)('course $course.id', ({ course, lessons }) => {
       for (const text of texts) {
         expect(() => renderMarkdown(text, { strict: true, links: { nodeId: course.nodeId } }), `${lesson.id}: ${text}`).not.toThrow()
       }
+    }
+  })
+
+  it('typesets every cheat-sheet formula in strict KaTeX, and the sheet is one the lessons derive', () => {
+    if (!sheet) return
+    const lessonIds = course.lessons.map((l) => l.id)
+    for (const item of sheet.sections.flatMap((s) => s.items)) {
+      for (const text of [item.formula, item.when]) {
+        expect(() => renderMarkdown(text, { strict: true, links: { nodeId: course.nodeId } }), `${item.id}: ${text}`).not.toThrow()
+      }
+      if (item.lesson) expect(lessonIds, item.id).toContain(item.lesson)
     }
   })
 

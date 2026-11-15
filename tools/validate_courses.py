@@ -7,6 +7,8 @@
 What is checked, for every content/<field>/courses/<course-id>/:
 
 - course.json and each lesson against schema/course.schema.json and schema/lesson.schema.json;
+- an optional cheatsheet.json against schema/cheatsheet.schema.json: item ids unique, `lesson`
+  one of the course's, Markdown checked as for lessons;
 - the course hangs on a node that exists in public/content/<field>/map.json (any number of
   courses may share a node), its folder is named after the course's id, and ids are unique; every listed lesson has a file and every file is listed;
 - every widget is in schema/widgets.json and its params match the schema there;
@@ -413,11 +415,13 @@ def load_json(path: Path, report: Report):
 def validators(schema_dir: Path):
     course = json.loads((schema_dir / "course.schema.json").read_text())
     lesson = json.loads((schema_dir / "lesson.schema.json").read_text())
-    registry = Registry().with_resources([(s["$id"], Resource.from_contents(s)) for s in (course, lesson)])
+    cheatsheet = json.loads((schema_dir / "cheatsheet.schema.json").read_text())
+    registry = Registry().with_resources([(s["$id"], Resource.from_contents(s)) for s in (course, lesson, cheatsheet)])
     widgets = json.loads((schema_dir / "widgets.json").read_text())["widgets"]
     return (
         Draft202012Validator(course, registry=registry),
         Draft202012Validator(lesson, registry=registry),
+        Draft202012Validator(cheatsheet, registry=registry),
         {name: Draft202012Validator(spec["params"]) for name, spec in widgets.items()},
     )
 
@@ -566,6 +570,21 @@ def check_lesson(lesson: dict, where: str, lesson_ids: set[str], node_ids: set[s
         check_markdown(lesson["sideQuest"]["body"], f"{where} sideQuest", lesson_ids, node_ids, report)
 
 
+def check_cheatsheet(sheet: dict, where: str, lesson_ids: set[str], node_ids: set[str], report: Report):
+    """Ids unique, `lesson` one of the course's, and the Markdown as safe as a lesson's."""
+    seen: set[str] = set()
+    for section in sheet["sections"]:
+        for item in section["items"]:
+            at = f"{where} item {item['id']!r}"
+            if item["id"] in seen:
+                report.add(at, "item id repeats")
+            seen.add(item["id"])
+            if "lesson" in item and item["lesson"] not in lesson_ids:
+                report.add(at, f"lesson {item['lesson']!r} is not a lesson of this course")
+            for key in ("formula", "when"):
+                check_markdown(item[key], f"{at} {key}", lesson_ids, node_ids, report)
+
+
 def map_ids(map_path: Path) -> set[str]:
     document = json.loads(map_path.read_text(encoding="utf-8"))
     ids = set()
@@ -580,7 +599,7 @@ def map_ids(map_path: Path) -> set[str]:
 def validate(content: Path, public: Path, schema_dir: Path) -> tuple[Report, dict[str, list[tuple[Path, dict]]]]:
     """Check everything; return the report and, per field, the courses found."""
     report = Report()
-    course_validator, lesson_validator, widget_validators = validators(schema_dir)
+    course_validator, lesson_validator, cheatsheet_validator, widget_validators = validators(schema_dir)
     found: dict[str, list[tuple[Path, dict]]] = {}
     course_ids: set[str] = set()
     for courses_dir in sorted(content.glob("*/courses")):
@@ -606,7 +625,8 @@ def validate(content: Path, public: Path, schema_dir: Path) -> tuple[Report, dic
             lesson_ids = [entry["id"] for entry in course["lessons"]]
             if len(set(lesson_ids)) != len(lesson_ids):
                 report.add(f"{where}/course.json", "a lesson id repeats")
-            files = {p.stem for p in course_dir.glob("*.json")} - {"course"}
+            # cheatsheet.json is the one optional file that is not a lesson.
+            files = {p.stem for p in course_dir.glob("*.json")} - {"course", "cheatsheet"}
             for extra in sorted(files - set(lesson_ids)):
                 report.add(f"{where}/{extra}.json", "is not listed in course.json")
             for entry in course["lessons"]:
@@ -622,6 +642,11 @@ def validate(content: Path, public: Path, schema_dir: Path) -> tuple[Report, dic
                 if lesson["title"] != entry["title"]:
                     report.add(f"{where}/{path.name}", "title differs from the one in course.json")
                 check_lesson(lesson, f"{where}/{path.name}", set(lesson_ids), nodes, widget_validators, report)
+            sheet_path = course_dir / "cheatsheet.json"
+            if sheet_path.exists():
+                sheet = load_json(sheet_path, report)
+                if sheet is not None and not schema_errors(cheatsheet_validator, sheet, f"{where}/cheatsheet.json", report):
+                    check_cheatsheet(sheet, f"{where}/cheatsheet.json", set(lesson_ids), nodes, report)
             found[field].append((course_dir, course))
     return report, found
 
@@ -640,10 +665,16 @@ def publish(found: dict[str, list[tuple[Path, dict]]], public: Path) -> list[Pat
         for course_dir, course in courses:
             out = target / course_dir.name
             out.mkdir()
-            for name in ["course"] + [entry["id"] for entry in course["lessons"]]:
+            names = ["course"] + [entry["id"] for entry in course["lessons"]]
+            if (course_dir / "cheatsheet.json").exists():
+                names.append("cheatsheet")
+            for name in names:
                 shutil.copyfile(course_dir / f"{name}.json", out / f"{name}.json")
                 written.append(out / f"{name}.json")
-        index = {"format": 1, "courses": [course for _, course in courses]}
+        # `cheatsheet: true` is added here, in the published index only. It is not part of
+        # course.schema.json: a course.json never says it, the folder does.
+        entries = [{**course, "cheatsheet": True} if (d / "cheatsheet.json").exists() else course for d, course in courses]
+        index = {"format": 1, "courses": entries}
         (target / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         written.append(target / "index.json")
     return written

@@ -71,3 +71,11 @@ export const CalculatorIcon = () => (
     <path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2" />
   </Icon>
 )
+
+export const SheetIcon = () => (
+  <Icon>
+    <path d="M6 3h9l4 4v14H6z" />
+    <path d="M14 3v5h5" />
+    <path d="M9 13h7M9 17h5" />
+  </Icon>
+)

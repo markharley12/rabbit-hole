@@ -24,6 +24,11 @@ export interface Course {
   written: string
   sources: CourseSource[]
   lessons: LessonEntry[]
+  /**
+   * True when the course folder has a cheatsheet.json. Set by the validator in the
+   * published index only; it is NOT part of course.schema.json or of course.json.
+   */
+  cheatsheet?: boolean
 }
 
 /** public/content/<field>/courses/index.json, written by the validator on publish. */
@@ -102,4 +107,23 @@ export interface Lesson {
   data?: Record<string, Value>
   blocks: Block[]
   sideQuest?: { title: string; body: string }
+}
+
+/** cheatsheet.json beside course.json. Mirrors schema/cheatsheet.schema.json. */
+export interface CheatItem {
+  id: string
+  name: string
+  formula: string
+  when: string
+  lesson?: string
+}
+
+export interface CheatSection {
+  title: string
+  items: CheatItem[]
+}
+
+export interface CheatSheet {
+  format: 1
+  sections: CheatSection[]
 }

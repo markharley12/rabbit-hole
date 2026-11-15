@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rabbit-hole/schema/cheatsheet.schema.json",
+  "title": "Cheat sheet",
+  "description": "content/<field>/courses/<course-id>/cheatsheet.json (optional): the formulas the course derives or uses, grouped, each with one line on when to reach for it. Shown as a tool in the lesson. Checked by tools/validate_courses.py, which also checks that `lesson` is one of the course's lessons and that the Markdown is safe. The learner's own notes are not here: they stay on the device.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "sections"],
+  "properties": {
+    "format": { "const": 1 },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "items"],
+        "properties": {
+          "title": { "type": "string", "minLength": 3, "maxLength": 50 },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "name", "formula", "when"],
+              "properties": {
+                "id": { "description": "Unique in the file.", "$ref": "lesson.schema.json#/$defs/slug" },
+                "name": { "description": "Plain words.", "type": "string", "minLength": 2, "maxLength": 50 },
+                "formula": { "description": "Markdown with KaTeX, in the course's own notation.", "type": "string", "minLength": 1, "maxLength": 300 },
+                "when": { "description": "One sentence: when to reach for it.", "type": "string", "minLength": 5, "maxLength": 200 },
+                "lesson": { "description": "The lesson that derives it (an id in course.json).", "$ref": "lesson.schema.json#/$defs/slug" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
