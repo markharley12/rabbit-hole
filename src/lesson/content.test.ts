@@ -104,6 +104,9 @@ describe('markdown', () => {
     expect(html).toContain('href="#15Axx/learn/dependent-columns"')
     expect(html).toContain('href="#15Axx"')
     expect(html).not.toContain('javascript:')
+    // Two courses on a node may share a lesson id, so inside a course the address names the course.
+    const inCourse = renderMarkdown('[next](lesson:dependent-columns)', { links: { nodeId: '15Axx', courseId: 'least-squares' } })
+    expect(inCourse).toContain('href="#15Axx/learn/least-squares/dependent-columns"')
   })
 
   it('throws on bad maths only when asked to be strict', () => {

@@ -11,6 +11,8 @@ import { Marked } from 'marked'
 export interface LinkContext {
   /** The node the course hangs on, for lesson: links. */
   nodeId: string
+  /** The course the text belongs to. Without it the address has no course id and the app picks the first course on the node with that lesson. */
+  courseId?: string
 }
 
 const escapeHtml = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -35,7 +37,7 @@ function makeMarked(links: LinkContext | undefined) {
     walkTokens(token) {
       if (token.type !== 'link') return
       const href: string = token.href
-      if (href.startsWith('lesson:') && links) token.href = `#${links.nodeId}/learn/${href.slice(7)}`
+      if (href.startsWith('lesson:') && links) token.href = `#${links.nodeId}/learn/${links.courseId ? `${links.courseId}/` : ''}${href.slice(7)}`
       else if (href.startsWith('node:')) token.href = `#${href.slice(5)}`
       else if (!/^https?:\/\//.test(href)) token.href = '#'
     },

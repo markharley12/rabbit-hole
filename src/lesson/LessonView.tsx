@@ -84,7 +84,7 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
     if (element) element.scrollTop = 0
   }, [at, lessonId])
 
-  const links = useMemo(() => ({ nodeId: course.nodeId }), [course.nodeId])
+  const links = useMemo(() => ({ nodeId: course.nodeId, courseId: course.id }), [course.nodeId, course.id])
   const readingHere = useMemo(() => (reading ? readingNodes(reading.layout, course.nodeId, reading.counts) : []), [reading, course.nodeId])
   const tools = useLessonTools({ course, lessonId, base, reading: reading && { nodes: readingHere, base: reading.base } })
 

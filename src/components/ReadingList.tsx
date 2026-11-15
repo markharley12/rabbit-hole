@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import { useResourceFiles } from '../resource-store.ts'
 import { formatChecked, latestChecked, readingGroups } from '../resources.ts'
 import type { ReadingNode, Resource } from '../resources.ts'
@@ -19,6 +19,28 @@ const subscribeOnline = (changed: () => void) => {
   }
 }
 const readOnline = () => navigator.onLine
+
+// Mark is overwhelmed by long lists: a node shows its first few links, the rest on request.
+const FIRST = 4
+
+function ReadingGroup({ resources }: { resources: Resource[] }) {
+  const [all, setAll] = useState(false)
+  const shown = all ? resources : resources.slice(0, FIRST)
+  return (
+    <>
+      <ul className="reading-list">
+        {shown.map((resource) => (
+          <ReadingRow key={resource.id} resource={resource} />
+        ))}
+      </ul>
+      {shown.length < resources.length && (
+        <button className="text-button" onClick={() => setAll(true)}>
+          Show {resources.length - shown.length} more
+        </button>
+      )}
+    </>
+  )
+}
 
 /** One link: the title is the link, with who made it, what kind, and when to reach for it. */
 function ReadingRow({ resource }: { resource: Resource }) {
@@ -60,11 +82,7 @@ export function ReadingList({ nodes, base }: Props) {
       {groups.map((group) => (
         <section key={group.from.id} aria-label={groups.length > 1 ? `Reading from ${group.from.name}` : undefined}>
           {groups.length > 1 && <h3 className="reading-from">{group.from.name}</h3>}
-          <ul className="reading-list">
-            {group.resources.map((resource) => (
-              <ReadingRow key={resource.id} resource={resource} />
-            ))}
-          </ul>
+          <ReadingGroup resources={group.resources} />
         </section>
       ))}
       {checked && <p className="note small">Links were checked on {formatChecked(checked)}.</p>}

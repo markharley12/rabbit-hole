@@ -69,7 +69,11 @@ describe('reading in the app', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Show more' }))
     const heading = await screen.findByRole('heading', { name: 'Reading' })
     expect(await screen.findByText('Lecture 16: Projection matrices and least squares (18.06)')).toBeTruthy()
-    expect(screen.getAllByRole('link').filter((a) => a.getAttribute('target') === '_blank' && a.closest('.reading'))).toHaveLength(14)
+    // A long list overwhelms: four links first, the rest on request.
+    const links = () => screen.getAllByRole('link').filter((a) => a.getAttribute('target') === '_blank' && a.closest('.reading'))
+    expect(links()).toHaveLength(4)
+    fireEvent.click(screen.getByRole('button', { name: 'Show 10 more' }))
+    expect(links()).toHaveLength(14)
     expect(screen.getByText('Links were checked on 15 Nov 2026.')).toBeTruthy()
     const course = screen.getByRole('heading', { name: 'Course' })
     expect(course.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
