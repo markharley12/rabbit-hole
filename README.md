@@ -45,6 +45,27 @@ Rebuild the map data from TreeQuiz's dataset (expects `~/git/TreeQuiz`):
 npm run build:map
 ```
 
+## Course packs
+
+A course lives in `content/<field>/courses/<course-id>/` (the folder is named after the course's
+`id`; any number of courses can hang on one map node). A pack is one `.rhpack` file holding a
+course, so you can send one to someone else. Packing refuses a course that fails validation.
+Packs land in `dist-packs/` (not in git):
+
+```bash
+npm run pack -- pack least-squares-to-the-pseudo-inverse
+```
+
+Unpacking treats the file as untrusted: it checks the manifest and every hash, accepts only plain
+`.json` files, validates the course, and only then writes it to `content/`. It will not replace a
+course you already have unless you add `--force`:
+
+```bash
+npm run pack -- unpack dist-packs/least-squares-to-the-pseudo-inverse.rhpack
+```
+
+Then `npm run courses` publishes it to the app.
+
 ## On a phone
 
 Build, then serve the `dist` folder over HTTPS. The author serves it to his own devices over

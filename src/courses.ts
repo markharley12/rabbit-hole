@@ -4,11 +4,18 @@
 import type { Layout, Placed } from './map/layout.ts'
 import type { Course } from './lesson/types.ts'
 
-/** Courses in each node's subtree (its own included). Nodes with none are absent. */
-export function countCourses(layout: Layout, courses: Map<string, Course>): Map<string, number> {
+/** The courses of each node, in the order given. Many courses may hang on one node. */
+export function groupByNode(courses: Course[]): Map<string, Course[]> {
+  const byNode = new Map<string, Course[]>()
+  for (const course of courses) byNode.set(course.nodeId, [...(byNode.get(course.nodeId) ?? []), course])
+  return byNode
+}
+
+/** Courses in each node's subtree (its own included, each one counted). Nodes with none are absent. */
+export function countCourses(layout: Layout, courses: Map<string, Course[]>): Map<string, number> {
   const counts = new Map<string, number>()
-  for (const nodeId of courses.keys()) {
-    for (let n: Placed | null = layout.byId.get(nodeId) ?? null; n; n = n.parent) counts.set(n.id, (counts.get(n.id) ?? 0) + 1)
+  for (const [nodeId, onNode] of courses) {
+    for (let n: Placed | null = layout.byId.get(nodeId) ?? null; n; n = n.parent) counts.set(n.id, (counts.get(n.id) ?? 0) + onNode.length)
   }
   return counts
 }

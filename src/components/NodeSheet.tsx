@@ -10,14 +10,14 @@ import type { Course } from '../lesson/types.ts'
 interface Props {
   node: Placed
   document: MapDocument
-  /** The course on this node, if there is one. */
-  course?: Course
+  /** The courses on this node: none, one, or several. */
+  courses: Course[]
   /** Courses under each node (its own included); absent means none. */
   counts: Map<string, number>
   open: boolean
   onOpenChange: (open: boolean) => void
   onSelect: (id: string) => void
-  onOpenLesson: (lessonId: string) => void
+  onOpenLesson: (course: Course, lessonId: string) => void
   onOpenCourses: () => void
 }
 
@@ -46,7 +46,7 @@ function childNoun(node: Placed): [string, string] {
 }
 
 /** The one button for a course: start it, carry on where you left off, or go over it again. */
-function CourseButton({ course, onOpenLesson }: { course: Course; onOpenLesson: (lessonId: string) => void }) {
+function CourseButton({ course, onOpenLesson }: { course: Course; onOpenLesson: (course: Course, lessonId: string) => void }) {
   const [record] = useProgress(course.id)
   const next = nextUp(course, record)
   const fresh = Object.keys(record.lessons).length === 0
@@ -54,24 +54,34 @@ function CourseButton({ course, onOpenLesson }: { course: Course; onOpenLesson: 
   const number = course.lessons.findIndex((l) => l.id === target) + 1
   const label = fresh ? 'Start course' : next ? `${next.verb} lesson ${number}` : 'Go over it again'
   return (
-    <button className="course-start" onClick={() => onOpenLesson(target)}>
+    <button className="course-start" onClick={() => onOpenLesson(course, target)}>
       {label}
     </button>
   )
 }
 
-function CourseSection({ course, onOpenLesson }: { course: Course; onOpenLesson: (lessonId: string) => void }) {
+/** One course: title, summary, lessons. With several courses on a node each carries its own button; with one, the header has it. */
+function CourseSection({
+  course,
+  withButton,
+  onOpenLesson,
+}: {
+  course: Course
+  withButton: boolean
+  onOpenLesson: (course: Course, lessonId: string) => void
+}) {
   const [record] = useProgress(course.id)
   return (
     <>
       <p className="note course-title">{course.title}</p>
       <p className="note">{course.summary}</p>
+      {withButton && <CourseButton course={course} onOpenLesson={onOpenLesson} />}
       <ol className="lessons">
         {course.lessons.map((lesson, i) => {
           const state = lessonState(record, lesson.id)
           return (
             <li key={lesson.id}>
-              <button className="lesson-row" onClick={() => onOpenLesson(lesson.id)}>
+              <button className="lesson-row" onClick={() => onOpenLesson(course, lesson.id)}>
                 <span className="lesson-number">{i + 1}</span>
                 <span className="lesson-name">
                   {lesson.title}
@@ -99,8 +109,9 @@ function CourseSection({ course, onOpenLesson }: { course: Course; onOpenLesson:
  * is, how big, whether there is a course); opened it lists where the node sits
  * and what is in it.
  */
-export function NodeSheet({ node, document: doc, course, counts, open, onOpenChange, onSelect, onOpenLesson, onOpenCourses }: Props) {
+export function NodeSheet({ node, document: doc, courses, counts, open, onOpenChange, onSelect, onOpenLesson, onOpenCourses }: Props) {
   const inside = counts.get(node.id) ?? 0
+  const course = courses.length === 1 ? courses[0] : undefined
   const drag = useRef<number | null>(null)
   const { node: data } = node
   const leaf = node.children.length === 0
@@ -142,6 +153,11 @@ export function NodeSheet({ node, document: doc, course, counts, open, onOpenCha
           <span>{size}</span>
           {course ? (
             <CourseButton course={course} onOpenLesson={onOpenLesson} />
+          ) : courses.length > 1 ? (
+            // Each course has its own button below; here one tap shows them.
+            <button className="course-count" onClick={() => onOpenChange(true)}>
+              {plural(courses.length, 'course')} here
+            </button>
           ) : inside > 0 ? (
             // A count is not the thing itself: show where they are rather than pretend to start one.
             <button className="course-count" onClick={onOpenCourses}>
@@ -202,9 +218,9 @@ export function NodeSheet({ node, document: doc, course, counts, open, onOpenCha
           </>
         )}
 
-        <h2>{leaf || course ? 'Course' : 'Courses'}</h2>
-        {course ? (
-          <CourseSection course={course} onOpenLesson={onOpenLesson} />
+        <h2>{courses.length > 1 ? 'Courses' : leaf || course ? 'Course' : 'Courses'}</h2>
+        {courses.length > 0 ? (
+          courses.map((c) => <CourseSection key={c.id} course={c} withButton={courses.length > 1} onOpenLesson={onOpenLesson} />)
         ) : inside > 0 ? (
           <p className="note">
             {plural(inside, 'course')} in here.{' '}
