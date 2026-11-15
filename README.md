@@ -4,15 +4,18 @@ An open-source, AI-native cousin of Brilliant.org, built around a **map**: see a
 mathematics on one screen, zoom into a subject, see what it depends on and how deep it goes,
 and have Claude Code generate the course for any node you want to learn. Mobile first.
 
-Status: **Phase 0**, the map. All of mathematics (the MSC2020 classification: 517 sections,
-4,810 topics) as zoomable circles, sized by topic count, one colour per branch. Tap a circle to
-zoom in and read what is in it. No courses yet. The plan is in [docs/PLAN.md](docs/PLAN.md).
+Status: **the map and one course.** All of mathematics (the MSC2020 classification: 517
+sections, 4,810 topics) as zoomable circles, sized by topic count, one colour per branch. Tap
+a circle to zoom in and read what is in it. One node, Basic linear algebra, has a course:
+*Least squares to the pseudo-inverse*, step by step, with typed answers checked on the phone
+and interactive pictures. The plan is in [docs/PLAN.md](docs/PLAN.md).
 
 This is a personal project built around its author's own setup; it is not meant to be turnkey.
 
 ## Run it
 
-Node 22 and Python 3 (standard library only).
+Node 22 and Python 3. The map build uses the standard library only; the course validator
+needs `sympy` and `jsonschema`.
 
 ```bash
 npm install
@@ -26,6 +29,14 @@ All checks (typecheck, lint, app tests, data-tool tests):
 
 ```bash
 npm run check
+```
+
+Check the courses in `content/` (schema, widgets, and every answer key re-derived with
+sympy) and publish them into `public/` if they pass. `npm run dev` and `npm run build` do this
+first anyway:
+
+```bash
+npm run courses
 ```
 
 Rebuild the map data from TreeQuiz's dataset (expects `~/git/TreeQuiz`):

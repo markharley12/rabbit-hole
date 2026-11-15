@@ -140,7 +140,8 @@ the thing he named as next. Verify every key with sympy before shipping.
 ## 8. Open questions about this seed
 
 - What date was the chat, and what led up to the understanding it states (the Strang and
-  Brunton videos?). See section 5.
+  Brunton videos?). See section 5. *Asked 15 Nov 2026: Mark doesn't remember the date, so it
+  stays undated; nothing depends on it.*
 - Does he want the app's tutor tone to match the chat's (warm, short, "Good setup, and A is
   exactly right")? The chat's replies suited him enough that he asked to continue.
 - Are there other chats (probability, optimisation, the SVD teaching session)? Add them as

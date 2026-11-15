@@ -6,32 +6,50 @@ the app's own content files. Personal project of Mark's; public on GitHub in the
 built around his setup (Claude Code on his PC, phone over Tailscale), so it is not meant to
 be turnkey for anyone else. **"rabbit-hole" is a working name** — rename freely.
 
-## Status: Phase 0 built, waiting for Mark's phone test (15 Nov 2026)
+## Status: Phase 2 slice built, waiting for Mark's phone test (15 Nov 2026)
 
-The map exists: an installable PWA showing all of maths as zoomable packed circles, with a
-node sheet. No server, no AI, no lessons, no Capacitor yet. What is where:
+The map, plus one real course: **"Least squares to the pseudo-inverse"** on `15Axx` (Basic
+linear algebra), five lessons resuming where Mark's chat stopped. No server, no AI, no photo
+marking, no Capacitor yet. What is where:
 
-- `tools/build_maths_map.py` → `public/content/maths/map.json` (593 nodes, 517 sections,
-  4,810 topics; source commit, hashes and licence recorded). Tests in `tools/tests/`.
-- `src/map/layout.ts`, `src/map/gestures.ts`: all geometry and rules (packing, fit, which
-  node a tap means, labels, pan/pinch maths). Pure and unit-tested; change behaviour here.
-- `src/map/MapView.tsx`: SVG drawing and pointer events only. The renderer is swappable.
-- `src/components/`: top bar (home, ancestry trail, theme) and the bottom sheet.
-- `pwa/sw.js` + the plugin in `vite.config.ts`: offline. A new build waits until the app is
-  fully closed, so **an update shows the second time the app is opened**.
-- Decided with Mark on 15 Nov: map stops at MSC sections (topics live in the sheet); one tap
-  zooms in and opens the sheet; name stays `rabbit-hole`; commit straight to `main`.
+- **Map.** `tools/build_maths_map.py` → `public/content/maths/map.json` (593 nodes, 517
+  sections, 4,810 topics; never hand-edited). `src/map/layout.ts` and `gestures.ts` hold the
+  pure, tested geometry; `MapView.tsx` only draws. `src/components/`: top bar and sheet.
+- **Course format.** `schema/` (course, lesson, widget catalogue). A lesson is screens; the
+  main one is a `step` (define, why, prompt, answer, three hints, check-it-yourself, one
+  `next`). Types in `src/lesson/types.ts`.
+- **Content** lives in `content/maths/courses/<node-id>/` (source, in git).
+  `tools/validate_courses.py` checks it (schema, widgets, links, hints, and every answer key
+  re-derived with sympy) and with `--publish` copies it into `public/content/…/courses/`
+  (gitignored). `npm run dev` and `npm run build` publish first, so **invalid content
+  never reaches the app**. The app joins courses to the map by `nodeId`.
+- **Checking answers** on the phone: `src/lesson/expr.ts` (the answer grammar, mirrored in
+  the validator) and `check.ts` (deterministic slip detectors). Tests use Mark's real slips.
+- **Lesson UI:** `src/lesson/LessonView.tsx`, `StepScreen.tsx`; routes are
+  `#<node>/learn/<lesson>` (`src/route.ts`). A lazy chunk with KaTeX (woff2 only).
+- **Widgets:** `src/widgets/` (line fitter, dependent columns, SVD geometry), pure maths in
+  `*-math.ts`, registry kept equal to `schema/widgets.json` by a test.
+- **Progress** is on the device only (`localStorage`, `rabbit-hole:progress:<course>`):
+  attempts, hints, drafts, where he is. **No scores** (claimed is not scored).
+- `pwa/sw.js`: offline. A new build waits until the app is fully closed, so **an update
+  shows the second time the app is opened**.
+- Decided with Mark on 15 Nov: map stops at MSC sections; one tap zooms in and opens the
+  sheet; name stays `rabbit-hole`; commit straight to `main`; the course hangs on `15Axx`;
+  KaTeX bundled; typed answers only until photo marking (Phase 5).
 
-Run everything with `npm run check` (typecheck, lint, Vitest, Python tests). Build and
-phone access are in [README.md](README.md). Open points and next steps are at the end of
-[docs/HANDOFF.md](docs/HANDOFF.md).
+Run everything with `npm run check` (typecheck, lint, Vitest, Python tests, course
+validation). Build and phone access are in [README.md](README.md). Open points and next
+steps are at the end of [docs/HANDOFF.md](docs/HANDOFF.md).
 
 The planning docs, still the reference for later phases. **Read in this order:**
 
 1. [docs/PLAN.md](docs/PLAN.md) — vision, decisions Mark has made, architecture, phases, open questions.
 2. [docs/REUSE.md](docs/REUSE.md) — what to take from TreeQuiz and Jarvis, with paths and the traps they hit.
-3. [docs/HANDOFF.md](docs/HANDOFF.md) — the Phase 0 brief, and what Phase 0 left open.
-4. [docs/seed-context.md](docs/seed-context.md) — how Mark actually learns, condensed from his
+3. [docs/HANDOFF.md](docs/HANDOFF.md) — the Phase 0 brief, what Phase 0 and the first course
+   left open.
+4. [docs/first-course-brief.md](docs/first-course-brief.md) — the brief the first course was
+   built from (Phase 2 slice).
+5. [docs/seed-context.md](docs/seed-context.md) — how Mark actually learns, condensed from his
    claude.ai chats (one so far): his teaching-style spec in his own words, where he got to, his
    slip patterns, and what they imply for the lesson format and widgets. Add further chats as
    dated sections. Read it before designing lessons, widgets or marking.
