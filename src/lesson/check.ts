@@ -47,6 +47,15 @@ export function nice(x: number): string {
   return x.toPrecision(3)
 }
 
+/** 23, or 0.6 (3/5), or 3.8729833: a decimal, with the fraction when it is a simple one. */
+export function formatValue(value: number): string {
+  if (!Number.isFinite(value)) return 'not a number'
+  if (Math.abs(value - Math.round(value)) < 1e-12) return `${Math.round(value)}`
+  const decimal = `${+value.toPrecision(8)}`
+  const exact = nice(value)
+  return exact.includes('/') ? `${decimal} (${exact})` : decimal
+}
+
 /** Compare typed answers with the keys; on a miss, name the slip if a detector sees one. */
 export function check(answer: Answer, inputs: Record<string, string | undefined>): Verdict {
   const vars = answer.vars ?? []

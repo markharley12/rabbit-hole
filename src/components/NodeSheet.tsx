@@ -3,13 +3,19 @@ import type { PointerEvent as ReactPointerEvent } from 'react'
 import { ancestry, shortCode } from '../map/layout.ts'
 import type { Placed } from '../map/layout.ts'
 import type { MapDocument } from '../map/types.ts'
+import { lessonState, nextUp } from '../lesson/progress.ts'
+import { useProgress } from '../lesson/progress-store.ts'
+import type { Course } from '../lesson/types.ts'
 
 interface Props {
   node: Placed
   document: MapDocument
+  /** The course on this node, if there is one. */
+  course?: Course
   open: boolean
   onOpenChange: (open: boolean) => void
   onSelect: (id: string) => void
+  onOpenLesson: (lessonId: string) => void
 }
 
 const plural = (n: number, one: string, many = one + 's') => `${n.toLocaleString('en-GB')} ${n === 1 ? one : many}`
@@ -27,12 +33,61 @@ function childNoun(node: Placed): [string, string] {
   return ['part', 'parts']
 }
 
+/** The one button for a course: start it, carry on where you left off, or go over it again. */
+function CourseButton({ course, onOpenLesson }: { course: Course; onOpenLesson: (lessonId: string) => void }) {
+  const [record] = useProgress(course.id)
+  const next = nextUp(course, record)
+  const fresh = Object.keys(record.lessons).length === 0
+  const target = next?.lessonId ?? course.lessons[0].id
+  const number = course.lessons.findIndex((l) => l.id === target) + 1
+  const label = fresh ? 'Start course' : next ? `${next.verb} lesson ${number}` : 'Go over it again'
+  return (
+    <button className="course-start" onClick={() => onOpenLesson(target)}>
+      {label}
+    </button>
+  )
+}
+
+function CourseSection({ course, onOpenLesson }: { course: Course; onOpenLesson: (lessonId: string) => void }) {
+  const [record] = useProgress(course.id)
+  return (
+    <>
+      <p className="note course-title">{course.title}</p>
+      <p className="note">{course.summary}</p>
+      <ol className="lessons">
+        {course.lessons.map((lesson, i) => {
+          const state = lessonState(record, lesson.id)
+          return (
+            <li key={lesson.id}>
+              <button className="lesson-row" onClick={() => onOpenLesson(lesson.id)}>
+                <span className="lesson-number">{i + 1}</span>
+                <span className="lesson-name">
+                  {lesson.title}
+                  {lesson.badge && <span className="badge">{lesson.badge}</span>}
+                </span>
+                <span className="lesson-state">{state.state === 'done' ? 'Done' : state.state === 'started' ? 'Started' : ''}</span>
+              </button>
+            </li>
+          )
+        })}
+      </ol>
+      <p className="note small">{course.written}</p>
+      {course.sources.map((source) => (
+        <p className="note small" key={source.name}>
+          Source: {source.url ? <a href={source.url} target="_blank" rel="noopener noreferrer">{source.name}</a> : source.name}
+          {source.note && `. ${source.note}`}
+        </p>
+      ))}
+    </>
+  )
+}
+
 /**
  * The bottom sheet for the focused node. Closed it is a short card (what this
  * is, how big, whether there is a course); opened it lists where the node sits
  * and what is in it.
  */
-export function NodeSheet({ node, document: doc, open, onOpenChange, onSelect }: Props) {
+export function NodeSheet({ node, document: doc, course, open, onOpenChange, onSelect, onOpenLesson }: Props) {
   const drag = useRef<number | null>(null)
   const { node: data } = node
   const leaf = node.children.length === 0
@@ -72,7 +127,7 @@ export function NodeSheet({ node, document: doc, open, onOpenChange, onSelect }:
         <h1 className="title">{data.name}</h1>
         <p className="meta">
           <span>{size}</span>
-          <span className="course-none">No course yet</span>
+          {course ? <CourseButton course={course} onOpenLesson={onOpenLesson} /> : <span className="course-none">No course yet</span>}
         </p>
       </div>
 
@@ -123,7 +178,11 @@ export function NodeSheet({ node, document: doc, open, onOpenChange, onSelect }:
         )}
 
         <h2>Course</h2>
-        <p className="note">No course yet. Generating courses is a later phase; nothing here can make one today.</p>
+        {course ? (
+          <CourseSection course={course} onOpenLesson={onOpenLesson} />
+        ) : (
+          <p className="note">No course yet. Generating courses is a later phase; nothing here can make one today.</p>
+        )}
 
         {data.url && (
           <p className="note">

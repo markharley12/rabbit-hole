@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { MapView } from './map/MapView.tsx'
 import { ancestry, layoutMap } from './map/layout.ts'
 import type { Rect } from './map/layout.ts'
@@ -7,8 +7,15 @@ import { NodeSheet } from './components/NodeSheet.tsx'
 import { TopBar } from './components/TopBar.tsx'
 import { applyTheme, initialTheme, saveTheme } from './theme.ts'
 import type { Theme } from './theme.ts'
+import type { Course, CourseIndex } from './lesson/types.ts'
+import { parseRoute } from './route.ts'
+
+// The lesson screens, KaTeX and the widgets load only when a lesson opens.
+const LessonView = lazy(() => import('./lesson/LessonView.tsx'))
 
 const MAP_URL = './content/maths/map.json'
+// Written by tools/validate_courses.py --publish, only from content that passed.
+const COURSES_URL = './content/maths/courses/'
 
 // Heights the map must keep clear of, in CSS pixels. They match styles.css
 // (--bar and --peek); the map only uses them to centre things, so a few
@@ -29,6 +36,7 @@ const subscribeResize = (changed: () => void) => {
 // One string, so the snapshot is stable between resizes.
 const readSize = () => `${window.innerWidth}x${window.innerHeight}`
 
+
 type Loaded = { state: 'loading' } | { state: 'failed'; reason: string } | { state: 'ready'; document: MapDocument }
 
 export default function App() {
@@ -36,6 +44,10 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(initialTheme)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [refit, setRefit] = useState(0)
+  const [courses, setCourses] = useState<Map<string, Course>>(new Map())
+  // Whether the open lesson was opened from the map in this page, so closing
+  // it can step back through history instead of piling up entries.
+  const openedHere = useRef(false)
   // The focused node is the URL's hash, so the phone's back button steps back
   // out of the rabbit hole and a link opens at a node.
   const hash = useSyncExternalStore(subscribeHash, readHash)
@@ -52,6 +64,18 @@ export default function App() {
       })
       .then((document) => live && setLoaded({ state: 'ready', document }))
       .catch((error: unknown) => live && setLoaded({ state: 'failed', reason: error instanceof Error ? error.message : String(error) }))
+    return () => {
+      live = false
+    }
+  }, [])
+
+  // Courses are an extra: if the index is missing, the map still works.
+  useEffect(() => {
+    let live = true
+    fetch(`${COURSES_URL}index.json`)
+      .then((response) => (response.ok ? (response.json() as Promise<CourseIndex>) : { format: 1 as const, courses: [] }))
+      .then((index) => live && setCourses(new Map(index.courses.map((course) => [course.nodeId, course]))))
+      .catch((error: unknown) => console.warn('No course index; the map shows no courses.', error))
     return () => {
       live = false
     }
@@ -77,7 +101,10 @@ export default function App() {
     )
   }
 
-  const focus = layout.byId.get(hash) ?? layout.root
+  const route = parseRoute(hash)
+  const focus = layout.byId.get(route.nodeId) ?? layout.root
+  const course = courses.get(focus.id)
+  const lessonOpen = !!(course && route.lessonId && course.lessons.some((l) => l.id === route.lessonId))
 
   const select = (id: string) => {
     setSheetOpen(false)
@@ -85,6 +112,22 @@ export default function App() {
     if (id === focus.id) setRefit((n) => n + 1)
     else window.location.hash = id
   }
+  const openLesson = (lessonId: string) => {
+    setSheetOpen(false)
+    openedHere.current = true
+    window.location.hash = `${focus.id}/learn/${lessonId}`
+  }
+  const closeLesson = () => {
+    if (openedHere.current) {
+      openedHere.current = false
+      window.history.back()
+    } else {
+      window.location.hash = focus.id
+    }
+  }
+  // Lesson to lesson replaces the address, so Back still goes to the map.
+  const nextLesson = (lessonId: string) => window.location.replace(`#${focus.id}/learn/${lessonId}`)
+
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark'
     saveTheme(next)
@@ -94,8 +137,16 @@ export default function App() {
   return (
     <>
       <MapView layout={layout} focusId={focus.id} refit={refit} screen={screen} area={area} onSelect={select} />
-      <TopBar path={ancestry(focus)} theme={theme} onSelect={select} onToggleTheme={toggleTheme} />
-      <NodeSheet node={focus} document={document} open={sheetOpen} onOpenChange={setSheetOpen} onSelect={select} />
+      {lessonOpen && course ? (
+        <Suspense fallback={<p className="status lesson-loading">Opening the lesson…</p>}>
+          <LessonView course={course} lessonId={route.lessonId!} base={`${COURSES_URL}${course.nodeId}/`} onClose={closeLesson} onOpenLesson={nextLesson} />
+        </Suspense>
+      ) : (
+        <>
+          <TopBar path={ancestry(focus)} theme={theme} onSelect={select} onToggleTheme={toggleTheme} />
+          <NodeSheet node={focus} document={document} course={course} open={sheetOpen} onOpenChange={setSheetOpen} onSelect={select} onOpenLesson={openLesson} />
+        </>
+      )}
     </>
   )
 }

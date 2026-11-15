@@ -55,9 +55,28 @@ function serviceWorker(): Plugin {
   }
 }
 
+/**
+ * KaTeX's stylesheet names each font three times (woff2, woff, ttf). Every
+ * browser this app runs in reads woff2, and the service worker precaches
+ * every built file, so keep only woff2: about 60 files fewer to install.
+ */
+function katexWoff2Only(): Plugin {
+  return {
+    name: 'katex-woff2-only',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!/[\\/]katex[\\/]dist[\\/]katex(\.min)?\.css$/.test(id.split('?')[0])) return null
+      const trimmed = code.replace(/,\s*url\([^)]*\.woff\)\s*format\("woff"\)/g, '').replace(/,\s*url\([^)]*\.ttf\)\s*format\("truetype"\)/g, '')
+      // Loud rather than quietly shipping all three again after a KaTeX update.
+      if (trimmed === code || /\.(woff|ttf)\)/.test(trimmed)) throw new Error('katex.min.css changed shape; update katexWoff2Only()')
+      return { code: trimmed, map: null }
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), serviceWorker()],
+  plugins: [katexWoff2Only(), react(), serviceWorker()],
   // Relative, so one build works at a domain's root or under any path.
   base: './',
   server: {
