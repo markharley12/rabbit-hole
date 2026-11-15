@@ -1,0 +1,10 @@
+node_modules/
+/dist/
+/build/
+# Learner data: handwritten-work photos, marking results, progress exports. Never public.
+/data/
+.env*
+.claude/
+__pycache__/
+*.pyc
+/.venv/
