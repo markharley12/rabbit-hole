@@ -4,11 +4,11 @@
     env -u PYTHONPATH python3 tools/validate_courses.py            # check only
     env -u PYTHONPATH python3 tools/validate_courses.py --publish  # check, then copy into public/
 
-What is checked, for every content/<field>/courses/<node-id>/:
+What is checked, for every content/<field>/courses/<course-id>/:
 
 - course.json and each lesson against schema/course.schema.json and schema/lesson.schema.json;
-- the course hangs on a node that exists in public/content/<field>/map.json, and its folder
-  is named after that node; every listed lesson has a file and every file is listed;
+- the course hangs on a node that exists in public/content/<field>/map.json (any number of
+  courses may share a node), its folder is named after the course's id, and ids are unique; every listed lesson has a file and every file is listed;
 - every widget is in schema/widgets.json and its params match the schema there;
 - every answer key is re-derived with sympy from the step's `verify` expression over the
   lesson's data (keys are exact: 3/5, sqrt(15), 5m^2 - 12m + 9);
@@ -598,8 +598,8 @@ def validate(content: Path, public: Path, schema_dir: Path) -> tuple[Report, dic
                 continue
             if course["nodeId"] not in nodes:
                 report.add(f"{where}/course.json", f"nodeId {course['nodeId']!r} is not a node of the {field} map")
-            if course_dir.name != course["nodeId"]:
-                report.add(f"{where}/course.json", f"the folder must be named after the node ({course['nodeId']})")
+            if course_dir.name != course["id"]:
+                report.add(f"{where}/course.json", f"the folder must be named after the course id ({course['id']})")
             if course["id"] in course_ids:
                 report.add(f"{where}/course.json", f"course id {course['id']!r} is used twice")
             course_ids.add(course["id"])
@@ -630,6 +630,10 @@ def publish(found: dict[str, list[tuple[Path, dict]]], public: Path) -> list[Pat
     written = []
     for field, courses in found.items():
         target = public / "content" / field / "courses"
+        # Replacing the whole folder is what drops courses that left the source. It may only
+        # ever be this one folder, whatever `field` holds.
+        if field in ("", ".", "..") or "/" in field or "\\" in field:
+            raise ValueError(f"refusing to publish into {target}")
         if target.exists():
             shutil.rmtree(target)
         target.mkdir(parents=True)

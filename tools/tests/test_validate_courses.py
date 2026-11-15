@@ -19,7 +19,8 @@ import sympy as sp  # noqa: E402
 import validate_courses as vc  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
-COURSE = ROOT / "content" / "maths" / "courses" / "15Axx"
+COURSE_ID = "least-squares-to-the-pseudo-inverse"
+COURSE = ROOT / "content" / "maths" / "courses" / COURSE_ID
 
 
 class Grammar(unittest.TestCase):
@@ -80,7 +81,7 @@ class Content(unittest.TestCase):
         self.public = self.tmp / "public"
         (self.public / "content" / "maths").mkdir(parents=True)
         shutil.copyfile(ROOT / "public" / "content" / "maths" / "map.json", self.public / "content" / "maths" / "map.json")
-        self.course = self.content / "maths" / "courses" / "15Axx"
+        self.course = self.content / "maths" / "courses" / COURSE_ID
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
@@ -141,10 +142,34 @@ class Content(unittest.TestCase):
         self.edit("dependent-columns", lambda d: d["blocks"][-1]["widget"]["params"].update(mode="sideways"))
         self.assertFails("dependent-columns params")
 
-    def test_the_node_must_exist_and_name_the_folder(self):
+    def test_the_node_must_exist(self):
         self.edit("course", lambda d: d.update(nodeId="99Zxx"))
         self.assertFails("nodeId '99Zxx' is not a node")
-        self.assertFails("the folder must be named after the node")
+
+    def copy_course(self, new_id):
+        target = self.course.parent / new_id
+        shutil.copytree(self.course, target)
+        document = json.loads((target / "course.json").read_text())
+        document["id"] = new_id
+        (target / "course.json").write_text(json.dumps(document, ensure_ascii=False))
+        return target
+
+    def test_two_courses_may_share_a_node(self):
+        self.copy_course("a-second-course")
+        self.assertEqual(self.errors(), [])
+        _, found = vc.validate(self.content, self.public, ROOT / "schema")
+        self.assertEqual([c["nodeId"] for _, c in found["maths"]], ["15Axx", "15Axx"])
+
+    def test_the_folder_must_be_named_after_the_course_id(self):
+        self.course.rename(self.course.parent / "15Axx")
+        self.assertFails("the folder must be named after the course id")
+
+    def test_course_ids_must_be_unique(self):
+        target = self.copy_course("a-second-course")
+        document = json.loads((target / "course.json").read_text())
+        document["id"] = COURSE_ID
+        (target / "course.json").write_text(json.dumps(document))
+        self.assertFails(f"course id '{COURSE_ID}' is used twice")
 
     def test_lessons_and_files_must_match(self):
         (self.course / "stray.json").write_text("{}")
@@ -185,7 +210,7 @@ class Content(unittest.TestCase):
         published = self.public / "content" / "maths" / "courses"
         index = json.loads((published / "index.json").read_text())
         self.assertEqual([c["nodeId"] for c in index["courses"]], ["15Axx"])
-        self.assertTrue((published / "15Axx" / "the-smallest-best-fit.json").exists())
+        self.assertTrue((published / COURSE_ID / "the-smallest-best-fit.json").exists())
 
         shutil.rmtree(published)
         self.edit("the-smallest-best-fit", lambda d: d["blocks"][3]["answer"]["fields"][0].update(key="1"))
@@ -193,6 +218,23 @@ class Content(unittest.TestCase):
             code = vc.main(["--publish", "--content", str(self.content), "--public", str(self.public)])
         self.assertEqual(code, 1)
         self.assertFalse(published.exists())
+
+    def test_publish_removes_courses_that_left_the_source(self):
+        published = self.public / "content" / "maths" / "courses"
+        (published / "15Axx").mkdir(parents=True)
+        (published / "15Axx" / "old.json").write_text("{}")
+        self.copy_course("a-second-course")
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(vc.main(["--publish", "--content", str(self.content), "--public", str(self.public)]), 0)
+        self.assertFalse((published / "15Axx").exists())
+        self.assertTrue((published / "a-second-course" / "course.json").exists())
+        self.assertTrue((published / COURSE_ID / "course.json").exists())
+        index = json.loads((published / "index.json").read_text())
+        self.assertEqual(len(index["courses"]), 2)
+
+    def test_publish_refuses_a_field_that_escapes_public(self):
+        with self.assertRaises(ValueError):
+            vc.publish({"../x": []}, self.public)
 
 
 if __name__ == "__main__":

@@ -14,6 +14,7 @@
     "test:tools": "env -u PYTHONPATH python3 -m unittest discover -s tools/tests",
     "build:map": "env -u PYTHONPATH python3 tools/build_maths_map.py",
     "courses": "env -u PYTHONPATH python3 tools/validate_courses.py --publish",
+    "pack": "env -u PYTHONPATH python3 tools/pack_course.py",
     "validate": "env -u PYTHONPATH python3 tools/validate_courses.py",
     "check": "npm run typecheck && npm run lint && npm run test && npm run test:tools && npm run validate"
   },
