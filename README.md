@@ -62,6 +62,8 @@ Open `https://<machine>.<tailnet>.ts.net:8443/` on the phone and use the browser
 app" / "Add to Home Screen". After that it opens offline. The serve setting survives reboots;
 `tailscale serve --https=8443 off` removes it. After a new `npm run build`, the phone picks the
 update up the second time the app is opened (the new version waits until the old one is closed).
+To see which build is running, open the sheet on the home view: "This version" gives the build
+time and commit.
 
 ## Attribution
 
