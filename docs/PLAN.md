@@ -56,7 +56,7 @@ courses** into the app's own format, interactive widgets, deterministic problem 
 
 The zoom levels are the hierarchy Mark already has in TreeQuiz's maths tree:
 **Mathematics → branch (5) → area → MSC subject → MSC section (517 leaves) → topic (about
-1,280 in `info.json`) → course → lesson.** The MSC leaves are research-field granularity; the
+4,810 in `info.json`) → course → lesson.** The MSC leaves are research-field granularity; the
 *topic* layer under them is where actual courses attach, and courses can be proposed below even
 that (e.g. SVD sits under 15A/65F topics).
 
@@ -139,7 +139,7 @@ generation time** to verify every answer key (the generator must produce a key t
 verifier confirms); the app does simple numeric/symbolic comparison at runtime. Only
 `paper-problem` calls a model.
 
-**Storage on device:** text is small (even all 1,280 topic summaries ≈ a few MB). Bundled
+**Storage on device:** text is small (even all 4,810 topic summaries ≈ a few MB). Bundled
 snapshot in the APK; downloaded updates in IndexedDB or Capacitor Filesystem; progress in
 IndexedDB. "Lots of data" is not a real constraint unless videos/images are embedded; avoid that.
 
@@ -218,7 +218,7 @@ thing is the map plus one real course, before the AI plumbing.
 
 1. Name: keep `rabbit-hole`?
 2. Hierarchy: should the map's finest zoom stop at MSC sections, or continue to the
-   ~1,280 topics from `info.json`, or to hand-curated "concepts" (e.g. "SVD")? (Recommend:
+   4,810 topics from `info.json`, or to hand-curated "concepts" (e.g. "SVD")? (Recommend:
    sections on the map, topics inside the node sheet, courses attached at either.)
 3. Is a 5-point `level` the right shape, or should difficulty be "years of study"?
 4. Progress/mastery: app-local, or keep Map.md as the record and sync into it?

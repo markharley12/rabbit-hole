@@ -13,7 +13,7 @@ are on Mark's PC. **Copy, don't import**: these are separate repos with their ow
   and `aliases` (e.g. `05Cxx` → `Graph theory`, alias `05C`). Branch and area names above the
   subjects are TreeQuiz's own grouping, not MSC.
 - `info.json` — 572 keyed entries (MSC codes like `03-XX`, `03Axx`): `description` (mostly
-  empty), `items[]` (the topic list under that code, about 1,280 topics in total), `url`
+  empty), `items[]` (the topic list under that code, 4,810 topics under the 517 sections; counted 15 Nov 2026, an earlier "about 1,280" here was wrong), `url`
   (zbMATH page). 358 KB.
 - `manifest.json` — title, sources and **licence (CC BY-NC-SA 4.0)**. Keep this attribution.
 

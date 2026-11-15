@@ -30,8 +30,22 @@ const CACHE = PREFIX + VERSION
 const url = (name) => new URL(name, SCOPE).href
 const PRECACHED = new Set(FILES.map(url))
 
+// index.html is fetched as the scope's own address, not by name. `tailscale
+// serve` (Go's file server) answers /index.html with a redirect to ./, and a
+// redirected response may be cached but cannot answer a navigation: the page
+// would have installed and then failed to open offline. Seen on the first
+// deploy to the tailnet, 15 Nov 2026. `cache: 'reload'` skips the HTTP cache,
+// so a new build never precaches a stale file.
+const fetchFile = async (name) => {
+  const response = await fetch(name === 'index.html' ? SCOPE : url(name), { cache: 'reload' })
+  if (!response.ok || response.redirected) throw new Error(`cannot precache ${name}: ${response.status}${response.redirected ? ' (redirected)' : ''}`)
+  return response
+}
+
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(FILES)))
+  event.waitUntil(
+    caches.open(CACHE).then((cache) => Promise.all(FILES.map(async (name) => cache.put(url(name), await fetchFile(name))))),
+  )
 })
 
 self.addEventListener('activate', (event) => {
