@@ -6,6 +6,8 @@ import { finishLesson, goTo, openLesson, recordAttempt, revealAnswer, saveDraft,
 import { useProgress } from './progress-store.ts'
 import { StepScreen } from './StepScreen.tsx'
 import type { Course, Lesson, TextBlock } from './types.ts'
+import { readingNodes } from '../resources.ts'
+import type { ReadingSource } from '../resources.ts'
 import { useLessonTools } from '../tools/lesson-tools.tsx'
 import { ToolDock } from '../tools/ToolDock.tsx'
 import { Widget } from '../widgets/Widget.tsx'
@@ -18,6 +20,8 @@ interface Props {
   base: string
   onClose: () => void
   onOpenLesson: (lessonId: string) => void
+  /** Where to find reading for the course's node and its ancestors; omitted when the app has none. */
+  reading?: ReadingSource
 }
 
 type Loaded = { state: 'loading' } | { state: 'failed'; reason: string } | { state: 'ready'; lesson: Lesson }
@@ -42,7 +46,7 @@ function TextScreen({ block, onNext }: { block: TextBlock; onNext: () => void })
 }
 
 /** A lesson, full screen over the map: one screen at a time, resuming where it was left. */
-export default function LessonView({ course, lessonId, base, onClose, onOpenLesson }: Props) {
+export default function LessonView({ course, lessonId, base, onClose, onOpenLesson, reading }: Props) {
   const [loaded, setLoaded] = useState<Loaded>({ state: 'loading' })
   const [record, update] = useProgress(course.id)
   const body = useRef<HTMLDivElement>(null)
@@ -81,7 +85,8 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
   }, [at, lessonId])
 
   const links = useMemo(() => ({ nodeId: course.nodeId }), [course.nodeId])
-  const tools = useLessonTools({ course, lessonId, base })
+  const readingHere = useMemo(() => (reading ? readingNodes(reading.layout, course.nodeId, reading.counts) : []), [reading, course.nodeId])
+  const tools = useLessonTools({ course, lessonId, base, reading: reading && { nodes: readingHere, base: reading.base } })
 
   const header = (subtitle: string) => (
     <header className="lesson-bar">

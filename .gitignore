@@ -12,3 +12,5 @@ __pycache__/
 # only after they pass; the source is content/.
 /public/content/*/courses/
 /dist-packs/
+# Reading links are published the same way (resources/<node-id>.json and an index).
+/public/content/*/resources/

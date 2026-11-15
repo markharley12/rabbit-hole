@@ -4,13 +4,16 @@
 """
 
 import contextlib
+import datetime
 import io
 import json
 import shutil
+import socket
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -315,6 +318,153 @@ class Content(unittest.TestCase):
     def test_publish_refuses_a_field_that_escapes_public(self):
         with self.assertRaises(ValueError):
             vc.publish({"../x": []}, self.public)
+
+
+class Reading(unittest.TestCase):
+    """content/<field>/resources/<node-id>.json: reading links attached to a map node."""
+
+    TODAY = datetime.date(2026, 11, 15)
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp)
+        self.content = self.tmp / "content"
+        shutil.copytree(ROOT / "content", self.content)
+        self.public = self.tmp / "public"
+        (self.public / "content" / "maths").mkdir(parents=True)
+        shutil.copyfile(ROOT / "public" / "content" / "maths" / "map.json", self.public / "content" / "maths" / "map.json")
+        self.dir = self.content / "maths" / "resources"
+        self.file = self.dir / "15Axx.json"
+
+    def edit(self, change, path=None):
+        path = path or self.file
+        document = json.loads(path.read_text())
+        change(document)
+        path.write_text(json.dumps(document, ensure_ascii=False))
+
+    def errors(self):
+        report = vc.Report()
+        vc.validate_resources(self.content, self.public, ROOT / "schema", report, today=self.TODAY)
+        return report.errors
+
+    def assertFails(self, needle):
+        errors = self.errors()
+        self.assertTrue(any(needle in e for e in errors), f"no error containing {needle!r} in {errors}")
+
+    def first(self, **fields):
+        return lambda d: d["resources"][0].update(fields)
+
+    def publish(self):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return vc.main(["--publish", "--content", str(self.content), "--public", str(self.public)])
+
+    def test_the_real_file_passes_and_keeps_its_fourteen(self):
+        self.assertEqual(self.errors(), [])
+        document = json.loads(self.file.read_text())
+        self.assertEqual(document["nodeId"], "15Axx")
+        self.assertEqual(len(document["resources"]), 14)
+        self.assertTrue(all(r["url"].startswith("https://") for r in document["resources"]))
+
+    def test_no_resources_folder_is_fine(self):
+        shutil.rmtree(self.dir)
+        self.assertEqual(self.errors(), [])
+
+    def test_schema_errors_are_reported(self):
+        self.edit(lambda d: d["resources"][0].pop("use"))
+        self.assertFails("'use' is a required property")
+        self.edit(self.first(kind="podcast"))
+        self.assertFails("is not one of")
+        self.edit(self.first(extra=1))
+        self.assertFails("15Axx.json")
+
+    def test_the_file_is_named_after_its_node(self):
+        self.file.rename(self.dir / "15Bxx.json")
+        self.assertFails("the file must be named after nodeId (15Axx.json)")
+
+    def test_the_node_must_be_in_the_map(self):
+        self.edit(lambda d: d.update(nodeId="99Zxx"))
+        self.assertFails("nodeId '99Zxx' is not a node")
+
+    def test_ids_must_be_unique(self):
+        self.edit(lambda d: d["resources"][1].update(id=d["resources"][0]["id"]))
+        self.assertFails("resource id repeats")
+
+    def test_urls_must_be_https(self):
+        for bad in ["http://example.org/x", "ftp://example.org/x", "javascript:alert(1)", "https://", "https:// spaced.example", "//example.org/x", "example.org"]:
+            with self.subTest(url=bad):
+                shutil.copyfile(ROOT / "content" / "maths" / "resources" / "15Axx.json", self.file)
+                self.edit(self.first(url=bad))
+                self.assertFails("15Axx.json")
+
+    def test_checked_must_be_a_real_date_not_in_the_future(self):
+        self.edit(self.first(checked="2026-02-30"))
+        self.assertFails("is not a real date")
+        self.edit(self.first(checked="15 Nov 2026"))
+        self.assertFails("15Axx.json")
+        self.edit(self.first(checked="2026-11-16"))
+        self.assertFails("is in the future")
+        self.edit(self.first(checked="2026-11-15"))
+        self.assertEqual(self.errors(), [])
+
+    def test_one_to_thirty_resources(self):
+        self.edit(lambda d: d.update(resources=[]))
+        self.assertFails("is too short")
+        one = json.loads((ROOT / "content" / "maths" / "resources" / "15Axx.json").read_text())["resources"][0]
+        self.edit(lambda d: d.update(resources=[{**one, "id": f"r-{i}"} for i in range(31)]))
+        self.assertFails("is too long")
+        self.edit(lambda d: d.update(resources=[{**one, "id": f"r-{i}"} for i in range(30)]))
+        self.assertEqual(self.errors(), [])
+
+    def test_text_limits_and_topics(self):
+        self.edit(self.first(about="a" * 301))
+        self.assertFails("is too long")
+        self.edit(self.first(about="Fine.", use="u" * 301))
+        self.assertFails("is too long")
+        self.edit(self.first(use="Fine, fine.", topics=["a topic"] * 2))
+        self.assertFails("non-unique")
+        self.edit(self.first(topics=["t1", "t2", "t3", "t4", "t5", "t6", "t7"]))
+        self.assertFails("is too long")
+        self.edit(self.first(topics=[]))
+        self.assertFails("is too short")
+
+    def test_it_never_goes_to_the_network(self):
+        def refuse(*args, **kwargs):
+            raise AssertionError("the validator opened a connection")
+
+        with mock.patch.object(socket.socket, "connect", refuse), mock.patch.object(socket, "create_connection", refuse), mock.patch.object(socket, "getaddrinfo", refuse):
+            self.assertEqual(self.errors(), [])
+            self.assertEqual(self.publish(), 0)
+
+    def test_publish_copies_the_files_and_counts_them(self):
+        self.assertEqual(self.publish(), 0)
+        published = self.public / "content" / "maths" / "resources"
+        self.assertEqual((published / "15Axx.json").read_bytes(), self.file.read_bytes())
+        self.assertEqual(json.loads((published / "index.json").read_text()), {"format": 1, "nodes": {"15Axx": 14}})
+
+    def test_publish_removes_a_resources_file_that_left_the_source(self):
+        published = self.public / "content" / "maths" / "resources"
+        published.mkdir(parents=True)
+        (published / "old-node.json").write_text("{}")
+        self.assertEqual(self.publish(), 0)
+        self.assertFalse((published / "old-node.json").exists())
+        self.assertTrue((published / "15Axx.json").exists())
+        # With no source at all the index is empty, not left over.
+        shutil.rmtree(self.dir)
+        self.assertEqual(self.publish(), 0)
+        self.assertEqual(json.loads((published / "index.json").read_text()), {"format": 1, "nodes": {}})
+        self.assertFalse((published / "15Axx.json").exists())
+
+    def test_nothing_is_published_when_a_reading_file_is_wrong(self):
+        self.edit(self.first(url="http://example.org"))
+        with contextlib.redirect_stderr(io.StringIO()):
+            code = vc.main(["--publish", "--content", str(self.content), "--public", str(self.public)])
+        self.assertEqual(code, 1)
+        self.assertFalse((self.public / "content" / "maths" / "courses").exists())
+        self.assertFalse((self.public / "content" / "maths" / "resources").exists())
+
+    def test_publish_refuses_a_field_that_escapes_public(self):
+        with self.assertRaises(ValueError):
+            vc.publish_resources({}, self.public, ["../x"])
 
 
 if __name__ == "__main__":

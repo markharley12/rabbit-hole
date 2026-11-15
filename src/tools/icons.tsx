@@ -79,3 +79,11 @@ export const SheetIcon = () => (
     <path d="M9 13h7M9 17h5" />
   </Icon>
 )
+
+export const BookIcon = () => (
+  <Icon>
+    <path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2z" />
+    <path d="M4 20a2 2 0 0 0 2 2h13v-4" />
+    <path d="M9 8h6" />
+  </Icon>
+)

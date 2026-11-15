@@ -17,13 +17,14 @@ from one screen to the next.
 content/maths/courses/<course-id>/
   course.json          title, summary, the map node it hangs on, sources, lesson order
   <lesson-id>.json     one per lesson: screens ("blocks"), shown one at a time
+  cheatsheet.json      optional: the formulas the course uses (section 9)
 ```
 
 - `<course-id>` equals `course.json`'s `id` (kebab-case). `nodeId` is an id in
   `public/content/maths/map.json` (an MSC code such as `15Axx`, or a slug). Several courses
   may hang on one node.
-- Schemas: `schema/course.schema.json`, `schema/lesson.schema.json`. Widgets:
-  `schema/widgets.json`. Read all three before writing.
+- Schemas: `schema/course.schema.json`, `schema/lesson.schema.json`, `schema/cheatsheet.schema.json`.
+  Widgets: `schema/widgets.json`. Read them before writing.
 - A finished course is the example to copy: `content/maths/courses/least-squares-to-the-pseudo-inverse/`.
 
 ## 2. Where it goes on the landscape
@@ -123,11 +124,71 @@ capable?
 
 ## 8. What a course-writing session may touch
 
-Only `content/<field>/courses/<its-course-id>/`. Not `schema/`, `tools/`, `src/`, the map, or
-another course. Leave the result uncommitted for Mark to look at unless told otherwise.
+Only `content/<field>/courses/<its-course-id>/`, and `content/<field>/resources/<node-id>.json`
+for the node it hangs on (section 10). Not `schema/`, `tools/`, `src/`, the map, or another
+course. Leave the result uncommitted for Mark to look at unless told otherwise.
 
-## 9. Parts that arrive with later stages
+## 9. The cheat sheet
 
-Added to this file when they exist (ROADMAP.md): a course's formula cheat sheet (B1), reading
-links attached to map nodes (B2), steps marked for spaced review (C), tunnels to other
-courses (E1).
+An optional `cheatsheet.json` beside `course.json` (`schema/cheatsheet.schema.json`). The
+lesson shows it as a dock tool, marking the items of the lesson he is on; he adds his own
+lines under "My notes", on his device, so nothing he types is ever in this file.
+
+```
+{ "format": 1, "sections": [ { "title": "Least squares", "items": [
+    { "id": "normal-equations", "name": "Normal equations",
+      "formula": "$A^\\mathsf{T}A\\,x = A^\\mathsf{T}b$",
+      "when": "To find the best fit. There is exactly one best line when $A^\\mathsf{T}A$ is invertible.",
+      "lesson": "normal-equations-from-your-points" } ] } ] }
+```
+
+- **Only what the course derives or uses.** Every formula is in one of its lessons. Nothing
+  "while we are here"; a cheat sheet that grows past what he has met is a second course.
+- **The course's own notation, exactly** (`A^\mathsf{T}`, `\|r\|^2`, `\sigma_{k+1}`), copied from the
+  lessons, so the sheet looks like the screen he came from. Name a thing as the lesson does.
+- 1 to 8 sections, 1 to 10 items each; aim for 10 to 16 items in all, in 3 to 5 sections. He
+  gets overwhelmed by long lists.
+- `name`: plain words, at most 50. `formula`: Markdown with KaTeX (strict, like lessons).
+  `when`: one sentence, at most 200, that says when to reach for it, not what it is called.
+- `lesson`: the lesson that derives it, when there is one. The validator checks it is one of the
+  course's lessons.
+- The validator checks the schema, that item ids are unique, and the Markdown as for lessons;
+  the app's `src/lesson/content.test.ts` typesets every formula in strict KaTeX.
+- The published `index.json` gets `"cheatsheet": true` for a course that has one. That flag is
+  written by `--publish`; never put it in `course.json`.
+
+## 10. Reading for a node
+
+Outside links belong to a **map node**, not to a course: `content/<field>/resources/<node-id>.json`
+(`schema/resources.schema.json`). The lesson shows them as the Reading tool (the course's node and
+its ancestors, nearest first), and the node's sheet shows its own. Other courses on the node, and
+courses not written yet, get them for free.
+
+```
+{ "format": 1, "nodeId": "15Axx", "resources": [ {
+    "id": "strang-1806-lecture-16", "title": "...", "by": "...",
+    "kind": "video", "url": "https://...",
+    "about": "What it is, one sentence.", "use": "When to reach for it, one sentence.",
+    "free": true, "checked": "2026-11-15", "topics": ["least squares", "projection"] } ] }
+```
+
+- **Every URL was opened in this session and confirmed to be what the entry says.** The
+  validator never fetches (it runs offline on every build), so `checked` is your word: the ISO
+  date you opened it. A URL you could not open is not listed; say so in your report instead.
+- Prefer **stable landing pages** (a course or book page, a lecture's page) over deep links,
+  files that move, or search results. HTTPS only.
+- A resource belongs to the **deepest node it fits**. A general linear algebra book goes on the
+  linear algebra node, not on the section a course happens to hang on.
+- `use` names the **topic**, not a lesson of one course ("When the SVD itself feels shaky", not
+  "in lesson 4"): the file belongs to the node, and other courses will hang there.
+- `about` and `use` are your own sentences. **Never copy text from the source**: summarise.
+- `free` is `false` for anything behind a payment, even if part is free (say which part in `about`
+  or `use`). `kind` is one of video, book, notes, article, course.
+- `topics`: 1 to 6 short tags. 1 to 30 resources per file. Keep the list short enough to read on a phone.
+- The validator checks the schema, that the file is named after `nodeId`, that the node is on the
+  map, unique ids, https, and that `checked` is a real date that is not in the future.
+
+## 11. Parts that arrive with later stages
+
+Added to this file when they exist (ROADMAP.md): steps marked for spaced review (C), tunnels to
+other courses (E1).

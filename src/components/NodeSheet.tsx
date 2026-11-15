@@ -6,6 +6,8 @@ import type { MapDocument } from '../map/types.ts'
 import { lessonState, nextUp } from '../lesson/progress.ts'
 import { useProgress } from '../lesson/progress-store.ts'
 import type { Course } from '../lesson/types.ts'
+import { ReadingList } from './ReadingList.tsx'
+import type { ReadingSource } from '../resources.ts'
 
 interface Props {
   node: Placed
@@ -19,6 +21,8 @@ interface Props {
   onSelect: (id: string) => void
   onOpenLesson: (course: Course, lessonId: string) => void
   onOpenCourses: () => void
+  /** Where to find reading; the sheet shows only the node's own. */
+  reading?: ReadingSource
 }
 
 // "15 Nov 2026, 19:04", in the phone's own time zone.
@@ -109,7 +113,7 @@ function CourseSection({
  * is, how big, whether there is a course); opened it lists where the node sits
  * and what is in it.
  */
-export function NodeSheet({ node, document: doc, courses, counts, open, onOpenChange, onSelect, onOpenLesson, onOpenCourses }: Props) {
+export function NodeSheet({ node, document: doc, courses, counts, open, onOpenChange, onSelect, onOpenLesson, onOpenCourses, reading }: Props) {
   const inside = counts.get(node.id) ?? 0
   const course = courses.length === 1 ? courses[0] : undefined
   const drag = useRef<number | null>(null)
@@ -233,6 +237,13 @@ export function NodeSheet({ node, document: doc, courses, counts, open, onOpenCh
           <p className="note">
             {leaf ? 'No course yet.' : 'No courses in here yet.'} Generating courses is a later phase; nothing here can make one today.
           </p>
+        )}
+
+        {open && reading && (reading.counts[node.id] ?? 0) > 0 && (
+          <>
+            <h2>Reading</h2>
+            <ReadingList nodes={[{ id: node.id, name: data.name }]} base={reading.base} />
+          </>
         )}
 
         {data.url && (

@@ -41,7 +41,8 @@ marking, no Capacitor yet. What is where:
   `.rhpack` file and back, treating the file as untrusted; tests in `tools/tests/test_pack_course.py`.
 - **Lesson tools** (`src/tools/`): a dock of round buttons at the right edge of the lesson,
   riding on the footer's top edge (`ToolDock.tsx`; a tool is `{ id, label, icon, render(close) }`,
-  so a cheat sheet or reading links are one more entry in `lesson-tools.tsx`). A tool opens as an
+  so the cheat sheet and Reading are entries in `lesson-tools.tsx`, each shown only when there is
+  something to show). A tool opens as an
   overlay over the lesson, never unmounting the step; Escape, a tap outside, or the phone's back
   button (a `pushState` entry plus `popstate`) closes it. **Scratch pad** (`ScratchPad.tsx`, pure
   `scratch-pad.ts`): one finger draws, two pan and pinch; pen, eraser (whole strokes), undo, redo,
@@ -50,6 +51,18 @@ marking, no Capacitor yet. What is where:
   **Number keyboard**: a box gets `inputMode="decimal"` only when the answer has no `vars` and
   that field's key is a plain number (`src/lesson/input-mode.ts`); an "abc"/"123" switch under the
   boxes changes every box's keyboard without clearing anything.
+- **Cheat sheet:** optional `cheatsheet.json` beside `course.json` (`schema/cheatsheet.schema.json`;
+  validator checks ids, `lesson`, Markdown; `--publish` flags `cheatsheet: true` in the course index
+  only). Dock tool "Cheat sheet" (`src/tools/CheatSheet.tsx`) fetched on first open, marks "this
+  lesson", ends with **My notes**: his own lines on the device (`rabbit-hole:cheatsheet-notes:<course>`,
+  pure `cheat-notes.ts`, max 100 x 500 chars, through the same safe Markdown renderer). Written for the
+  first course. No line on the node sheet (it would need an overlay outside a lesson). Authoring: course-authoring.md section 9.
+- **Reading:** outside links belong to a map **node**: `content/maths/resources/<node-id>.json`
+  (`schema/resources.schema.json`; validator never fetches URLs, `checked` is the date someone opened
+  it), published with an index of counts (`public/content/maths/resources/`, gitignored). Lesson dock
+  tool "Reading" (the course's node and ancestors, nearest first; `src/resources.ts`,
+  `src/components/ReadingList.tsx`) and a "Reading" section on the sheet of a node that has its own.
+  The app reads the index once and a node's file only when shown. 14 links on `15Axx`. course-authoring.md section 10.
 - **Progress** is on the device only (`localStorage`, `rabbit-hole:progress:<course>`):
   attempts, hints, drafts, where he is. **No scores** (claimed is not scored).
 - `pwa/sw.js`: offline. A new build waits until the app is fully closed, so an update

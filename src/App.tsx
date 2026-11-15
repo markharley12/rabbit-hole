@@ -12,6 +12,8 @@ import { lessonHash, parseRoute, resolveLesson } from './route.ts'
 import { countCourses, groupByNode } from './courses.ts'
 import { CoursesMenu } from './components/CoursesMenu.tsx'
 import { UpdateBar } from './components/UpdateBar.tsx'
+import { parseIndex } from './resources.ts'
+import type { ReadingSource } from './resources.ts'
 
 // The lesson screens, KaTeX and the widgets load only when a lesson opens.
 const LessonView = lazy(() => import('./lesson/LessonView.tsx'))
@@ -19,6 +21,8 @@ const LessonView = lazy(() => import('./lesson/LessonView.tsx'))
 const MAP_URL = './content/maths/map.json'
 // Written by tools/validate_courses.py --publish, only from content that passed.
 const COURSES_URL = './content/maths/courses/'
+// The same for reading links: one file per node, and an index of how many each has.
+const RESOURCES_URL = './content/maths/resources/'
 
 // Heights the map must keep clear of, in CSS pixels. They match styles.css
 // (--bar and --peek); the map only uses them to centre things, so a few
@@ -48,6 +52,7 @@ export default function App() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [refit, setRefit] = useState(0)
   const [courseList, setCourseList] = useState<Course[]>([])
+  const [readingCounts, setReadingCounts] = useState<Record<string, number>>({})
   // Whether the open lesson was opened from the map in this page, so closing
   // it can step back through history instead of piling up entries.
   const openedHere = useRef(false)
@@ -84,9 +89,26 @@ export default function App() {
     }
   }, [])
 
+  // Reading is an extra too: a missing index means no Reading anywhere. A node's own file is
+  // fetched only when something shows it.
+  useEffect(() => {
+    let live = true
+    fetch(`${RESOURCES_URL}index.json`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((index: unknown) => live && setReadingCounts(parseIndex(index)))
+      .catch((error: unknown) => console.warn('No reading index; no reading links.', error))
+    return () => {
+      live = false
+    }
+  }, [])
+
   const document = loaded.state === 'ready' ? loaded.document : null
   const layout = useMemo(() => (document ? layoutMap(document.root) : null), [document])
   const courses = useMemo(() => groupByNode(courseList), [courseList])
+  const reading = useMemo<ReadingSource | undefined>(
+    () => (layout ? { layout, counts: readingCounts, base: RESOURCES_URL } : undefined),
+    [layout, readingCounts],
+  )
   const counts = useMemo(() => (layout ? countCourses(layout, courses) : new Map<string, number>()), [layout, courses])
   const screen = useMemo(() => {
     const [width, height] = size.split('x').map(Number)
@@ -165,6 +187,7 @@ export default function App() {
             base={`${COURSES_URL}${opened.course.id}/`}
             onClose={closeLesson}
             onOpenLesson={(lessonId) => nextLesson(opened.course, lessonId)}
+            reading={reading}
           />
         </Suspense>
       ) : (
@@ -180,6 +203,7 @@ export default function App() {
             onSelect={select}
             onOpenLesson={openLesson}
             onOpenCourses={openMenu}
+            reading={reading}
           />
         </>
       )}

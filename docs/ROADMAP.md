@@ -161,3 +161,17 @@ Subagents (Sonnet by default) build. To make that work:
 ## 7. Done log
 
 Filled in as stages land (date, commit, what was not checked).
+
+- **B1 Cheat sheet** (15 Nov 2026, "Cheat sheet: cheatsheet.json per course..."). `cheatsheet.json`
+  with its schema, validator rules and tests; dock tool with "this lesson" marks and his own notes
+  (device only); 16 formulas in 5 sections for the first course, every one typeset in strict KaTeX by
+  `content.test.ts`. Looked at in the built-in browser at 375x812, dark and light. Not checked: on the
+  phone itself; the offline path (the build's file list is read from `public/`, which includes
+  `cheatsheet.json`, but no offline run was made); the line on the node sheet was skipped (needs an
+  overlay outside a lesson). The formulas were written from the lessons by a model and not yet read by Mark.
+- **B2 Reading for a node** (15 Nov 2026). `content/maths/resources/`, schema, a second validator
+  pass and publish (with an index; stale files removed), `src/resources.ts`, a "Reading" dock tool and
+  a "Reading" section on the node sheet; the 14 links of `15Axx` were opened by another agent on 15 Nov
+  (nothing here fetched them again) and their `use` lines were rewritten for the node. Not checked: any
+  URL in this stage; the offline message with the real network off; on the phone itself; whether 14
+  links in one list is too many for Mark (the sheet shows them all, as briefed).

@@ -1,0 +1,226 @@
+{
+  "format": 1,
+  "nodeId": "15Axx",
+  "resources": [
+    {
+      "id": "strang-1806-lecture-16",
+      "title": "Lecture 16: Projection matrices and least squares (18.06)",
+      "by": "Gilbert Strang, MIT OpenCourseWare",
+      "kind": "video",
+      "url": "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-16-projection-matrices-and-least-squares/",
+      "about": "Strang derives least squares as projecting b onto the column space of A, giving the normal equations AᵀAx = Aᵀb, and fits a line to data.",
+      "use": "When the normal equations or the projection picture of least squares are not clicking.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "least squares",
+        "projection",
+        "normal equations"
+      ]
+    },
+    {
+      "id": "strang-1806-lecture-33",
+      "title": "Lecture 33: Left and right inverses; pseudoinverse (18.06)",
+      "by": "Gilbert Strang, MIT OpenCourseWare",
+      "kind": "video",
+      "url": "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-33-left-and-right-inverses-pseudoinverse/",
+      "about": "Strang on matrices with only a left inverse, only a right inverse or none, and the pseudoinverse as the fix, tied to the four fundamental subspaces.",
+      "use": "For the pseudo-inverse, and for why the minimum-norm solution lies in the row space.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "pseudo-inverse",
+        "minimum norm",
+        "four subspaces"
+      ]
+    },
+    {
+      "id": "strang-18065-lecture-6",
+      "title": "Lecture 6: Singular Value Decomposition (SVD) (18.065)",
+      "by": "Gilbert Strang, MIT OpenCourseWare",
+      "kind": "video",
+      "url": "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/resources/lecture-6-singular-value-decomposition-svd/",
+      "about": "Strang on A = UΣVᵀ as rotation, stretch, rotation, with the eigenvectors of AᵀA and AAᵀ and σ² as the shared eigenvalues.",
+      "use": "When the singular value decomposition itself feels shaky.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "SVD",
+        "singular values"
+      ]
+    },
+    {
+      "id": "strang-18065-lecture-7",
+      "title": "Lecture 7: Eckart-Young: The Closest Rank k Matrix to A (18.065)",
+      "by": "Gilbert Strang, MIT OpenCourseWare",
+      "kind": "video",
+      "url": "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/resources/lecture-7-eckart-young-the-closest-rank-k-matrix-to-a/",
+      "about": "Strang states and discusses Eckart-Young: truncating the SVD at k terms gives the closest rank-k matrix, with the norm background.",
+      "use": "To see Eckart–Young stated and discussed: the truncated SVD is the closest rank-k matrix.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "Eckart-Young",
+        "low-rank approximation",
+        "SVD"
+      ]
+    },
+    {
+      "id": "3blue1brown-inverse-matrices",
+      "title": "Essence of linear algebra, Chapter 7: Inverse matrices, column space and null space",
+      "by": "Grant Sanderson (3Blue1Brown)",
+      "kind": "video",
+      "url": "https://www.3blue1brown.com/lessons/inverse-matrices",
+      "about": "Geometric account of Ax = v, when an inverse exists, column space, rank and null space, on the 3Blue1Brown site with the video and a text version.",
+      "use": "When column space, rank or null space need a picture, for example with dependent columns.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "null space",
+        "column space",
+        "rank"
+      ]
+    },
+    {
+      "id": "brunton-kutz-databook-svd",
+      "title": "Data-Driven Science & Engineering, Chapter 1: Singular Value Decomposition (video lectures)",
+      "by": "Steven L. Brunton and J. Nathan Kutz",
+      "kind": "course",
+      "url": "https://www.databookuw.com/page-2/page-4/",
+      "about": "The book's site page for chapter 1, with a video per section: matrix approximation, Frobenius norm, optimal truncation, and 'Linear Systems, Least Squares & Regression'.",
+      "use": "For video walk-throughs of least squares through the SVD and of optimal truncation.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "SVD",
+        "least squares",
+        "truncation"
+      ]
+    },
+    {
+      "id": "mml-book",
+      "title": "Mathematics for Machine Learning",
+      "by": "Deisenroth, Faisal and Ong (Cambridge University Press)",
+      "kind": "book",
+      "url": "https://mml-book.github.io/",
+      "about": "Free-PDF book for ML practitioners; the chapters most relevant here are 3 (Analytic Geometry), 4 (Matrix Decompositions), 9 (Linear Regression) and 10 (PCA).",
+      "use": "For projections, least squares and matrix decompositions in machine-learning notation.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "projection",
+        "least squares",
+        "matrix decompositions"
+      ]
+    },
+    {
+      "id": "higham-what-is-the-svd",
+      "title": "What Is the Singular Value Decomposition?",
+      "by": "Nick Higham (nhigham.com)",
+      "kind": "article",
+      "url": "https://nhigham.com/2020/10/13/what-is-the-singular-value-decomposition/",
+      "about": "A short, precise note on the SVD, the Eckart-Young theorem (best rank-k approximation in the 2-norm and Frobenius norm) and the pseudoinverse.",
+      "use": "For the exact statement of the SVD and of Eckart–Young.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "SVD",
+        "Eckart-Young"
+      ]
+    },
+    {
+      "id": "higham-what-is-the-pseudoinverse",
+      "title": "What Is the Pseudoinverse of a Matrix?",
+      "by": "Nick Higham (nhigham.com)",
+      "kind": "article",
+      "url": "https://nhigham.com/2023/07/25/what-is-the-pseudoinverse-of-a-matrix/",
+      "about": "Short note on the pseudoinverse: it gives the minimum 2-norm least squares solution, and it is built from the SVD.",
+      "use": "For a compact statement that the pseudo-inverse gives the minimum-norm least squares solution.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "pseudo-inverse",
+        "minimum norm",
+        "least squares"
+      ]
+    },
+    {
+      "id": "wikipedia-moore-penrose-inverse",
+      "title": "Moore–Penrose inverse (Wikipedia)",
+      "by": "Wikipedia contributors",
+      "kind": "article",
+      "url": "https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse",
+      "about": "Reference article: the four Penrose conditions, construction via the SVD, and applications including minimum-norm solutions.",
+      "use": "For the four Penrose conditions and the construction from the SVD.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "pseudo-inverse",
+        "SVD"
+      ]
+    },
+    {
+      "id": "wikipedia-low-rank-approximation",
+      "title": "Low-rank approximation (Wikipedia)",
+      "by": "Wikipedia contributors",
+      "kind": "article",
+      "url": "https://en.wikipedia.org/wiki/Low-rank_approximation",
+      "about": "Reference article stating the Eckart–Young–Mirsky theorem and proving it separately for the spectral norm and the Frobenius norm.",
+      "use": "To compare a proof of Eckart–Young for the spectral norm with a published one.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "Eckart-Young",
+        "low-rank approximation"
+      ]
+    },
+    {
+      "id": "wikipedia-ordinary-least-squares",
+      "title": "Ordinary least squares (Wikipedia)",
+      "by": "Wikipedia contributors",
+      "kind": "article",
+      "url": "https://en.wikipedia.org/wiki/Ordinary_least_squares",
+      "about": "Reference article on OLS, with the normal equations (XᵀX)β = Xᵀy and the projection interpretation. It is written in statistics notation (X, β, y).",
+      "use": "As a cross-check in statistics notation on the projection picture of least squares.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "least squares",
+        "projection",
+        "normal equations"
+      ]
+    },
+    {
+      "id": "trefethen-bau-nla",
+      "title": "Numerical Linear Algebra (Trefethen and Bau), author's page",
+      "by": "Lloyd N. Trefethen and David Bau III (SIAM, 1997)",
+      "kind": "book",
+      "url": "https://people.maths.ox.ac.uk/trefethen/text.html",
+      "about": "Trefethen's page for the book: 40 short lectures, with the front matter and Lectures 1 to 5 as free downloads.",
+      "use": "For a rigorous treatment of the SVD, projectors and least squares; only the front matter and lectures 1 to 5 are free.",
+      "free": false,
+      "checked": "2026-11-15",
+      "topics": [
+        "SVD",
+        "least squares",
+        "numerical linear algebra"
+      ]
+    },
+    {
+      "id": "stanford-ee263-lectures",
+      "title": "EE263 lecture slides (Stanford)",
+      "by": "Stanford EE263 teaching staff (course by Stephen Boyd)",
+      "kind": "notes",
+      "url": "https://ee263.stanford.edu/lectures.html",
+      "about": "Slides for least squares (Lecture 10), least-norm solutions (Lecture 12) and the SVD (Lecture 17), as plain and annotated PDFs.",
+      "use": "For slides on least squares, least-norm solutions and the SVD.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": [
+        "least squares",
+        "minimum norm",
+        "SVD"
+      ]
+    }
+  ]
+}

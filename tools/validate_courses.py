@@ -17,8 +17,14 @@ What is checked, for every content/<field>/courses/<course-id>/:
 - known slips are not right answers, the first two hints don't give the key away, there is
   no raw HTML, and lesson:/node: links in Markdown resolve.
 
+Reading links are checked in a second pass, for every content/<field>/resources/<node-id>.json:
+the file is named after its nodeId, which is a node of the map; ids are unique; every url is
+https; `checked` is a real date that is not in the future; 1 to 30 resources. No URL is
+fetched (this runs offline on every build): `checked` is a claim by whoever opened the link.
+
 Publishing replaces public/content/<field>/courses/ with the validated files plus an
-index.json the app reads to know which nodes have a course. That folder is gitignored:
+index.json the app reads to know which nodes have a course, and public/content/<field>/resources/
+with the reading files plus an index.json of counts per node. Both folders are gitignored:
 content/ is the source, public/ the checked copy.
 
 Keys and verify expressions are parsed by a small recursive-descent parser written here,
@@ -29,6 +35,7 @@ is passed to eval(), sympify() or parse_expr().
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import re
 import shutil
@@ -596,9 +603,9 @@ def map_ids(map_path: Path) -> set[str]:
     return ids
 
 
-def validate(content: Path, public: Path, schema_dir: Path) -> tuple[Report, dict[str, list[tuple[Path, dict]]]]:
-    """Check everything; return the report and, per field, the courses found."""
-    report = Report()
+def validate(content: Path, public: Path, schema_dir: Path, report: Report | None = None) -> tuple[Report, dict[str, list[tuple[Path, dict]]]]:
+    """Check every course; return the report and, per field, the courses found."""
+    report = report or Report()
     course_validator, lesson_validator, cheatsheet_validator, widget_validators = validators(schema_dir)
     found: dict[str, list[tuple[Path, dict]]] = {}
     course_ids: set[str] = set()
@@ -651,6 +658,83 @@ def validate(content: Path, public: Path, schema_dir: Path) -> tuple[Report, dic
     return report, found
 
 
+def resources_validator(schema_dir: Path):
+    lesson = json.loads((schema_dir / "lesson.schema.json").read_text())
+    resources = json.loads((schema_dir / "resources.schema.json").read_text())
+    registry = Registry().with_resources([(s["$id"], Resource.from_contents(s)) for s in (lesson, resources)])
+    return Draft202012Validator(resources, registry=registry)
+
+
+def validate_resources(content: Path, public: Path, schema_dir: Path, report: Report, today: datetime.date | None = None) -> dict[str, list[tuple[Path, dict]]]:
+    """Check content/<field>/resources/<node-id>.json; return, per field, the files that passed.
+
+    Nothing here touches the network: `checked` is a claim that a person opened the URL,
+    and the most this can do is make sure the claim is a real date that is not in the future.
+    """
+    today = today or datetime.date.today()
+    validator = resources_validator(schema_dir)
+    found: dict[str, list[tuple[Path, dict]]] = {}
+    for resources_dir in sorted(content.glob("*/resources")):
+        field = resources_dir.parent.name
+        map_path = public / "content" / field / "map.json"
+        if not map_path.exists():
+            report.add(str(resources_dir), f"there is no map for {field!r} at {map_path}")
+            continue
+        nodes = map_ids(map_path)
+        found[field] = []
+        for path in sorted(p for p in resources_dir.iterdir() if p.is_file()):
+            where = str(path.relative_to(content.parent)) if content.parent in path.parents else str(path)
+            if path.suffix != ".json":
+                report.add(where, "is not a .json file")
+                continue
+            document = load_json(path, report)
+            if document is None or schema_errors(validator, document, where, report):
+                continue
+            if document["nodeId"] not in nodes:
+                report.add(where, f"nodeId {document['nodeId']!r} is not a node of the {field} map")
+            if path.stem != document["nodeId"]:
+                report.add(where, f"the file must be named after nodeId ({document['nodeId']}.json)")
+            seen: set[str] = set()
+            for entry in document["resources"]:
+                at = f"{where} resource {entry['id']!r}"
+                if entry["id"] in seen:
+                    report.add(at, "resource id repeats")
+                seen.add(entry["id"])
+                try:
+                    checked = datetime.date.fromisoformat(entry["checked"])
+                except ValueError:
+                    report.add(at, f"checked {entry['checked']!r} is not a real date")
+                    continue
+                if checked > today:
+                    report.add(at, f"checked {entry['checked']} is in the future")
+            found[field].append((path, document))
+    return found
+
+
+def publish_resources(found: dict[str, list[tuple[Path, dict]]], public: Path, fields) -> list[Path]:
+    """Replace public/content/<field>/resources/ with the checked files and an index of counts.
+
+    Every field in `fields` gets an index, even with no resources, so a stale one never
+    outlives its source and the app can read the index without a 404.
+    """
+    written = []
+    for field in fields:
+        if field in ("", ".", "..") or "/" in field or "\\" in field:
+            raise ValueError(f"refusing to publish into {field!r}")
+        target = public / "content" / field / "resources"
+        if target.exists():
+            shutil.rmtree(target)
+        target.mkdir(parents=True)
+        counts = {}
+        for path, document in found.get(field, []):
+            shutil.copyfile(path, target / f"{document['nodeId']}.json")
+            written.append(target / f"{document['nodeId']}.json")
+            counts[document["nodeId"]] = len(document["resources"])
+        (target / "index.json").write_text(json.dumps({"format": 1, "nodes": counts}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        written.append(target / "index.json")
+    return written
+
+
 def publish(found: dict[str, list[tuple[Path, dict]]], public: Path) -> list[Path]:
     written = []
     for field, courses in found.items():
@@ -689,15 +773,17 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     report, found = validate(args.content, args.public, args.schema)
+    resources = validate_resources(args.content, args.public, args.schema, report)
     count = sum(len(c) for c in found.values())
+    notes = sum(len(r) for r in resources.values())
     if report.errors:
         print(f"{len(report.errors)} problem(s); nothing published.", file=sys.stderr)
         for error in report.errors:
             print(f"  {error}", file=sys.stderr)
         return 1
-    print(f"{count} course(s) valid.")
+    print(f"{count} course(s) valid." + (f" {notes} reading file(s) valid." if notes else ""))
     if args.publish:
-        written = publish(found, args.public)
+        written = publish(found, args.public) + publish_resources(resources, args.public, sorted(set(found) | set(resources)))
         print(f"Published {len(written)} file(s) to {args.public / 'content'}.")
     return 0
 
