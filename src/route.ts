@@ -1,6 +1,7 @@
 // The address is the app's state: #15Axx is a node on the map,
 // #15Axx/learn/<course-id>/<lesson-id> a lesson of one of the courses on that
-// node, and #15Axx/courses the courses menu opened from there. So the phone's
+// node, #15Axx/courses the courses menu opened from there and #15Axx/review a session of
+// spaced review, opened the same way. So the phone's
 // back button closes what is open and then steps back up the map.
 //
 // The first version had one course per node and no course id in the address,
@@ -9,13 +10,14 @@
 
 import type { Course } from './lesson/types.ts'
 
-export type Route = { nodeId: string; courseId?: string; lessonId?: string; menu?: boolean }
+export type Route = { nodeId: string; courseId?: string; lessonId?: string; menu?: boolean; review?: boolean }
 
 export function parseRoute(hash: string): Route {
   const [nodeId, kind, first, second] = hash.split('/')
   if (kind === 'learn' && first && second) return { nodeId, courseId: first, lessonId: second }
   if (kind === 'learn' && first) return { nodeId, lessonId: first }
   if (kind === 'courses') return { nodeId, menu: true }
+  if (kind === 'review') return { nodeId, review: true }
   return { nodeId: hash }
 }
 

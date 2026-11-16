@@ -22,6 +22,15 @@ describe('parseRoute', () => {
   it('reads the courses menu form', () => {
     expect(parseRoute('mathematics/courses')).toEqual({ nodeId: 'mathematics', menu: true })
   })
+
+  it('reads the review form, from any node', () => {
+    expect(parseRoute('mathematics/review')).toEqual({ nodeId: 'mathematics', review: true })
+    expect(parseRoute('15Axx/review')).toEqual({ nodeId: '15Axx', review: true })
+  })
+
+  it('does not take review for a lesson or a course', () => {
+    expect(resolveLesson(parseRoute('15Axx/review'), [course('a', 'one')])).toBeUndefined()
+  })
 })
 
 describe('resolveLesson', () => {

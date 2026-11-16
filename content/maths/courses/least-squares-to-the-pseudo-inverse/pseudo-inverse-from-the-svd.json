@@ -11,6 +11,7 @@
     {
       "type": "step",
       "id": "eigenvalues-of-ata",
+      "review": true,
       "title": "The singular values",
       "define": [
         { "term": "singular values", "meaning": "$\\sigma_i = \\sqrt{\\lambda_i}$, where the $\\lambda_i$ are the eigenvalues of $A^\\mathsf{T}A$. Its unit eigenvectors are the right singular vectors $v_i$." }
