@@ -141,9 +141,10 @@ class Content(unittest.TestCase):
 
     def test_a_key_right_only_up_to_sign_needs_accept_negated(self):
         def flip(d):
-            d["blocks"][4]["answer"].pop("accept")
-            d["blocks"][4]["answer"].pop("acceptNote")
-            for f in d["blocks"][4]["answer"]["fields"]:
+            answer = next(b for b in d["blocks"] if b["id"] == "best-fit-residual")["answer"]
+            answer.pop("accept")
+            answer.pop("acceptNote")
+            for f in answer["fields"]:
                 f["key"] = f"-({f['key']})"
 
         self.edit("normal-equations-from-your-points", flip)
@@ -203,7 +204,7 @@ class Content(unittest.TestCase):
     def test_a_known_slip_that_is_the_right_answer(self):
         self.edit(
             "normal-equations-from-your-points",
-            lambda d: d["blocks"][3]["answer"]["slips"][0].update(when={"m": "2.5"}),
+            lambda d: next(b for b in d["blocks"] if b["id"] == "solve-normal-equations")["answer"]["slips"][0].update(when={"m": "2.5"}),
         )
         self.assertFails("slip 0 lists a right answer for m")
 
@@ -379,6 +380,209 @@ class Content(unittest.TestCase):
     def test_publish_refuses_a_field_that_escapes_public(self):
         with self.assertRaises(ValueError):
             vc.publish({"../x": []}, self.public)
+
+
+class Quizzes(unittest.TestCase):
+    """Choice and order screens: the schema, the rules the schema cannot say, and the index."""
+
+    LESSON = "dependent-columns"
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.content = self.tmp / "content"
+        copy_fixture_content(self.content)
+        self.public = self.tmp / "public"
+        (self.public / "content" / "maths").mkdir(parents=True)
+        shutil.copyfile(ROOT / "public" / "content" / "maths" / "map.json", self.public / "content" / "maths" / "map.json")
+        self.course = self.content / "maths" / "courses" / COURSE_ID
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def with_blocks(self, *extra, keep_quizzes=False):
+        """The lesson's steps (and text), without any quiz it has, plus `extra`."""
+        path = self.course / f"{self.LESSON}.json"
+        document = json.loads(path.read_text())
+        document["blocks"] = [b for b in document["blocks"] if keep_quizzes or b["type"] in ("step", "text")] + list(extra)
+        path.write_text(json.dumps(document, ensure_ascii=False))
+
+    def errors(self):
+        report, _ = vc.validate(self.content, self.public, ROOT / "schema")
+        return report.errors
+
+    def assertFails(self, needle):
+        errors = self.errors()
+        self.assertTrue(any(needle in e for e in errors), f"no error containing {needle!r} in {errors}")
+
+    @staticmethod
+    def choice(**change):
+        block = {
+            "type": "choice",
+            "id": "which-is-symmetric",
+            "prompt": "Which of these could be $A^\\mathsf{T}A$?",
+            "options": [
+                {"id": "a", "text": "$\\begin{bmatrix}5&2\\\\2&1\\end{bmatrix}$", "correct": True, "say": "Symmetric, with non-negative diagonal."},
+                {"id": "b", "text": "$\\begin{bmatrix}3&6\\\\1&14\\end{bmatrix}$", "correct": False, "say": "6 and 1 are the same dot product."},
+                {"id": "c", "text": "$\\begin{bmatrix}3&6\\\\6&-14\\end{bmatrix}$", "correct": False, "say": "A column dotted with itself is not negative."},
+            ],
+            "next": "Carry on",
+        }
+        block.update(change)
+        return block
+
+    @staticmethod
+    def order(**change):
+        block = {
+            "type": "order",
+            "id": "put-in-order",
+            "prompt": "Put the lines of the argument in order.",
+            "items": [{"id": f"s{i}", "text": f"Line number {i}"} for i in range(1, 6)],
+            "next": "Carry on",
+        }
+        block.update(change)
+        return block
+
+    def test_a_good_choice_and_a_good_order_pass(self):
+        self.with_blocks(self.choice(), self.order(fixed=["s1"], say={"s3": "Which line needs an earlier one?"}))
+        self.assertEqual(self.errors(), [])
+
+    def test_a_single_answer_choice_has_exactly_one_correct_option(self):
+        none = self.choice()
+        for option in none["options"]:
+            option["correct"] = False
+        self.with_blocks(none)
+        self.assertFails("exactly one correct option (has 0)")
+        two = self.choice()
+        two["options"][1]["correct"] = True
+        self.with_blocks(two)
+        self.assertFails("exactly one correct option (has 2)")
+
+    def test_a_multiple_choice_needs_at_least_one_correct_and_one_wrong(self):
+        two = self.choice(multiple=True)
+        two["options"][1]["correct"] = True
+        self.with_blocks(two)
+        self.assertEqual(self.errors(), [])
+        none = self.choice(multiple=True)
+        for option in none["options"]:
+            option["correct"] = False
+        self.with_blocks(none)
+        self.assertFails("at least one correct option")
+        every = self.choice(multiple=True)
+        for option in every["options"]:
+            option["correct"] = True
+        self.with_blocks(every)
+        self.assertFails("at least one option must be incorrect")
+
+    def test_option_texts_and_ids_are_distinct(self):
+        same = self.choice()
+        same["options"][2]["text"] = same["options"][1]["text"]
+        self.with_blocks(same)
+        self.assertFails("two options have the same text")
+        repeated = self.choice()
+        repeated["options"][2]["id"] = "b"
+        self.with_blocks(repeated)
+        self.assertFails("option ids repeat")
+
+    def test_every_option_needs_a_reason(self):
+        block = self.choice()
+        del block["options"][1]["say"]
+        self.with_blocks(block)
+        self.assertFails("'say' is a required property")
+
+    def test_two_to_five_options_and_no_stray_keys(self):
+        block = self.choice()
+        block["options"] = block["options"][:1]
+        self.with_blocks(block)
+        self.assertFails("options")
+        many = self.choice()
+        many["options"] += [{"id": f"x{i}", "text": f"Extra {i}", "correct": False, "say": "No."} for i in range(3)]
+        self.with_blocks(many)
+        self.assertFails("is too long")
+        self.with_blocks(self.choice(answer="a"))
+        self.assertFails("Additional properties")
+
+    def test_order_fixed_and_say_name_real_lines(self):
+        self.with_blocks(self.order(fixed=["s9"]))
+        self.assertFails("fixed names 's9'")
+        self.with_blocks(self.order(say={"s9": "x"}))
+        self.assertFails("say names 's9'")
+        self.with_blocks(self.order(fixed=["s1"], say={"s1": "x"}))
+        self.assertFails("which is fixed")
+
+    def test_order_needs_three_movable_lines(self):
+        items = [{"id": f"s{i}", "text": f"Line number {i}"} for i in range(1, 5)]
+        self.with_blocks(self.order(items=items, fixed=["s1", "s4"]))
+        self.assertFails("at least three lines must be movable")
+        self.with_blocks(self.order(items=items, fixed=["s1"]))
+        self.assertEqual(self.errors(), [])
+
+    def test_order_has_three_to_seven_lines_with_distinct_texts(self):
+        self.with_blocks(self.order(items=[{"id": "s1", "text": "One"}, {"id": "s2", "text": "Two"}]))
+        self.assertFails("items")
+        same = self.order()
+        same["items"][1]["text"] = same["items"][0]["text"]
+        self.with_blocks(same)
+        self.assertFails("two lines have the same text")
+
+    def test_a_lesson_needs_a_step(self):
+        path = self.course / f"{self.LESSON}.json"
+        document = json.loads(path.read_text())
+        document["blocks"] = [self.choice(), self.order()]
+        path.write_text(json.dumps(document, ensure_ascii=False))
+        self.assertFails("needs at least one step")
+
+    def test_half_is_allowed_and_more_is_not(self):
+        path = self.course / f"{self.LESSON}.json"
+        original = json.loads(path.read_text())
+        step = next(b for b in original["blocks"] if b["type"] == "step")
+        document = dict(original, blocks=[step, self.choice()])
+        path.write_text(json.dumps(document, ensure_ascii=False))
+        self.assertEqual(self.errors(), [])
+        document["blocks"] = [step, self.choice(), self.order()]
+        path.write_text(json.dumps(document, ensure_ascii=False))
+        self.assertFails("at most half the screens may be choice or order (2 of 3)")
+
+    def test_block_ids_stay_unique_across_types(self):
+        step_id = "dependent-ata"
+        self.with_blocks(self.choice(id=step_id))
+        self.assertFails("block id repeats")
+
+    def test_markdown_in_every_string_is_checked(self):
+        bad_say = self.choice()
+        bad_say["options"][1]["say"] = "Try <b>this</b>"
+        self.with_blocks(bad_say)
+        self.assertFails("options/1/say: raw HTML is not allowed")
+        bad_text = self.choice()
+        bad_text["options"][0]["text"] = "Costs $5"
+        self.with_blocks(bad_text)
+        self.assertFails("options/0/text: an unmatched $")
+        self.with_blocks(self.order(hint="See [it](lesson:nowhere)"))
+        self.assertFails("hint: link 'lesson:nowhere' does not resolve")
+        self.with_blocks(self.order(say={"s2": "Try <i>again</i>"}))
+        self.assertFails("say/s2: raw HTML is not allowed")
+        bad_item = self.order()
+        bad_item["items"][3]["text"] = "Costs $5"
+        self.with_blocks(bad_item)
+        self.assertFails("items/3/text: an unmatched $")
+
+    def test_widgets_on_a_choice_are_checked_like_a_steps(self):
+        self.with_blocks(self.choice(widget={"name": "no-such-widget"}))
+        self.assertFails("no widget called 'no-such-widget'")
+
+    def test_publish_lists_marked_choice_and_order_blocks_in_the_review_index(self):
+        self.with_blocks(self.choice(review=True), self.order(review=True), self.order(id="not-marked"))
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(vc.main(["--publish", "--content", str(self.content), "--public", str(self.public)]), 0)
+        index = json.loads((self.public / "content" / "maths" / "courses" / "index.json").read_text())
+        marked = next(c for c in index["courses"] if c["id"] == COURSE_ID)["review"]
+        ours = [m["step"] for m in marked if m["lesson"] == self.LESSON]
+        # The lesson's own marked steps first, then the quizzes in lesson order; the unmarked one is absent.
+        self.assertEqual(ours[-2:], ["which-is-symmetric", "put-in-order"])
+        self.assertNotIn("not-marked", ours)
+
+    def test_review_must_be_a_boolean_on_a_quiz(self):
+        self.with_blocks(self.choice(review="yes"))
+        self.assertFails("is not of type 'boolean'")
 
 
 class Reading(unittest.TestCase):

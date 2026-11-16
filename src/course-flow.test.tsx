@@ -100,7 +100,7 @@ describe('the first course', () => {
     await goTo(window.location.hash.slice(1))
     expect(window.location.hash).toBe(`#15Axx/learn/${course.id}/normal-equations-from-your-points`)
 
-    expect(await screen.findByText('1 of 6', {}, LOAD)).toBeTruthy()
+    expect(await screen.findByText('1 of 8', {}, LOAD)).toBeTruthy()
     expect(screen.getByRole('dialog', { name: 'Normal equations from your three points' })).toBeTruthy()
 
     // One clear action: Check, disabled until there is something to check.
@@ -120,7 +120,7 @@ describe('the first course', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Check' }))
     expect(screen.getByText('Right.')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Set up the normal equations' }))
-    expect(screen.getByText('2 of 6')).toBeTruthy()
+    expect(screen.getByText('2 of 8')).toBeTruthy()
 
     // His real slip: an AᵀA with 12 and 1 off the diagonal.
     type('row 1, column 1', '3')
@@ -147,7 +147,7 @@ describe('the first course', () => {
     await goTo('15Axx')
     fireEvent.click(await screen.findByRole('button', { name: 'Continue lesson 1' }))
     await goTo(window.location.hash.slice(1))
-    expect(await screen.findByText('2 of 6', {}, LOAD)).toBeTruthy()
+    expect(await screen.findByText('2 of 8', {}, LOAD)).toBeTruthy()
     // What he had typed is still there.
     expect((box('row 1, column 2') as HTMLInputElement).value).toBe('12')
   })
@@ -156,12 +156,12 @@ describe('the first course', () => {
     serve()
     localStorage.setItem(
       `rabbit-hole:progress:${course.id}`,
-      JSON.stringify({ format: 1, lessons: { 'normal-equations-from-your-points': { at: 4, done: false, started: '', steps: {} } } }),
+      JSON.stringify({ format: 1, lessons: { 'normal-equations-from-your-points': { at: 5, done: false, started: '', steps: {} } } }),
     )
     render(<App />)
     await screen.findByRole('heading', { level: 1, name: 'Mathematics' })
     await goTo(`15Axx/learn/${course.id}/normal-equations-from-your-points`)
-    await screen.findByText('5 of 6', {}, LOAD)
+    await screen.findByText('6 of 8', {}, LOAD)
     type('entry 1', '-0.5')
     type('entry 2', '1')
     type('entry 3', '-1/2')
@@ -245,7 +245,7 @@ describe('the first course', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Least squares to the pseudo-inverse/ }))
     await goTo(window.location.hash.slice(1))
     expect(window.location.hash).toBe(`#15Axx/learn/${course.id}/normal-equations-from-your-points`)
-    expect(await screen.findByText('1 of 6', {}, LOAD)).toBeTruthy()
+    expect(await screen.findByText('1 of 8', {}, LOAD)).toBeTruthy()
   })
 
   it('still shows the map when there is no course index', async () => {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { LinksContext } from './links-context.ts'
 import { Md } from './Md.tsx'
+import type { Attempt } from './progress.ts'
 import { finishLesson, goTo, openLesson, recordAttempt, revealAnswer, saveDraft, takeHint } from './progress.ts'
 import { readProgress, useProgress } from './progress-store.ts'
 import { ChatStore, chatKey, useTutorAvailable } from '../ai/chat-store.ts'
@@ -8,6 +9,8 @@ import { createClient } from '../ai/client.ts'
 import type { ChatClient } from '../ai/client.ts'
 import { aboutLine, buildContext, snapshot } from '../ai/context.ts'
 import type { AskOption } from '../tools/lesson-tools.tsx'
+import { ChoiceScreen } from './ChoiceScreen.tsx'
+import { OrderScreen } from './OrderScreen.tsx'
 import { StepScreen } from './StepScreen.tsx'
 import type { Course, Lesson, TextBlock } from './types.ts'
 import { readingNodes } from '../resources.ts'
@@ -102,7 +105,9 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
   const nodeName = reading?.layout.byId.get(course.nodeId)?.node.name
   const shownBlock = lesson?.blocks[at]
   const ask = useMemo<AskOption | undefined>(() => {
-    if (!available || !lesson || !shownBlock) return undefined
+    // The tutor's server accepts only step and text screens (server/rabbit_server.py), so a quiz or
+    // puzzle has no Ask tool rather than one that fails.
+    if (!available || !lesson || !shownBlock || shownBlock.type === 'choice' || shownBlock.type === 'order') return undefined
     // Read at the moment a message is sent, so the tutor sees the latest draft and attempts.
     const stepRecord = () => readProgress(course.id).lessons[lesson.id]?.steps[shownBlock.id]
     return {
@@ -159,7 +164,7 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
 
   let screen
   if (!block) {
-    const steps = lesson.blocks.filter((b) => b.type === 'step')
+    const steps = lesson.blocks.filter((b) => b.type !== 'text')
     screen = (
       <>
         <div className="lesson-body">
@@ -198,18 +203,23 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
   } else if (block.type === 'text') {
     screen = <TextScreen key={block.id} block={block} onNext={advance} />
   } else {
-    screen = (
-      <StepScreen
-        key={block.id}
-        block={block}
-        record={lessonRecord?.steps[block.id]}
-        onDraft={(values) => update((r) => saveDraft(r, lessonId, block.id, values, now()))}
-        onAttempt={(attempt) => update((r) => recordAttempt(r, lessonId, block.id, attempt))}
-        onHint={() => update((r) => takeHint(r, lessonId, block.id, now()))}
-        onReveal={() => update((r) => revealAnswer(r, lessonId, block.id, now()))}
-        onNext={advance}
-      />
-    )
+    // A step, a quiz question and an ordering puzzle share one record and one set of callbacks.
+    const shared = {
+      record: lessonRecord?.steps[block.id],
+      onDraft: (values: Record<string, string>) => update((r) => saveDraft(r, lessonId, block.id, values, now())),
+      onAttempt: (attempt: Attempt) => update((r) => recordAttempt(r, lessonId, block.id, attempt)),
+      onHint: () => update((r) => takeHint(r, lessonId, block.id, now())),
+      onReveal: () => update((r) => revealAnswer(r, lessonId, block.id, now())),
+      onNext: advance,
+    }
+    screen =
+      block.type === 'choice' ? (
+        <ChoiceScreen key={block.id} block={block} {...shared} />
+      ) : block.type === 'order' ? (
+        <OrderScreen key={block.id} block={block} {...shared} />
+      ) : (
+        <StepScreen key={block.id} block={block} {...shared} />
+      )
   }
 
   return (

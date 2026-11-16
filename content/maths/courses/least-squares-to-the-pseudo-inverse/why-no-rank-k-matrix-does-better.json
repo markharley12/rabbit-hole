@@ -161,6 +161,56 @@
         "$\\sigma_2$ of diag$(3, 2, 1)$."
       ],
       "solution": "$\\sigma_2 = 2$, and $A_1$ reaches it. With your easy half, that is Eckart–Young in the 2-norm: the smallest $\\|A - B\\|_2$ over rank$(B) \\le k$ is $\\sigma_{k+1}$, reached by $A_k$.",
+      "next": "Put the proof in order"
+    },
+    {
+      "type": "order",
+      "id": "order-the-proof",
+      "title": "The proof, in order",
+      "why": "Seen as one chain, each line is there because the next one needs it.",
+      "prompt": "The hard half of Eckart–Young: no matrix $B$ of rank at most $k$ gets closer to $A$ than $\\sigma_{k+1}$ in the 2-norm. Put the proof in order. Each line uses what the lines above it gave. The first and last are given.",
+      "items": [
+        {
+          "id": "take-b",
+          "text": "Take any matrix $B$ with rank at most $k$."
+        },
+        {
+          "id": "null-space",
+          "text": "Rank–nullity: the null space of $B$ has dimension at least $n - k$."
+        },
+        {
+          "id": "add-dimensions",
+          "text": "Add the dimension of span$(v_1, \\ldots, v_{k+1})$, which is $k + 1$, to that: at least $n + 1$, more than $n$."
+        },
+        {
+          "id": "witness",
+          "text": "So the two subspaces share a non-zero vector. Scale it to a unit $w$ with $Bw = 0$ and $w$ in the span."
+        },
+        {
+          "id": "b-drops-out",
+          "text": "Because $Bw = 0$, $(A - B)w = Aw$, so $\\|A - B\\|_2 \\ge \\|Aw\\|$."
+        },
+        {
+          "id": "aw-is-big",
+          "text": "That leaves $\\|Aw\\|$: for a unit $w$ in the span, $\\|Aw\\|^2 = \\sum_i \\sigma_i^2 (v_i \\cdot w)^2 \\ge \\sigma_{k+1}^2$."
+        },
+        {
+          "id": "conclusion",
+          "text": "Together: $\\|A - B\\|_2 \\ge \\|Aw\\| \\ge \\sigma_{k+1}$, for every such $B$."
+        }
+      ],
+      "fixed": [
+        "take-b",
+        "conclusion"
+      ],
+      "say": {
+        "add-dimensions": "This line adds a dimension to one already found. Is that one above it?",
+        "witness": "A shared vector needs two dimensions already counted. Are both above this line?",
+        "b-drops-out": "This uses the vector $w$. Is the line that makes $w$ above it?",
+        "aw-is-big": "This bounds $\\|Aw\\|$ after the line that says why $\\|Aw\\|$ is the thing to bound. Is that line above it?"
+      },
+      "hint": "Ask of each line: what must I already know to say this? The line that needs nothing new comes first.",
+      "solution": "A big null space (rank–nullity), a shared vector $w$, then $\\|A - B\\|_2 \\ge \\|Aw\\| \\ge \\sigma_{k+1}$. With your easy half, that is the theorem.",
       "next": "Finish the course"
     }
   ]

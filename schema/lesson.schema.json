@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "rabbit-hole/schema/lesson.schema.json",
   "title": "Lesson",
-  "description": "One lesson: a list of screens, shown one at a time. Most screens are steps (one task each); a text screen is for the rare thing that is only read. Checked by tools/validate_courses.py, which also re-verifies every answer key with sympy. Types in src/lesson/types.ts mirror this file.",
+  "description": "One lesson: a list of screens, shown one at a time. Most screens are steps (one task each); a choice (one question, pick the right option) or an order (put the lines in order) tests what a typed number cannot; a text screen is for the rare thing that is only read. A lesson needs at least one step, and at most half its screens may be choice or order (the validator checks both). Checked by tools/validate_courses.py, which also re-verifies every answer key with sympy. Types in src/lesson/types.ts mirror this file.",
   "type": "object",
   "additionalProperties": false,
   "required": ["format", "id", "title", "blocks"],
@@ -25,10 +25,12 @@
         "description": "Dispatched on type (not oneOf), so a mistake is reported against the right kind of block.",
         "type": "object",
         "required": ["type"],
-        "properties": { "type": { "enum": ["step", "text"] } },
+        "properties": { "type": { "enum": ["step", "text", "choice", "order"] } },
         "allOf": [
           { "if": { "properties": { "type": { "const": "step" } } }, "then": { "$ref": "#/$defs/step" } },
-          { "if": { "properties": { "type": { "const": "text" } } }, "then": { "$ref": "#/$defs/text" } }
+          { "if": { "properties": { "type": { "const": "text" } } }, "then": { "$ref": "#/$defs/text" } },
+          { "if": { "properties": { "type": { "const": "choice" } } }, "then": { "$ref": "#/$defs/choice" } },
+          { "if": { "properties": { "type": { "const": "order" } } }, "then": { "$ref": "#/$defs/order" } }
         ]
       }
     },
@@ -186,6 +188,82 @@
           "description": "True when the step is worth coming back to after days, weeks, months (spaced review). Mark a step only when its prompt can be answered from its own screen, without a result from an earlier one: it is shown on its own, with a fresh record. 1 to 3 per lesson.",
           "type": "boolean"
         }
+      }
+    },
+    "choice": {
+      "description": "A quiz question: pick the right option (or options). Use it where a typed number cannot test the idea: which statement is true, why a step is valid. Every option carries a `say`, because an option without a reason teaches nothing: for a wrong one, the misconception it catches, named precisely. The answer is never shown unasked.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "prompt", "options", "next"],
+      "properties": {
+        "type": { "const": "choice" },
+        "id": { "$ref": "#/$defs/slug" },
+        "title": { "type": "string", "maxLength": 50 },
+        "why": { "description": "One or two sentences: why this question is worth asking.", "$ref": "#/$defs/markdown" },
+        "prompt": { "description": "The question. Self-contained if the block is marked for review.", "$ref": "#/$defs/markdown" },
+        "widget": { "$ref": "#/$defs/widget" },
+        "options": {
+          "description": "Two to five. Shown shuffled unless `shuffle` is false. Texts must differ.",
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "text", "correct", "say"],
+            "properties": {
+              "id": { "$ref": "#/$defs/slug" },
+              "text": { "$ref": "#/$defs/markdown" },
+              "correct": { "type": "boolean" },
+              "say": { "description": "Why this option is right, or the specific misconception it catches. Shown when it is picked wrongly, and for every option once the question is done.", "$ref": "#/$defs/markdown" }
+            }
+          }
+        },
+        "multiple": { "description": "True: tick every right option (at least one is right). False or absent: exactly one is right.", "type": "boolean" },
+        "shuffle": { "description": "Default true. False when the order carries meaning.", "type": "boolean" },
+        "hint": { "description": "One nudge, shown on request.", "$ref": "#/$defs/markdown" },
+        "solution": { "description": "Shown once the question is done: what it means.", "$ref": "#/$defs/markdown" },
+        "next": { "description": "The one next action, as the button says it.", "type": "string", "minLength": 3, "maxLength": 50 },
+        "review": { "description": "True when worth coming back to in spaced review. The prompt and options must make sense alone, on a fresh screen.", "type": "boolean" }
+      }
+    },
+    "order": {
+      "description": "A puzzle: put the lines in order (the steps of a derivation, a proof, an algorithm). Items are written in the CORRECT order and shown shuffled. There must be exactly one valid order: choose lines that each depend on an earlier one, never lines that could swap.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "prompt", "items", "next"],
+      "properties": {
+        "type": { "const": "order" },
+        "id": { "$ref": "#/$defs/slug" },
+        "title": { "type": "string", "maxLength": 50 },
+        "why": { "description": "One or two sentences: why this ordering is worth doing.", "$ref": "#/$defs/markdown" },
+        "prompt": { "description": "What is being ordered. Self-contained if the block is marked for review.", "$ref": "#/$defs/markdown" },
+        "items": {
+          "description": "Three to seven lines, listed in the correct order. Texts must differ.",
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 7,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "text"],
+            "properties": {
+              "id": { "$ref": "#/$defs/slug" },
+              "text": { "$ref": "#/$defs/markdown" }
+            }
+          }
+        },
+        "fixed": { "description": "Ids of lines shown already in place (the first or last line, given). At least three lines stay movable.", "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/slug" } },
+        "say": {
+          "description": "Optional nudge per line, said when that line is the first one out of place. Keys are item ids.",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/slug" },
+          "additionalProperties": { "$ref": "#/$defs/markdown" }
+        },
+        "hint": { "description": "One nudge, shown on request.", "$ref": "#/$defs/markdown" },
+        "solution": { "description": "Shown once the puzzle is done.", "$ref": "#/$defs/markdown" },
+        "next": { "description": "The one next action, as the button says it.", "type": "string", "minLength": 3, "maxLength": 50 },
+        "review": { "description": "True when worth coming back to in spaced review. The prompt must make sense alone.", "type": "boolean" }
       }
     },
     "text": {

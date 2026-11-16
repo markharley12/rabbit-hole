@@ -6,6 +6,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { check } from './check.ts'
+import { gradeChoice } from './choice.ts'
+import { correctOrder, gradeOrder, initialOrder } from './order.ts'
 import { plainLabel, renderMarkdown } from './markdown.ts'
 import type { Block, CheatSheet, Course, Lesson, WidgetRef } from './types.ts'
 import { registry } from '../widgets/registry.ts'
@@ -25,6 +27,24 @@ function markdownOf(block: Block): string[] {
   if (block.type === 'text') {
     texts.push(block.body)
     widget(block.widget)
+    return texts
+  }
+  if (block.type === 'choice') {
+    if (block.why) texts.push(block.why)
+    texts.push(block.prompt)
+    block.options.forEach((o) => texts.push(o.text, o.say))
+    if (block.hint) texts.push(block.hint)
+    if (block.solution) texts.push(block.solution)
+    widget(block.widget)
+    return texts
+  }
+  if (block.type === 'order') {
+    if (block.why) texts.push(block.why)
+    texts.push(block.prompt)
+    block.items.forEach((i) => texts.push(i.text))
+    Object.values(block.say ?? {}).forEach((say) => texts.push(say))
+    if (block.hint) texts.push(block.hint)
+    if (block.solution) texts.push(block.solution)
     return texts
   }
   texts.push(block.why, block.prompt, ...block.hints)
@@ -59,6 +79,20 @@ describe.each(courses)('course $course.id', ({ course, lessons, sheet }) => {
     },
   )
 
+  const quizzes = lessons.flatMap((lesson) => lesson.blocks.filter((b) => b.type === 'choice' || b.type === 'order').map((block) => ({ lesson: lesson.id, block })))
+
+  it.each(quizzes)('$lesson / $block.id: the app grades its own key right, and an order does not open solved', ({ block }) => {
+    if (block.type === 'choice') {
+      const right = block.options.filter((o) => o.correct).map((o) => o.id)
+      expect(gradeChoice(block, right)).toEqual({ status: 'correct' })
+      expect(gradeChoice(block, block.options.filter((o) => !o.correct).map((o) => o.id)).status).toBe('wrong')
+    }
+    if (block.type === 'order') {
+      expect(gradeOrder(block, correctOrder(block))).toEqual({ status: 'correct' })
+      for (const seed of ['a', 'b', 'c', 'd']) expect(gradeOrder(block, initialOrder(block, seed)).status).toBe('wrong')
+    }
+  })
+
   it('typesets every piece of maths without a KaTeX error', () => {
     for (const lesson of lessons) {
       const texts = [...lesson.blocks.flatMap(markdownOf), ...(lesson.sideQuest ? [lesson.sideQuest.body] : [])]
@@ -82,7 +116,8 @@ describe.each(courses)('course $course.id', ({ course, lessons, sheet }) => {
   it('names only widgets the app has', () => {
     for (const lesson of lessons) {
       for (const block of lesson.blocks) {
-        const widgets = [block.widget, block.type === 'step' ? block.check?.widget : undefined].filter(Boolean) as WidgetRef[]
+        const own = block.type === 'order' ? undefined : block.widget
+        const widgets = [own, block.type === 'step' ? block.check?.widget : undefined].filter(Boolean) as WidgetRef[]
         for (const widget of widgets) expect(Object.keys(registry), `${lesson.id}/${block.id}`).toContain(widget.name)
       }
     }

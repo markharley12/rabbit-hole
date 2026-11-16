@@ -233,3 +233,10 @@ Filled in as stages land (date, commit, what was not checked).
   was not controlling the page on localhost; only the unit test covers it); offline; dark/light (dark only);
   on the phone itself; a build lasting the real tens of minutes; Stop and failure screens in the browser
   (tests only); whether WebFetch could reach a private address through a public DNS name.
+
+- **Quiz and puzzle screens** (16 Nov 2026). Blocks `choice` and `order` (schema, validator rules and tests,
+  `ChoiceScreen`, `OrderScreen`, pure `choice.ts`, `order.ts`, `seed.ts`), review support, 5 added to the first
+  course and 4 to the PCA course, PCA steps marked for review. Looked at in the built-in browser at 375x812 where
+  noted in the report. Not checked: on the phone itself; drag to reorder (not built: buttons only); the Ask tool is
+  hidden on these screens because `server/rabbit_server.py` rejects block types other than step and text;
+  whether the puzzles have exactly one valid order beyond the author's reading; read by Mark.

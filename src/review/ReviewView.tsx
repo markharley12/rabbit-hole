@@ -2,8 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { LinksContext } from '../lesson/links-context.ts'
 import { Md } from '../lesson/Md.tsx'
 import type { Attempt, StepRecord } from '../lesson/progress.ts'
+import { ChoiceScreen } from '../lesson/ChoiceScreen.tsx'
+import { OrderScreen } from '../lesson/OrderScreen.tsx'
 import { StepScreen } from '../lesson/StepScreen.tsx'
-import type { Course, Lesson, StepBlock } from '../lesson/types.ts'
+import type { ChoiceBlock, Course, Lesson, OrderBlock, StepBlock } from '../lesson/types.ts'
 import { gradeItem } from './review-record.ts'
 import { writeReview } from './review-store.ts'
 import type { ReviewItem } from './queue.ts'
@@ -45,9 +47,20 @@ const CloseIcon = () => (
   </svg>
 )
 
-/** A step: the lesson's own screen, answered from a clean record, graded when its button is pressed. */
+/** What a marked block can be: the three screens that keep a record and have a right answer. */
+type Question = StepBlock | ChoiceBlock | OrderBlock
+
+const isQuestion = (block: Lesson['blocks'][number] | undefined): block is Question =>
+  block?.type === 'step' || block?.type === 'choice' || block?.type === 'order'
+
+/**
+ * A marked step, quiz question or ordering puzzle: the lesson's own screen, answered from a clean
+ * record, graded when its button is pressed (right first try with no hint is good, right after a
+ * wrong try or the hint is hard, shown is again). A quiz or puzzle opens with a fresh shuffle each
+ * time, because the screen draws a new seed when the record has no draft.
+ */
 function StepItem({ item, base, cache, onDone }: { item: ReviewItem & { kind: 'step' }; base: string; cache: LessonCache; onDone: (grade?: Grade) => void }) {
-  const [loaded, setLoaded] = useState<{ state: 'loading' } | { state: 'failed' } | { state: 'ready'; block: StepBlock }>({ state: 'loading' })
+  const [loaded, setLoaded] = useState<{ state: 'loading' } | { state: 'failed' } | { state: 'ready'; block: Question }>({ state: 'loading' })
   const [record, setRecord] = useState<StepRecord>(freshStep)
   const links = useMemo(() => ({ nodeId: item.course.nodeId, courseId: item.course.id }), [item.course.nodeId, item.course.id])
   const title = item.course.lessons.find((l) => l.id === item.lessonId)?.title ?? item.lessonId
@@ -58,7 +71,7 @@ function StepItem({ item, base, cache, onDone }: { item: ReviewItem & { kind: 's
       .then((lesson) => {
         const block = lesson.blocks.find((b) => b.id === item.stepId)
         if (!live) return
-        setLoaded(block && block.type === 'step' ? { state: 'ready', block } : { state: 'failed' })
+        setLoaded(isQuestion(block) ? { state: 'ready', block } : { state: 'failed' })
       })
       .catch(() => live && setLoaded({ state: 'failed' }))
     return () => {
@@ -85,20 +98,26 @@ function StepItem({ item, base, cache, onDone }: { item: ReviewItem & { kind: 's
   }
 
   const wrong = record.log.filter((a) => a.result === 'wrong').length
+  const shared = {
+    record,
+    onDraft: () => {},
+    onAttempt: (attempt: Attempt) =>
+      setRecord((r) => ({ ...r, attempts: r.attempts + 1, solved: r.solved || attempt.result === 'correct', log: [...r.log, attempt] })),
+    onHint: () => setRecord((r) => ({ ...r, hints: Math.min(3, r.hints + 1) })),
+    onReveal: () => setRecord((r) => ({ ...r, revealed: true })),
+    onNext: () => onDone(gradeStep({ solved: record.solved, revealed: !!record.revealed, hints: record.hints, wrong })),
+  }
+  const { block } = loaded
   return (
     <LinksContext.Provider value={links}>
       <p className="review-from">From {title}</p>
-      <StepScreen
-        block={loaded.block}
-        record={record}
-        onDraft={() => {}}
-        onAttempt={(attempt: Attempt) =>
-          setRecord((r) => ({ ...r, attempts: r.attempts + 1, solved: r.solved || attempt.result === 'correct', log: [...r.log, attempt] }))
-        }
-        onHint={() => setRecord((r) => ({ ...r, hints: Math.min(3, r.hints + 1) }))}
-        onReveal={() => setRecord((r) => ({ ...r, revealed: true }))}
-        onNext={() => onDone(gradeStep({ solved: record.solved, revealed: !!record.revealed, hints: record.hints, wrong }))}
-      />
+      {block.type === 'choice' ? (
+        <ChoiceScreen block={block} {...shared} />
+      ) : block.type === 'order' ? (
+        <OrderScreen block={block} {...shared} />
+      ) : (
+        <StepScreen block={block} {...shared} />
+      )}
     </LinksContext.Provider>
   )
 }

@@ -118,6 +118,42 @@
         "Now multiply by $1/\\sigma_1 = 1/\\sqrt{15}$, and note $\\sqrt5\\,\\sqrt3 = \\sqrt{15}$."
       ],
       "check": { "say": "Row 2 should be twice row 1. And $A A^+ A$ gives back $A$: try its top-left entry." },
+      "next": "Pick out Σ⁺"
+    },
+    {
+      "type": "choice",
+      "id": "which-sigma-plus",
+      "title": "Inverting the singular values",
+      "why": "The one rule inside $A^+$ is what $\\Sigma^+$ does to each singular value. Pick it out from the near misses.",
+      "prompt": "For this $A$, $\\sigma_1 = \\sqrt{15}$ and $\\sigma_2 = 0$. Which are the diagonal entries of $\\Sigma^+$, in that order?",
+      "options": [
+        {
+          "id": "invert-nonzero",
+          "text": "$\\dfrac{1}{\\sqrt{15}}$ and $0$",
+          "correct": true,
+          "say": "Undo the stretch where there is one ($1/\\sigma_1$), and send the direction $A$ cannot see to $0$. It is the rule behind your $A^+ = \\frac{1}{\\sigma_1}\\,v_1 u_1^\\mathsf{T}$."
+        },
+        {
+          "id": "one-over-zero",
+          "text": "$\\dfrac{1}{\\sqrt{15}}$ and $\\dfrac{1}{0}$",
+          "correct": false,
+          "say": "$1/0$ is not a number. A zero singular value means $A$ flattens that direction, so there is nothing to undo. $\\Sigma^+$ puts $0$ there, not infinity."
+        },
+        {
+          "id": "not-inverted",
+          "text": "$\\sqrt{15}$ and $0$",
+          "correct": false,
+          "say": "That is $\\Sigma$ again: the stretch is not undone. $A^+$ must reverse the stretch, so each non-zero $\\sigma$ becomes $1/\\sigma$."
+        },
+        {
+          "id": "inverted-lambda",
+          "text": "$\\dfrac{1}{15}$ and $0$",
+          "correct": false,
+          "say": "15 is $\\lambda_1 = \\sigma_1^2$, the eigenvalue of $A^\\mathsf{T}A$. The stretch is $\\sigma_1 = \\sqrt{15}$, so it is $1/\\sqrt{15}$ that undoes it."
+        }
+      ],
+      "hint": "$\\Sigma^+$ undoes the stretch. Which number undoes a stretch by $\\sigma$, and what can you not do when $\\sigma = 0$?",
+      "solution": "$1/\\sigma$ where $\\sigma \\ne 0$, and $0$ where $\\sigma = 0$: the rule that makes $A^+b$ the smallest best fit.",
       "next": "Apply A⁺ to b"
     },
     {
