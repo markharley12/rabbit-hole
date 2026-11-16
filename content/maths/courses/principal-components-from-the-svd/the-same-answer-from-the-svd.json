@@ -10,6 +10,7 @@
     {
       "type": "step",
       "id": "singular-values-of-x",
+      "review": true,
       "title": "The singular values of X",
       "define": [
         { "term": "SVD of X", "meaning": "$X = U\\Sigma V^\\mathsf{T}$, as you know it: the $\\sigma_i^2$ are the eigenvalues of $X^\\mathsf{T}X$, and the columns $v_i$ of $V$ (the right singular vectors) are its unit eigenvectors." }
@@ -149,6 +150,45 @@
       ],
       "check": { "say": "$u_1$ is a unit vector: the squares of its entries add to 1." },
       "solution": "So PCA is the SVD of the centred data: $V$ gives the principal directions, $\\sigma_i^2/(n - 1)$ the variances, and $U\\Sigma$ the scores. Software does it this way, without ever forming $C$.",
+      "next": "Put the steps in order"
+    },
+    {
+      "type": "order",
+      "id": "from-the-data-to-the-scores",
+      "title": "PCA, step by step",
+      "why": "Software does it in this order, without ever forming $C$.",
+      "prompt": "Principal component analysis (PCA) by the SVD, from the raw points to one number per point. Put the steps in order. Each uses what the one above it gave.",
+      "items": [
+        {
+          "id": "mean",
+          "text": "Find the mean of the points."
+        },
+        {
+          "id": "centre",
+          "text": "Subtract the mean from every point: this gives the centred matrix $X$."
+        },
+        {
+          "id": "svd",
+          "text": "Take the SVD of $X$: $X = U\\Sigma V^\\mathsf{T}$."
+        },
+        {
+          "id": "direction",
+          "text": "The first column of $V$ is the first principal direction, $v_1$."
+        },
+        {
+          "id": "scores",
+          "text": "The scores are $Xv_1$: one number per point."
+        }
+      ],
+      "say": {
+        "centre": "This needs the mean. Is the line that finds it above?",
+        "svd": "This needs a matrix to take the SVD of. Is it above?",
+        "direction": "This reads $V$ off the SVD. Is the line that produces the SVD above?",
+        "scores": "This needs $v_1$. Is the line that gives it above?"
+      },
+      "hint": "Ask of each line: what must I already have to do this? The line that needs nothing comes first.",
+      "solution": "Centre, take the SVD, read off $V$, then project. The scores $Xv_1$ equal $\\sigma_1 u_1$, the first column of $U\\Sigma$.",
+      "review": true,
       "next": "Finish the lesson"
     }
   ],

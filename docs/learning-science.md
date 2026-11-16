@@ -70,6 +70,21 @@ worked fragment) and the answer only after the hints.
   associated with early skill development, and learners can be prompted to self-explain them.
   This supports worked examples; the specific three-hint ladder is the project's own design.
 
+## Quiz and puzzle screens
+
+**In the app:** a `choice` question and an `order` puzzle (course-authoring.md section 12) are answered on
+the spot, and every option carries its own reason, so a wrong pick is told why that option is wrong. They
+come back in review like steps. They exist because a typed number cannot test which statement is true, why
+a step is valid, or the order of a proof.
+
+- Roediger and Karpicke (2006) and Dunlosky et al. (2013), above: answering a question is itself a way to
+  learn (practice testing), which is why these are scored questions and not text to read.
+- Hattie and Timperley (2007), above: the kind of feedback matters, which is why each option has a specific
+  `say` and an order puzzle marks one line only, not the whole answer.
+- Not shown by any source opened here: that choosing or ordering teaches better than typing an answer. The
+  reason for the formats is what they can test, a design choice. The thresholds for "Show the answer" (two
+  wrong tries for a question, three for a puzzle) are comfort choices.
+
 ## What is not evidence-based in the design
 
 - **The ladder numbers (1, 3, 7, 16, 35, 90) are a convention, not an optimum.** The evidence

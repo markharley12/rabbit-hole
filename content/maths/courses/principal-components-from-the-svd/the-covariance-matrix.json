@@ -11,6 +11,7 @@
     {
       "type": "step",
       "id": "build-xtx",
+      "review": true,
       "title": "XᵀX",
       "define": [
         { "term": "XᵀX", "meaning": "For the $5 \\times 2$ matrix $X$, a $2 \\times 2$ matrix: row $i$, column $j$ is (column $i$ of $X$) · (column $j$ of $X$). The same bookkeeping as $A^\\mathsf{T}A$ in least squares." }

@@ -10,6 +10,7 @@
     {
       "type": "step",
       "id": "eigenvalues-of-c",
+      "review": true,
       "title": "The eigenvalues of C",
       "define": [
         { "term": "eigenvector, eigenvalue", "meaning": "A non-zero $v$ with $Cv = \\lambda v$: $C$ only stretches it, by the eigenvalue $\\lambda$." }
@@ -67,6 +68,7 @@
     {
       "type": "step",
       "id": "why-v1-is-best",
+      "review": true,
       "title": "Why nothing beats v₁",
       "define": [
         { "term": "v₂", "meaning": "The unit eigenvector for $\\lambda_2 = 3$. For a symmetric matrix, eigenvectors with different eigenvalues are perpendicular, so $v_1, v_2$ is a pair of perpendicular unit axes." }

@@ -141,9 +141,10 @@ class Content(unittest.TestCase):
 
     def test_a_key_right_only_up_to_sign_needs_accept_negated(self):
         def flip(d):
-            d["blocks"][4]["answer"].pop("accept")
-            d["blocks"][4]["answer"].pop("acceptNote")
-            for f in d["blocks"][4]["answer"]["fields"]:
+            answer = next(b for b in d["blocks"] if b["id"] == "best-fit-residual")["answer"]
+            answer.pop("accept")
+            answer.pop("acceptNote")
+            for f in answer["fields"]:
                 f["key"] = f"-({f['key']})"
 
         self.edit("normal-equations-from-your-points", flip)
@@ -203,7 +204,7 @@ class Content(unittest.TestCase):
     def test_a_known_slip_that_is_the_right_answer(self):
         self.edit(
             "normal-equations-from-your-points",
-            lambda d: d["blocks"][3]["answer"]["slips"][0].update(when={"m": "2.5"}),
+            lambda d: next(b for b in d["blocks"] if b["id"] == "solve-normal-equations")["answer"]["slips"][0].update(when={"m": "2.5"}),
         )
         self.assertFails("slip 0 lists a right answer for m")
 

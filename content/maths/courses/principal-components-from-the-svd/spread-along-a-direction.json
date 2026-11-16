@@ -23,6 +23,7 @@
     {
       "type": "step",
       "id": "the-mean",
+      "review": true,
       "title": "The mean",
       "define": [
         { "term": "mean", "meaning": "The average point: the average of the $x$-coordinates and the average of the $y$-coordinates. Write it $\\bar x$." }
@@ -135,6 +136,38 @@
         "widget": { "name": "pca-scatter", "params": { "points": [[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]], "start": 0 } }
       },
       "solution": "The points spread more across ($x$) than up ($y$). But the cloud leans, so a tilted line might do better.",
+      "next": "Test the centring"
+    },
+    {
+      "type": "choice",
+      "id": "without-centring",
+      "title": "What skipping the centring does",
+      "why": "Centring is easy to skip and hard to notice. This is what it costs.",
+      "prompt": "You skip the centring and put the raw points $(0, 2)$, $(3, 0)$, $(5, 0)$, $(5, 4)$, $(7, 4)$ into the same formula, $\\frac{1}{n-1}\\sum_i (p_i \\cdot u)^2$. Which of these change? Tick every one.",
+      "multiple": true,
+      "options": [
+        {
+          "id": "along-x",
+          "text": "The \"variance\" along $(1, 0)$",
+          "correct": true,
+          "say": "The raw $x$-coordinates are $0, 3, 5, 5, 7$. Their squares add to 108, and $108/4 = 27$, not the 7 you get with centred points. The sum now measures distance from the origin, not from the mean."
+        },
+        {
+          "id": "along-y",
+          "text": "The \"variance\" along $(0, 1)$",
+          "correct": true,
+          "say": "The raw $y$-coordinates are $2, 0, 0, 4, 4$. Their squares add to 36, and $36/4 = 9$, not 4."
+        },
+        {
+          "id": "distances",
+          "text": "The distance between any two of the points",
+          "correct": false,
+          "say": "Centring takes the same mean off every point. That slides the whole cloud without changing any distance inside it: $(3, 0)$ and $(5, 0)$ are 2 apart before and after. Only where the origin sits against the cloud changes."
+        }
+      ],
+      "hint": "Add up the squares of the raw $x$-coordinates and divide by $n - 1 = 4$. Is it still the spread of the cloud?",
+      "solution": "Without centring the formula measures spread around the origin, so how far the whole cloud sits from the origin is counted as spread. That is why the mean comes first.",
+      "review": true,
       "next": "Try the diagonal"
     },
     {
@@ -191,6 +224,72 @@
       ],
       "check": { "say": "The picture should read about 8.00 near 27°." },
       "solution": "8 beats 7, 4 and 7.5. Turn the line in the picture: nothing gets past 8. The next two lessons show why, and what this direction is.",
+      "next": "Say why the tilt wins"
+    },
+    {
+      "type": "choice",
+      "id": "why-a-tilt-wins",
+      "title": "Why a tilted line wins",
+      "why": "You have scored four directions. This asks what the scores say.",
+      "prompt": "The variances so far: $x$-axis 7, $y$-axis 4, the diagonal ($45°$) 7.5, and the $27°$ line 8. Why does a tilted line beat the $x$-axis?",
+      "widget": {
+        "name": "pca-scatter",
+        "params": {
+          "points": [
+            [
+              0,
+              2
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              7,
+              4
+            ]
+          ],
+          "centre": true,
+          "start": 27
+        },
+        "caption": "Turn the line: the dashes drop each point onto it."
+      },
+      "options": [
+        {
+          "id": "the-lean",
+          "text": "The cloud leans up to the right, so a line along the lean has more of the spread along it.",
+          "correct": true,
+          "say": "The points sit up-right and down-left of the middle, and a line along that lean catches more of that spread than the $x$-axis does."
+        },
+        {
+          "id": "longer-vector",
+          "text": "$(1, 1)$ is a longer vector than $(1, 0)$, so its sums come out bigger.",
+          "correct": false,
+          "say": "Only if you forget to make it a unit vector. $(1, 1)$ has length $\\sqrt2$, which would double the variance to 15. Dividing by $\\sqrt2$ makes the comparison fair, and 7.5 is what is left."
+        },
+        {
+          "id": "more-points",
+          "text": "A line that passes through more of the points has more variance.",
+          "correct": false,
+          "say": "Variance is not about how many points the line passes through. The dashes drop every point onto the line, and what counts is how far apart those feet are along it."
+        },
+        {
+          "id": "more-tilt",
+          "text": "Any tilt beats the axes, and more tilt is better.",
+          "correct": false,
+          "say": "The scores say otherwise: $45°$ gave 7.5 and $27°$ gave 8, so more tilt was worse. The best tilt lies between."
+        }
+      ],
+      "hint": "Turn the line in the picture. Where are the feet of the dashes most spread out along it?",
+      "solution": "A tilt wins when it follows the lean, and a fair comparison needs a unit vector. The next two lessons find the best tilt exactly.",
       "next": "Finish the lesson"
     }
   ],

@@ -87,6 +87,42 @@
       "check": {
         "say": "Addition slips are the easiest ones to make here. Add the products one at a time in the calculator."
       },
+      "next": "Test what AᵀA can be"
+    },
+    {
+      "type": "choice",
+      "id": "which-could-be-ata",
+      "title": "Which could be AᵀA?",
+      "why": "$A^\\mathsf{T}A$ is made of dot products of columns. That rules some matrices out at a glance, and it is a free check on your own $A^\\mathsf{T}A$.",
+      "prompt": "$A$ is a $3 \\times 2$ matrix: three points, two unknowns. Which of these could be $A^\\mathsf{T}A$ for some such $A$?",
+      "options": [
+        {
+          "id": "symmetric",
+          "text": "$\\begin{bmatrix}5&2\\\\2&1\\end{bmatrix}$",
+          "correct": true,
+          "say": "Yes. Columns $(2, 1, 0)$ and $(1, 0, 0)$ give the dot products 5, 2, 2 and 1."
+        },
+        {
+          "id": "unequal",
+          "text": "$\\begin{bmatrix}3&6\\\\1&14\\end{bmatrix}$",
+          "correct": false,
+          "say": "Not symmetric. Row 1, column 2 is (column 1) · (column 2) and row 2, column 1 is (column 2) · (column 1): the same dot product, so the two entries must match. Here they are 6 and 1."
+        },
+        {
+          "id": "negative",
+          "text": "$\\begin{bmatrix}3&6\\\\6&-14\\end{bmatrix}$",
+          "correct": false,
+          "say": "Symmetric, but the bottom-right entry is (column 2) · (column 2), a sum of squares. A sum of squares cannot be negative."
+        },
+        {
+          "id": "wrong-size",
+          "text": "$\\begin{bmatrix}2&1&1\\\\1&2&1\\\\1&1&2\\end{bmatrix}$",
+          "correct": false,
+          "say": "Symmetric, with a positive diagonal, but the wrong size. $A^\\mathsf{T}A$ has one row and one column per column of $A$: $2 \\times 2$ here, not $3 \\times 3$."
+        }
+      ],
+      "hint": "Each entry of $A^\\mathsf{T}A$ is a dot product of two columns. How many columns does $A$ have, and what must match across the diagonal?",
+      "solution": "Two quick checks for any $A^\\mathsf{T}A$ you build: it equals its own transpose, and no diagonal entry is negative.",
       "next": "Solve for c and m"
     },
     {
@@ -142,6 +178,42 @@
       "check": {
         "say": "Dot $r$ with each column of $A$. At the best fit both come to 0: that is the condition you started from."
       },
+      "next": "Say what r is perpendicular to"
+    },
+    {
+      "type": "choice",
+      "id": "residual-is-perpendicular-to",
+      "title": "What r is perpendicular to",
+      "why": "The normal equations come from one property of the best fit. Pick it out from the near misses.",
+      "prompt": "At the best fit $c = -2$, $m = 2.5$ the residual is $r = (\\tfrac12, -1, \\tfrac12)$. Which of these is $r$ perpendicular to?",
+      "options": [
+        {
+          "id": "both-columns",
+          "text": "Both columns of $A$: $(1, 1, 1)$ and $(1, 2, 3)$",
+          "correct": true,
+          "say": "$r \\cdot (1, 1, 1) = \\tfrac12 - 1 + \\tfrac12 = 0$ and $r \\cdot (1, 2, 3) = \\tfrac12 - 2 + \\tfrac32 = 0$. This is the property the normal equations are written from."
+        },
+        {
+          "id": "data",
+          "text": "The data vector $b = (1, 2, 6)$",
+          "correct": false,
+          "say": "$r \\cdot b = \\tfrac12 - 2 + 3 = \\tfrac32$, not 0. The residual is what is left of $b$ after the fit, so it is not perpendicular to $b$. It is perpendicular to the columns the fit is built from."
+        },
+        {
+          "id": "first-only",
+          "text": "Only the first column, $(1, 1, 1)$, and not the second",
+          "correct": false,
+          "say": "$r \\cdot (1, 1, 1) = 0$, but $r \\cdot (1, 2, 3)$ is $0$ as well. The best fit makes $r$ perpendicular to every column. That is why there are two normal equations, one per column."
+        },
+        {
+          "id": "coefficients",
+          "text": "The coefficients $x = (-2, 2.5)$",
+          "correct": false,
+          "say": "$r$ has three entries (one per point) and $x$ has two (one per unknown). They live in different spaces, so there is no dot product to be zero."
+        }
+      ],
+      "hint": "Take the dot product of $r$ with each candidate. Which come out as exactly 0?",
+      "solution": "Perpendicular to every column of $A$ is $A^\\mathsf{T}r = 0$, which is $A^\\mathsf{T}A\\,x = A^\\mathsf{T}b$: the normal equations you solved.",
       "next": "Compare with your guesses"
     },
     {

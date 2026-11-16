@@ -19,7 +19,9 @@ marking, no Capacitor yet. What is where:
   pure, tested geometry; `MapView.tsx` only draws. `src/components/`: top bar and sheet.
 - **Course format.** `schema/` (course, lesson, widget catalogue). A lesson is screens; the
   main one is a `step` (define, why, prompt, answer, three hints, check-it-yourself, one
-  `next`). Types in `src/lesson/types.ts`.
+  `next`); also `choice` (quiz question, every option has a `say`) and `order` (puzzle, items listed in
+  correct order), at most half a lesson, never without a step (authoring doc section 12). Types in
+  `src/lesson/types.ts`.
 - **Content** lives in `content/maths/courses/<course-id>/` (source, in git; the folder name is
   the course's `id`, and several courses may share a `nodeId`).
   `tools/validate_courses.py` checks it (schema, widgets, links, hints, and every answer key

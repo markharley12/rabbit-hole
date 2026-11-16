@@ -52,6 +52,12 @@ Never edit `map.json`.
 Three to eight lessons per course; four to ten screens per lesson (the schema allows twelve).
 A lesson has one idea and ends on something the learner worked out himself.
 
+Three kinds of screen: the **step** below (one task, a typed answer), a **text** screen, and the
+two quiz screens, **choice** (pick the right option) and **order** (put the lines in order),
+for what a typed number cannot test (section 12). Quizzes support the worked problems and never
+replace them: a lesson has at least one step, and at most half its screens are choice or order.
+Aim for 0 to 2 a lesson.
+
 The main screen is a **step**: one task. In order it gives:
 
 | Part | Rule |
@@ -209,6 +215,88 @@ app's cheat-sheet formulas come back too, as recall cards, with no work from you
 - Nothing else changes: the schema allows `review` on steps only, and `--publish` lists the marked
   steps in the course's entry in `index.json` (`review: [{lesson, step}]`), not in `course.json`.
 
-## 12. Parts that arrive with later stages
+## 12. Quiz and puzzle screens
+
+A **choice** is one question with two to five options; an **order** is three to seven lines to put
+in sequence. Both keep the step's record (attempts, hint, shown), are checked on the phone with no
+model, and can be marked `"review": true` (section 11).
+
+**Use one when a typed number cannot test the idea:**
+
+- which statement is true, or which object could exist ("which of these could be $A^\mathsf{T}A$?");
+- why a step is valid ("what is $r$ perpendicular to?"), with the wrong reasons as the options;
+- what stays the same and what changes (tick every one);
+- the order of a proof, a derivation or an algorithm.
+
+**Do not use one** when a number would do (make it a step, which also checks the arithmetic he slips
+on); for a definition to be recalled with no reasoning; to pad a lesson; or for a question whose
+wrong options are silly. A wrong option nobody could believe teaches nothing.
+
+### choice
+
+```
+{ "type": "choice", "id": "which-could-be-ata", "title": "...", "why": "...",
+  "prompt": "The question.", "widget": { ... },
+  "options": [ { "id": "symmetric", "text": "...", "correct": true,  "say": "Why this is right." },
+               { "id": "unequal",   "text": "...", "correct": false, "say": "The misconception it catches." } ],
+  "multiple": false, "shuffle": true, "hint": "One nudge.", "solution": "...", "review": false, "next": "..." }
+```
+
+- `title`, `why`, `widget`, `hint`, `solution`, `multiple`, `shuffle`, `review` are optional. `multiple`
+  true means "tick every right one" (at least one correct, at least one wrong); otherwise exactly one
+  is correct. `shuffle` is on by default; turn it off only when the order carries meaning.
+- **Every option has a `say`.** For a wrong option it names the misconception precisely and, where
+  the lesson has the numbers, shows the check ("$r \cdot b = \frac32$, not 0"). It is shown when that
+  option is picked wrongly, and for every option once the question is done, so write the `say`s to be
+  read together, as a list: "A. Right. ..." then "B. Not this one. ...".
+- **Each distractor is a real misconception**, one he could hold: a slip from seed-context.md section 4
+  (a non-symmetric $A^\mathsf{T}A$, a transposed factor), a near-by true statement that answers a different
+  question ($\lambda$ for $\sigma$), or a result that is true of something else. Not a joke, not "none of
+  the above", not an option that is wrong only by being longer or vaguer.
+- Options of one length and shape, so the right one cannot be picked by looking. Texts must differ.
+- The prompt asks one thing, in the positive ("which could be", not "which could not be").
+- `multiple`: the app says how many of his ticks are right, and gives the `say` of each wrong tick. It
+  never says which unticked options are right.
+- What he is told: after two wrong tries "Show the answer" appears; it is never shown unasked. One `hint`
+  at most, a nudge toward the idea, never the answer.
+- Add nothing the lessons do not already establish. Use the course's own notation and numbers.
+
+### order
+
+```
+{ "type": "order", "id": "order-the-proof", "title": "...", "why": "...",
+  "prompt": "What is being ordered.",
+  "items": [ { "id": "take-b", "text": "..." }, { "id": "null-space", "text": "..." }, ... ],
+  "fixed": ["take-b"], "say": { "null-space": "A nudge for when this line is the first out of place." },
+  "hint": "...", "solution": "...", "review": false, "next": "..." }
+```
+
+- **List `items` in the correct order**; the app shuffles them (never into the correct order).
+- **Exactly one valid order.** Lines the checker cannot tell apart are not supported: it marks the
+  first line from the top that is not where you wrote it. Test your puzzle: could any two lines swap and
+  still read as a proof? If so, rewrite the lines so each uses something the one above it gave ("add the
+  dimension of the span to that"), or drop one of them. The validator can only check that the texts differ.
+- Three to seven items. `fixed` lists lines shown already in place (the first or last, given), at least
+  three stay movable. `say` is optional, per item id: the nudge shown when that line is the first one out
+  of place (a good one asks "what must come before this?"). Without it he sees "The line marked is not
+  where it belongs yet." The app marks one line only: a hint, not the answer.
+- After three wrong tries "Show the answer" appears; it is never shown unasked.
+- Lines are Markdown (maths in `$...$`); one short sentence each, so they fit a phone row.
+
+### Review
+
+Marked quiz screens come back in review like steps: from a clean record, with a fresh shuffle, graded
+the same way (right first time and no hint is good; right after a wrong try or the hint is hard; shown is
+again). The prompt, the options and the lines must make sense alone: put every number in the screen
+itself, not "the matrix above".
+
+### What the validator checks
+
+The schema; ids unique; choice: one correct option (or at least one when `multiple`), at least one
+incorrect, distinct texts; order: `fixed` and `say` name real items, three movable, distinct texts; every
+Markdown string; widgets; the lesson rules (one step at least, quizzes at most half). It cannot check
+that distractors are good or that the order is unique: that is for the author and the reviewer.
+
+## 13. Parts that arrive with later stages
 
 Added to this file when they exist (ROADMAP.md): tunnels to other courses (E1).

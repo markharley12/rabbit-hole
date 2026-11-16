@@ -80,6 +80,36 @@
         "$\\frac{16}{25} + \\frac{64}{25}$."
       ],
       "check": { "say": "It should equal the square of point 1's score along $v_2$, which is $x_1 \\cdot (-1, 2)/\\sqrt5 = 4/\\sqrt5$." },
+      "next": "Say which way it points"
+    },
+    {
+      "type": "choice",
+      "id": "which-way-the-loss-points",
+      "title": "Which way is the lost part?",
+      "why": "What one component throws away has a direction. It says what PCA is ignoring.",
+      "prompt": "Point 1 is $x_1 = (-4, 0)$. Its kept part is $\\hat x_1 = (-3.2, -1.6)$, on the line along $v_1 = (2, 1)/\\sqrt5$. The lost part is $x_1 - \\hat x_1 = (-0.8, 1.6)$. Which direction is it along?",
+      "options": [
+        {
+          "id": "v2",
+          "text": "$v_2 = (-1, 2)/\\sqrt5$, perpendicular to $v_1$",
+          "correct": true,
+          "say": "$(-0.8, 1.6) = 0.8\\,(-1, 2)$. The lost part is the part of the point across the line, so it is perpendicular to $v_1$, just as the residual in least squares is perpendicular to the columns."
+        },
+        {
+          "id": "v1",
+          "text": "$v_1 = (2, 1)/\\sqrt5$, along the line",
+          "correct": false,
+          "say": "That is the kept part. $(-0.8, 1.6) \\cdot (2, 1) = -1.6 + 1.6 = 0$, so none of the lost part is along $v_1$."
+        },
+        {
+          "id": "the-point",
+          "text": "The point itself, $x_1 = (-4, 0)$",
+          "correct": false,
+          "say": "$(-0.8, 1.6)$ and $(-4, 0)$ point different ways. They would agree only if the point lay on the line already, and then nothing would be lost."
+        }
+      ],
+      "hint": "Take the dot product of the lost part with $v_1$. What do you get?",
+      "solution": "Whatever one component loses lies across the line, along $v_2$.",
       "next": "Add up all five"
     },
     {
@@ -110,12 +140,13 @@
     {
       "type": "step",
       "id": "explained-variance",
+      "review": true,
       "title": "How much is kept",
       "define": [
         { "term": "explained variance ratio", "meaning": "The share of the total variance that a component carries: $\\lambda_1/(\\lambda_1 + \\lambda_2)$ for the first." }
       ],
       "why": "This one number is how PCA is judged in practice: how much spread one component keeps.",
-      "prompt": "What is the explained variance ratio of the first component? Give a fraction.",
+      "prompt": "The covariance matrix has eigenvalues $\\lambda_1 = 8$ and $\\lambda_2 = 3$. What is the explained variance ratio of the first component? Give a fraction.",
       "answer": {
         "fields": [{ "name": "r", "label": "ratio =", "key": "8/11" }],
         "verify": "entry(eigs(tr(X)*X/(5 - 1)), 1)/(sq(X)/(5 - 1))",
