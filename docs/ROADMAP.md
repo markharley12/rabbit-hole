@@ -6,6 +6,19 @@ work; PLAN.md stays the reference for architecture. As in PLAN.md, three kinds o
 are kept apart: **Decided** (Mark said it), **Recommended** (the orchestrator's call, argue
 with it), **Open** (needs Mark).
 
+## 0. Standing direction (Mark, 16 Nov 2026)
+
+Decided, his words condensed. The orchestrating session works through the stages below on
+its own judgement, choosing whatever is the best use of effort, without waiting to be asked:
+
+- **The mission:** an alternative to Brilliant.org: learning through lessons, visualisation,
+  puzzles, quizzes and problems.
+- **Use what is scientifically shown to help people learn**, spaced repetition (Anki-style)
+  first. Recommended reading of that, to be sourced when built: retrieval practice, spacing,
+  interleaving, worked examples then fading, immediate specific feedback.
+- **AI-native:** when someone is stuck they can ask, inside the course.
+- **Building new courses with AI is part of the app**, not a separate tool.
+
 ## 1. What Mark said (condensed, his meaning kept)
 
 1. **Orchestration.** One strong session orchestrates; the bulk of the work runs in
