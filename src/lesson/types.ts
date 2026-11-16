@@ -190,6 +190,8 @@ export interface CheatItem {
   name: string
   formula: string
   when: string
+  /** The review card's front, besides the name: what to recall, without the formula. */
+  cue?: string
   lesson?: string
 }
 

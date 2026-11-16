@@ -247,3 +247,4 @@ Filled in as stages land (date, commit, what was not checked).
   what the tutor may do on each. The Ask tool is no longer hidden on these screens (the note in the entry
   above is now out of date). Not checked: any of it with the real CLI, so whether the tutor keeps the
   answer back on these screens is untested; not looked at in the browser.
+- **Tunnels, Where I am, review cues** (16 Nov 2026). `tunnels` in `course.json` (validator: real course, no repeat, no `needs` loop); "Builds on" / "Leads to" lines on the sheet and one "Next course" on the end of a last lesson; `#<node>/progress` ("Where I am": one next action, per-course counts, repeated slips, review); optional `cue` on cheat-sheet items so a review card's front does not give the formula away. Tested in jsdom; looked at in the browser pane where noted in the commit messages. Not checked: on the phone itself.

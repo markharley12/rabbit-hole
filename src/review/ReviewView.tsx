@@ -122,7 +122,7 @@ function StepItem({ item, base, cache, onDone }: { item: ReviewItem & { kind: 's
   )
 }
 
-/** A cheat-sheet formula: see the name, write it on paper, reveal it, say how it went. */
+/** A cheat-sheet formula: see the name and cue, write it on paper, reveal it (with when to use it), say how it went. */
 function FormulaItem({ item, onDone }: { item: ReviewItem & { kind: 'formula' }; onDone: (grade: Grade) => void }) {
   const [shown, setShown] = useState(false)
   const { formula } = item
@@ -131,10 +131,12 @@ function FormulaItem({ item, onDone }: { item: ReviewItem & { kind: 'formula' };
       <div className="lesson-body">
         <p className="review-from">Cheat sheet: {item.course.title}</p>
         <h2 className="screen-title">{formula.name}</h2>
-        <Md className="prompt" text={formula.when} />
+        {/* The front is the name and the cue only: `when` often nearly states the formula, so it waits for the back. */}
+        {formula.cue && <Md className="prompt" text={formula.cue} />}
         {shown ? (
           <div className="review-formula" role="status">
             <Md text={formula.formula} />
+            <Md className="note small" text={formula.when} />
           </div>
         ) : (
           <p className="note">Write it on paper first.</p>

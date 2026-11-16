@@ -31,6 +31,7 @@
                 "name": { "description": "Plain words.", "type": "string", "minLength": 2, "maxLength": 50 },
                 "formula": { "description": "Markdown with KaTeX, in the course's own notation.", "type": "string", "minLength": 1, "maxLength": 300 },
                 "when": { "description": "One sentence: when to reach for it.", "type": "string", "minLength": 5, "maxLength": 200 },
+                "cue": { "description": "Optional. What the review card shows on its front besides `name`: the recall prompt, in Markdown. It must say WHAT to recall without containing the formula (or the line that nearly states it); `when` moves to the back. The cheat sheet tool itself does not show it.", "type": "string", "minLength": 5, "maxLength": 160 },
                 "lesson": { "description": "The lesson that derives it (an id in course.json).", "$ref": "lesson.schema.json#/$defs/slug" }
               }
             }

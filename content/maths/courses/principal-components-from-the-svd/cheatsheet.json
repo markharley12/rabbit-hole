@@ -9,6 +9,7 @@
           "name": "Centring",
           "formula": "$x_i \\to x_i - \\bar x$; the rows of $X$ are the centred points",
           "when": "Always first: every variance in this course is spread around the mean $\\bar x$.",
+          "cue": "The first step of PCA: what you do to every point, and what the rows of $X$ then are",
           "lesson": "spread-along-a-direction"
         },
         {
@@ -16,6 +17,7 @@
           "name": "Variance along a unit u",
           "formula": "$\\frac{1}{n-1}\\sum_i (x_i \\cdot u)^2$",
           "when": "To score one direction from the points. $u$ must be a unit vector; this course divides by $n - 1$.",
+          "cue": "The variance of the points along a unit direction $u$, as a sum over the points, with this course's divisor",
           "lesson": "spread-along-a-direction"
         },
         {
@@ -23,6 +25,7 @@
           "name": "Total variance",
           "formula": "$\\frac{1}{n-1}\\sum_i \\|x_i\\|^2 = C_{11} + C_{22}$",
           "when": "Any direction and its perpendicular split this between them: along + across is always the total.",
+          "cue": "The total variance, written two ways: from the points, and from $C$",
           "lesson": "the-covariance-matrix"
         }
       ]
@@ -35,6 +38,7 @@
           "name": "Covariance matrix",
           "formula": "$C = \\frac{1}{n-1}X^\\mathsf{T}X$",
           "when": "To get every variance at once. Row $i$, column $j$ of $X^\\mathsf{T}X$ is (column $i$) · (column $j$); it equals its own transpose.",
+          "cue": "The covariance matrix $C$ of the centred points, in terms of $X$ and $n$",
           "lesson": "the-covariance-matrix"
         },
         {
@@ -42,6 +46,7 @@
           "name": "Variance from C",
           "formula": "$u^\\mathsf{T}Cu$",
           "when": "The variance along a unit $u$, straight from $C$ without going back to the points.",
+          "cue": "The variance along a unit $u$, worked out from $C$ alone",
           "lesson": "the-covariance-matrix"
         }
       ]
@@ -54,6 +59,7 @@
           "name": "The best direction",
           "formula": "$Cv_1 = \\lambda_1 v_1$, with $\\lambda_1$ the largest eigenvalue",
           "when": "The variance along $u$ is largest at $u = \\pm v_1$, and there it equals $\\lambda_1$.",
+          "cue": "The equation that makes $v_1$ the best direction, and what $\\lambda_1$ is",
           "lesson": "the-best-direction-is-an-eigenvector"
         },
         {
@@ -61,6 +67,7 @@
           "name": "Why nothing beats v₁",
           "formula": "$u = a v_1 + b v_2 \\Rightarrow u^\\mathsf{T}Cu = \\lambda_1 a^2 + \\lambda_2 b^2$",
           "when": "With $a^2 + b^2 = 1$ this is at most $\\lambda_1$. $v_1 \\perp v_2$ because $C$ is symmetric.",
+          "cue": "Why no unit $u$ beats $v_1$: the variance of a mixed direction, in terms of $\\lambda_1$, $\\lambda_2$ and its two coordinates",
           "lesson": "the-best-direction-is-an-eigenvector"
         },
         {
@@ -68,6 +75,7 @@
           "name": "The closest line",
           "formula": "mean sq. distance to the line along $v_1$ $= \\lambda_2$",
           "when": "The line with the most spread along it is the one closest to the points, measured perpendicular (not vertically, as in least squares).",
+          "cue": "The mean squared distance from the points to the line along $v_1$, in terms of the eigenvalues",
           "lesson": "the-best-direction-is-an-eigenvector"
         }
       ]
@@ -80,6 +88,7 @@
           "name": "Singular values and variances",
           "formula": "$\\lambda_i = \\sigma_i^2/(n - 1)$",
           "when": "$X^\\mathsf{T}X = (n - 1)C$, so the SVD of the centred $X$ gives the PCA variances. Its right singular vectors $v_i$ are the principal directions.",
+          "cue": "How the PCA variances $\\lambda_i$ relate to the singular values $\\sigma_i$ of the centred $X$",
           "lesson": "the-same-answer-from-the-svd"
         },
         {
@@ -87,6 +96,7 @@
           "name": "Scores",
           "formula": "$Xv_1 = \\sigma_1 u_1$",
           "when": "Each point's one-number summary. Their squares add to $\\sigma_1^2$.",
+          "cue": "The score vector $Xv_1$: what it equals in terms of the SVD",
           "lesson": "the-same-answer-from-the-svd"
         }
       ]
@@ -99,6 +109,7 @@
           "name": "Rebuilding a point",
           "formula": "$\\hat x_i = (x_i \\cdot v_1)\\,v_1$, then add $\\bar x$",
           "when": "To read a point back from its score: the foot of $x_i$ on the line along $v_1$.",
+          "cue": "How to rebuild a point $\\hat x_i$ from its score along $v_1$, mean included",
           "lesson": "keeping-one-component"
         },
         {
@@ -106,6 +117,7 @@
           "name": "What one component loses",
           "formula": "$\\sum_i \\|x_i - \\hat x_i\\|^2 = \\sigma_2^2$, with $X_1 = \\sigma_1 u_1 v_1^\\mathsf{T}$",
           "when": "Eckart–Young: no rank-1 matrix is closer to $X$. Divided by $n - 1$ it is $\\lambda_2$.",
+          "cue": "What keeping one component loses in total, and the rank-1 matrix $X_1$ that is kept (Eckart–Young)",
           "lesson": "keeping-one-component"
         },
         {
@@ -113,6 +125,7 @@
           "name": "Explained variance ratio",
           "formula": "$\\frac{\\lambda_1}{\\lambda_1 + \\lambda_2} = \\frac{\\sigma_1^2}{\\sigma_1^2 + \\sigma_2^2}$",
           "when": "To say how much of the spread one component keeps.",
+          "cue": "The fraction of the spread that one component keeps, in $\\lambda$ and in $\\sigma$",
           "lesson": "keeping-one-component"
         }
       ]

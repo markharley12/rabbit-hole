@@ -8,7 +8,7 @@ What is checked, for every content/<field>/courses/<course-id>/:
 
 - course.json and each lesson against schema/course.schema.json and schema/lesson.schema.json;
 - an optional cheatsheet.json against schema/cheatsheet.schema.json: item ids unique, `lesson`
-  one of the course's, Markdown checked as for lessons;
+  one of the course's, Markdown (including the optional `cue`) checked as for lessons;
 - optional `tunnels` in course.json: each `to` is another course of the same field, none repeats,
   and the `needs` tunnels never form a loop (a cycle of "do that first");
 - steps, choice and order screens marked `review: true` (a boolean, schema only). Publishing lists
@@ -666,8 +666,9 @@ def check_cheatsheet(sheet: dict, where: str, lesson_ids: set[str], node_ids: se
             seen.add(item["id"])
             if "lesson" in item and item["lesson"] not in lesson_ids:
                 report.add(at, f"lesson {item['lesson']!r} is not a lesson of this course")
-            for key in ("formula", "when"):
-                check_markdown(item[key], f"{at} {key}", lesson_ids, node_ids, report)
+            for key in ("formula", "when", "cue"):
+                if key in item:
+                    check_markdown(item[key], f"{at} {key}", lesson_ids, node_ids, report)
 
 
 def check_tunnels(courses: list[tuple[str, dict]], report: Report):

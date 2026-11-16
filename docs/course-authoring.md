@@ -156,6 +156,12 @@ lines under "My notes", on his device, so nothing he types is ever in this file.
   gets overwhelmed by long lists.
 - `name`: plain words, at most 50. `formula`: Markdown with KaTeX (strict, like lessons).
   `when`: one sentence, at most 200, that says when to reach for it, not what it is called.
+- `cue` (optional, at most 160, Markdown): what the **front of a review card** shows besides `name`.
+  Review shows a formula card as `name` plus `cue`, then the formula, with `when` under it on the
+  back, so the cue must say WHAT to recall without containing the formula or a line that nearly
+  states it ("The residual of a fit, in terms of $A$, $x$ and $b$", not "Data minus fit"). For an
+  item that belongs to one worked example, say which example. The cheat sheet tool does not show
+  `cue`. Write one for every item.
 - `lesson`: the lesson that derives it, when there is one. The validator checks it is one of the
   course's lessons.
 - The validator checks the schema, that item ids are unique, and the Markdown as for lessons;

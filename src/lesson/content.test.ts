@@ -106,10 +106,29 @@ describe.each(courses)('course $course.id', ({ course, lessons, sheet }) => {
     if (!sheet) return
     const lessonIds = course.lessons.map((l) => l.id)
     for (const item of sheet.sections.flatMap((s) => s.items)) {
-      for (const text of [item.formula, item.when]) {
+      for (const text of [item.formula, item.when, ...(item.cue ? [item.cue] : [])]) {
         expect(() => renderMarkdown(text, { strict: true, links: { nodeId: course.nodeId } }), `${item.id}: ${text}`).not.toThrow()
       }
       if (item.lesson) expect(lessonIds, item.id).toContain(item.lesson)
+    }
+  })
+
+  it('gives every cheat-sheet item a cue that does not contain its formula', () => {
+    if (!sheet) return
+    // Maths inside $...$ with spaces dropped. A cue may name the symbols, but must not copy a formula
+    // that is one whole $...$ span, nor what stands right of the "=" in any span (what is to be recalled).
+    const maths = (text: string) => [...text.matchAll(/\$([^$]+)\$/g)].map((m) => m[1].replace(/\s+/g, ''))
+    for (const item of sheet.sections.flatMap((s) => s.items)) {
+      expect(item.cue, `${item.id} has no cue`).toBeTruthy()
+      const squashed = item.cue!.replace(/\s+/g, '')
+      const pieces = maths(item.formula)
+      if (pieces.length === 1 && /^\$[^$]+\$$/.test(item.formula.trim())) {
+        expect(squashed, `${item.id}: the cue contains the whole formula`).not.toContain(pieces[0])
+      }
+      for (const piece of pieces) {
+        const answer = piece.split('=').pop()!
+        if (piece.includes('=') && answer.length > 3) expect(squashed, `${item.id}: the cue contains ${answer}`).not.toContain(answer)
+      }
     }
   })
 

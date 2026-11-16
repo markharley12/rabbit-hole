@@ -351,6 +351,23 @@ class Content(unittest.TestCase):
         self.sheet(self.first_item(formula="$r$", when="See [it](lesson:dependent-columns)."))
         self.assertEqual(self.errors(), [])
 
+    def test_cue_is_optional_limited_and_checked_like_other_markdown(self):
+        self.sheet(self.first_item(cue="The residual of a fit, in terms of $A$, $x$ and $b$"))
+        self.assertEqual(self.errors(), [])
+        self.sheet(self.first_item(cue="c" * 161))
+        self.assertFails("is too long")
+        self.sheet(self.first_item(cue="The $r"))
+        self.assertFails("an unmatched $")
+        self.sheet(self.first_item(cue="<b>r</b> of a fit"))
+        self.assertFails("raw HTML")
+
+    def test_every_real_cheat_sheet_item_has_a_cue(self):
+        for name in ("least-squares-to-the-pseudo-inverse", "principal-components-from-the-svd"):
+            path = ROOT / "content/maths/courses" / name / "cheatsheet.json"
+            for section in json.loads(path.read_text())["sections"]:
+                for item in section["items"]:
+                    self.assertIn("cue", item, f"{path.parent.name}/{item['id']}")
+
     def test_a_broken_cheat_sheet_stops_publishing(self):
         self.sheet(self.first_item(lesson="no-such-lesson"))
         with contextlib.redirect_stderr(io.StringIO()):
