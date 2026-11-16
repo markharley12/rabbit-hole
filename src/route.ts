@@ -2,7 +2,8 @@
 // #15Axx/learn/<course-id>/<lesson-id> a lesson of one of the courses on that
 // node, #15Axx/courses the courses menu opened from there and #15Axx/review a session of
 // spaced review, opened the same way, and #15Axx/new-course the chat that makes a new
-// course, opened from there (the node is only a suggestion to the session). So the phone's
+// course, opened from there (the node is only a suggestion to the session), and #15Axx/progress
+// "Where I am", opened from the courses menu. So the phone's
 // back button closes what is open and then steps back up the map.
 //
 // The first version had one course per node and no course id in the address,
@@ -11,7 +12,7 @@
 
 import type { Course } from './lesson/types.ts'
 
-export type Route = { nodeId: string; courseId?: string; lessonId?: string; menu?: boolean; review?: boolean; newCourse?: boolean }
+export type Route = { nodeId: string; courseId?: string; lessonId?: string; menu?: boolean; review?: boolean; newCourse?: boolean; progress?: boolean }
 
 export function parseRoute(hash: string): Route {
   const [nodeId, kind, first, second] = hash.split('/')
@@ -20,6 +21,7 @@ export function parseRoute(hash: string): Route {
   if (kind === 'courses') return { nodeId, menu: true }
   if (kind === 'review') return { nodeId, review: true }
   if (kind === 'new-course') return { nodeId, newCourse: true }
+  if (kind === 'progress') return { nodeId, progress: true }
   return { nodeId: hash }
 }
 

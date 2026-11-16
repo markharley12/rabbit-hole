@@ -4,6 +4,7 @@
 import { useCallback, useSyncExternalStore } from 'react'
 import { parseRecord } from './progress.ts'
 import type { CourseRecord } from './progress.ts'
+import type { Course } from './types.ts'
 
 // Prefixed: localStorage is shared by everything on an origin (a TreeQuiz trap).
 const key = (courseId: string) => `rabbit-hole:progress:${courseId}`
@@ -11,6 +12,8 @@ const key = (courseId: string) => `rabbit-hole:progress:${courseId}`
 const cache = new Map<string, CourseRecord>()
 const listeners = new Set<() => void>()
 let askedToPersist = false
+// Bumped on every write, so a hook over several courses has one number to watch.
+let version = 0
 
 export function readProgress(courseId: string): CourseRecord {
   let record = cache.get(courseId)
@@ -30,6 +33,7 @@ export function readProgress(courseId: string): CourseRecord {
 export function writeProgress(courseId: string, change: (record: CourseRecord) => CourseRecord) {
   const next = change(readProgress(courseId))
   cache.set(courseId, next)
+  version++
   try {
     localStorage.setItem(key(courseId), JSON.stringify(next))
   } catch {
@@ -53,6 +57,17 @@ export function useProgress(courseId: string): [CourseRecord, (change: (record: 
   const record = useSyncExternalStore(subscribe, () => readProgress(courseId))
   const update = useCallback((change: (record: CourseRecord) => CourseRecord) => writeProgress(courseId, change), [courseId])
   return [record, update]
+}
+
+/** Every given course's record (a fresh empty one for a course never opened), keyed by course id. */
+export function readAllProgress(courses: Course[]): Map<string, CourseRecord> {
+  return new Map(courses.map((course) => [course.id, readProgress(course.id)]))
+}
+
+/** The records of all the courses, for screens that look across them ("Where I am"); re-reads on any write. */
+export function useAllProgress(courses: Course[]): Map<string, CourseRecord> {
+  useSyncExternalStore(subscribe, () => version)
+  return readAllProgress(courses)
 }
 
 /** For tests: forget what is cached so the next read comes from storage. */
