@@ -188,7 +188,27 @@ courses not written yet, get them for free.
 - The validator checks the schema, that the file is named after `nodeId`, that the node is on the
   map, unique ids, https, and that `checked` is a real date that is not in the future.
 
-## 11. Parts that arrive with later stages
+## 11. Steps for spaced review
 
-Added to this file when they exist (ROADMAP.md): steps marked for spaced review (C), tunnels to
-other courses (E1).
+A step may carry `"review": true`. Once the learner has solved it (or been shown its answer) it
+comes back in the app's Review after 1, 3, 7, 16, 35, 90 days, answered again from scratch. The
+app's cheat-sheet formulas come back too, as recall cards, with no work from you.
+
+- **Mark 1 to 3 steps per lesson**: the ones that are a skill worth still having in a month
+  (build AᵀA, solve the normal equations, find a singular value), not the warm-up and not the
+  last link of a derivation.
+- **The prompt must stand on its own screen.** A review step is shown alone, with a clean
+  record. Read its `prompt` as if nothing came before: if it says "with this A" or "using v1"
+  and the matrix or vector is not written in the prompt, do not mark it. Do not rewrite a prompt
+  to make it eligible without re-deriving its key and checking its hints.
+- A step whose point is a widget interaction is a poor choice; the review screen does show the
+  widget, but nothing checks that the prompt can be answered without it (the validator has no
+  rule for this: nothing in a step says reliably).
+- Its `next` label is shown on the review screen's button, so a label that names the next step
+  ("Now Aᵀb") reads oddly there. Prefer steps whose `next` still makes sense, but do not rewrite.
+- Nothing else changes: the schema allows `review` on steps only, and `--publish` lists the marked
+  steps in the course's entry in `index.json` (`review: [{lesson, step}]`), not in `course.json`.
+
+## 12. Parts that arrive with later stages
+
+Added to this file when they exist (ROADMAP.md): tunnels to other courses (E1).

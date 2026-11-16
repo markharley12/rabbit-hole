@@ -14,9 +14,12 @@ import { CoursesMenu } from './components/CoursesMenu.tsx'
 import { UpdateBar } from './components/UpdateBar.tsx'
 import { parseIndex } from './resources.ts'
 import type { ReadingSource } from './resources.ts'
+import { useReviewQueue } from './review/use-review-queue.ts'
 
 // The lesson screens, KaTeX and the widgets load only when a lesson opens.
 const LessonView = lazy(() => import('./lesson/LessonView.tsx'))
+// Review shows lessons' steps, so it needs KaTeX too.
+const ReviewView = lazy(() => import('./review/ReviewView.tsx'))
 
 const MAP_URL = './content/maths/map.json'
 // Written by tools/validate_courses.py --publish, only from content that passed.
@@ -110,6 +113,7 @@ export default function App() {
     [layout, readingCounts],
   )
   const counts = useMemo(() => (layout ? countCourses(layout, courses) : new Map<string, number>()), [layout, courses])
+  const review = useReviewQueue(courseList, COURSES_URL)
   const screen = useMemo(() => {
     const [width, height] = size.split('x').map(Number)
     return { width, height }
@@ -133,6 +137,7 @@ export default function App() {
   const onNode = courses.get(focus.id) ?? []
   const opened = resolveLesson(route, onNode)
   const menuOpen = !!route.menu
+  const reviewOpen = !!route.review
 
   const select = (id: string) => {
     setSheetOpen(false)
@@ -150,9 +155,15 @@ export default function App() {
     openedHere.current = true
     window.location.hash = `${focus.id}/courses`
   }
+  const openReview = () => {
+    setSheetOpen(false)
+    openedHere.current = true
+    window.location.hash = `${focus.id}/review`
+  }
   // From the menu, replace its address: Back from what it opens returns to
   // where the menu was opened, not to the menu.
   const menuToLesson = (course: Course, lessonId: string) => window.location.replace(`#${lessonHash(course, lessonId)}`)
+  const menuToReview = () => window.location.replace(`#${focus.id}/review`)
   const menuToNode = (id: string) => {
     openedHere.current = false
     window.location.replace(`#${id}`)
@@ -177,8 +188,24 @@ export default function App() {
   return (
     <>
       <MapView layout={layout} focusId={focus.id} refit={refit} screen={screen} area={area} courseIds={courses} onSelect={select} />
-      {menuOpen ? (
-        <CoursesMenu layout={layout} courses={courseList} onClose={closeLesson} onOpenLesson={menuToLesson} onShowNode={menuToNode} />
+      {reviewOpen ? (
+        review.ready ? (
+          <Suspense fallback={<p className="status lesson-loading">Opening review…</p>}>
+            <ReviewView items={review.items} base={COURSES_URL} unavailable={review.unavailable} onClose={closeLesson} />
+          </Suspense>
+        ) : (
+          <p className="status lesson-loading">Opening review…</p>
+        )
+      ) : menuOpen ? (
+        <CoursesMenu
+          layout={layout}
+          courses={courseList}
+          onClose={closeLesson}
+          onOpenLesson={menuToLesson}
+          onShowNode={menuToNode}
+          dueCount={review.due}
+          onOpenReview={menuToReview}
+        />
       ) : opened ? (
         <Suspense fallback={<p className="status lesson-loading">Opening the lesson…</p>}>
           <LessonView
@@ -192,7 +219,15 @@ export default function App() {
         </Suspense>
       ) : (
         <>
-          <TopBar path={ancestry(focus)} theme={theme} onSelect={select} onToggleTheme={toggleTheme} onOpenCourses={openMenu} />
+          <TopBar
+            path={ancestry(focus)}
+            theme={theme}
+            onSelect={select}
+            onToggleTheme={toggleTheme}
+            onOpenCourses={openMenu}
+            dueCount={review.due}
+            onOpenReview={openReview}
+          />
           <NodeSheet
             node={focus}
             document={document}
@@ -204,6 +239,8 @@ export default function App() {
             onOpenLesson={openLesson}
             onOpenCourses={openMenu}
             reading={reading}
+            dueCount={review.due}
+            onOpenReview={openReview}
           />
         </>
       )}

@@ -12,6 +12,9 @@ interface Props {
   onClose: () => void
   onOpenLesson: (course: Course, lessonId: string) => void
   onShowNode: (id: string) => void
+  /** Items due for review today; the line under the search box shows only above zero. */
+  dueCount?: number
+  onOpenReview?: () => void
 }
 
 const where = (node: Placed) =>
@@ -35,7 +38,7 @@ function progressText(course: Course) {
  * Every course in the app, and a search over courses and the map's sections
  * and topics. Full screen over the map; Back or × closes it.
  */
-export function CoursesMenu({ layout, courses, onClose, onOpenLesson, onShowNode }: Props) {
+export function CoursesMenu({ layout, courses, onClose, onOpenLesson, onShowNode, dueCount = 0, onOpenReview }: Props) {
   const [query, setQuery] = useState('')
   const courseHits = useMemo(() => searchCourses(query, courses, layout), [query, courses, layout])
   const nodeHits = useMemo(() => searchNodes(query, layout), [query, layout])
@@ -71,6 +74,12 @@ export function CoursesMenu({ layout, courses, onClose, onOpenLesson, onShowNode
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
+
+        {onOpenReview && dueCount > 0 && (
+          <button className="text-button review-line" onClick={onOpenReview}>
+            {dueCount} to review
+          </button>
+        )}
 
         <h2 className="menu-heading">{searching ? `Courses (${courseHits.length})` : 'All courses'}</h2>
         {courseHits.length === 0 && <p className="note">{searching ? 'No course matches.' : 'No courses yet.'}</p>}
