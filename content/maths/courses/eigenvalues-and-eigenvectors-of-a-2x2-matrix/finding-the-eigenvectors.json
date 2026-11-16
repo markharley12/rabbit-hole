@@ -1,0 +1,164 @@
+{
+  "format": 1,
+  "id": "finding-the-eigenvectors",
+  "title": "Finding the eigenvectors",
+  "summary": "For each eigenvalue of B, solve (B − λI)v = 0 for a direction, check Bv = λv by hand, and see they are not perpendicular.",
+  "data": {
+    "B": [[4, 1], [2, 3]],
+    "v1": [1, 1],
+    "v2": [1, -2]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "b-minus-five-i",
+      "title": "B − 5I",
+      "why": "An eigenvector for $\\lambda$ is a non-zero solution of $(B - \\lambda I)\\,v = 0$. First write the matrix down.",
+      "prompt": "$B = \\begin{bmatrix}4&1\\\\2&3\\end{bmatrix}$ has eigenvalues 5 and 2. Write out $B - 5I$.",
+      "answer": {
+        "fields": [
+          { "name": "a11", "key": "-1" },
+          { "name": "a12", "key": "1" },
+          { "name": "a21", "key": "2" },
+          { "name": "a22", "key": "-2" }
+        ],
+        "matrix": [2, 2],
+        "verify": "B - entry(eigs(B), 1)*eye(2)",
+        "slips": [
+          { "detect": "transpose", "name": "B − 5I" },
+          { "detect": "known", "when": { "a12": "-4", "a21": "-3" }, "say": "$5I$ is 5 on the diagonal only. The off-diagonal entries of $B$ stay." }
+        ]
+      },
+      "hints": [
+        "Take 5 off each diagonal entry. Leave the others alone.",
+        "The diagonal entries become $4 - 5$ and $3 - 5$.",
+        "Top-left $-1$, top-right still $1$."
+      ],
+      "check": { "say": "Its determinant must be 0, because 5 is an eigenvalue. If it is not, look for a slip before going on." },
+      "solution": "Row 2 is $-2$ times row 1. That is what a zero determinant looks like: the two rows give one equation, not two.",
+      "next": "Solve for the eigenvector"
+    },
+    {
+      "type": "step",
+      "id": "eigenvector-for-five",
+      "title": "The eigenvector for 5",
+      "why": "Solving $(B - 5I)\\,v = 0$ gives the line that $B$ stretches by 5.",
+      "prompt": "$B - 5I = \\begin{bmatrix}-1&1\\\\2&-2\\end{bmatrix}$. Find a non-zero $v$ with $(B - 5I)\\,v = 0$.",
+      "answer": {
+        "fields": [
+          { "name": "x1", "key": "1" },
+          { "name": "x2", "key": "1" }
+        ],
+        "accept": ["multiple"],
+        "acceptNote": "Any non-zero multiple is right: it is the same line, and the course writes it as $(1, 1)$.",
+        "verify": "nullvec(B - entry(eigs(B), 1)*eye(2))",
+        "slips": [
+          { "detect": "known", "when": { "x1": "0", "x2": "0" }, "say": "$(0, 0)$ solves it, but the zero vector is never an eigenvector. Pick $x = 1$ and find $y$." }
+        ]
+      },
+      "hints": [
+        "Write $v = (x, y)$. Row 1 of the matrix gives one equation in $x$ and $y$.",
+        "Row 1: $-x + y = 0$. Row 2, $2x - 2y = 0$, says the same thing.",
+        "So $y = x$. Pick $x = 1$."
+      ],
+      "check": { "say": "$B$ times your $v$ should be $5v$. With $B = \\begin{bmatrix}4&1\\\\2&3\\end{bmatrix}$, each row of $B$ dotted with $v$ should be 5 times that entry of $v$." },
+      "solution": "$(1, 1)$: $B\\,(1, 1) = (5, 5)$. Every point on the line $y = x$ is an eigenvector for 5.",
+      "next": "Now λ = 2"
+    },
+    {
+      "type": "step",
+      "id": "eigenvector-for-two",
+      "title": "The eigenvector for 2",
+      "why": "Each eigenvalue has its own line of eigenvectors. Same method, other eigenvalue.",
+      "prompt": "$B = \\begin{bmatrix}4&1\\\\2&3\\end{bmatrix}$ has eigenvalue 2. Solve $(B - 2I)\\,v = 0$ for a non-zero $v$. Take the one with first entry 1.",
+      "answer": {
+        "fields": [
+          { "name": "x1", "key": "1" },
+          { "name": "x2", "key": "-2" }
+        ],
+        "accept": ["multiple"],
+        "acceptNote": "Any non-zero multiple is right: it is the same line. The course writes it as $(1, -2)$.",
+        "verify": "nullvec(B - entry(eigs(B), 2)*eye(2))",
+        "slips": [
+          { "detect": "known", "when": { "x1": "2", "x2": "-1" }, "say": "$x$ and $y$ swapped: $2x + y = 0$ gives $y = -2x$, so with $x = 1$, $y = -2$." }
+        ]
+      },
+      "hints": [
+        "First write out $B - 2I$: take 2 off each diagonal entry.",
+        "$B - 2I = \\begin{bmatrix}2&1\\\\2&1\\end{bmatrix}$. Both rows give the same equation.",
+        "$2x + y = 0$. With $x = 1$, solve for $y$."
+      ],
+      "check": { "say": "Put your $v$ into $2x + y$: it should give 0." },
+      "solution": "$(1, -2)$, the line $y = -2x$. Next, check it the direct way.",
+      "review": true,
+      "next": "Check it: multiply by B"
+    },
+    {
+      "type": "step",
+      "id": "check-b-times-v2",
+      "title": "Check Bv = 2v",
+      "why": "The direct check catches a slip in any earlier step: if $Bv$ is not $\\lambda v$, something went wrong.",
+      "prompt": "With $B = \\begin{bmatrix}4&1\\\\2&3\\end{bmatrix}$, compute $B\\,(1, -2)$.",
+      "answer": {
+        "fields": [
+          { "name": "y1", "key": "2" },
+          { "name": "y2", "key": "-4" }
+        ],
+        "verify": "B*v2",
+        "slips": [
+          { "detect": "known", "when": { "y1": "0", "y2": "-5" }, "say": "That is $B^\\mathsf{T}(1, -2)$: you used the columns of $B$ as rows. Row 1 of $B$ is $(4, 1)$." },
+          { "detect": "known", "when": { "y2": "4" }, "say": "Row 2 is $2 \\cdot 1 + 3 \\cdot (-2) = 2 - 6$." },
+          { "detect": "known", "when": { "y1": "6", "y2": "8" }, "say": "That is $B\\,(1, 2)$. The second entry of the vector is $-2$." }
+        ]
+      },
+      "hints": [
+        "Each entry is a row of $B$ dotted with $(1, -2)$.",
+        "Row 1: $4 \\cdot 1 + 1 \\cdot (-2)$.",
+        "Row 1 gives $4 - 2$, row 2 gives $2 - 6$."
+      ],
+      "check": { "say": "If $(1, -2)$ is an eigenvector for 2, the answer is $2\\,(1, -2)$." },
+      "solution": "$(2, -4) = 2\\,(1, -2)$. Confirmed: $B$ stretches this line by 2.",
+      "next": "Pick out another eigenvector"
+    },
+    {
+      "type": "choice",
+      "id": "which-is-for-two",
+      "title": "Another eigenvector for 2",
+      "why": "An eigenvector is a line, so it can look different from the one you found. This checks you can spot it.",
+      "prompt": "$B = \\begin{bmatrix}4&1\\\\2&3\\end{bmatrix}$ has eigenvalues 5 and 2. Which of these is an eigenvector for $\\lambda = 2$?",
+      "options": [
+        { "id": "minus-two-four", "text": "$(-2, 4)$", "correct": true, "say": "Right. It is $-2\\,(1, -2)$, and $B\\,(-2, 4) = (-4, 8) = 2\\,(-2, 4)$." },
+        { "id": "one-two", "text": "$(1, 2)$", "correct": false, "say": "Not this one: a sign slip. $B\\,(1, 2) = (6, 8)$, not a multiple of $(1, 2)$. The line is $y = -2x$." },
+        { "id": "one-one", "text": "$(1, 1)$", "correct": false, "say": "Not this one. It is an eigenvector, but for 5: $B\\,(1, 1) = (5, 5)$." },
+        { "id": "two-minus-one", "text": "$(2, -1)$", "correct": false, "say": "Not this one: $x$ and $y$ swapped. $B\\,(2, -1) = (7, 1)$." }
+      ],
+      "hint": "Is it a multiple of $(1, -2)$? Or multiply it by $B$.",
+      "solution": "Every non-zero multiple of $(1, -2)$ is an eigenvector for 2, negative multiples included.",
+      "review": true,
+      "next": "Compare the two lines"
+    },
+    {
+      "type": "step",
+      "id": "not-perpendicular",
+      "title": "Are they perpendicular?",
+      "why": "Next lesson needs eigenvectors that meet at a right angle. Test whether $B$'s do.",
+      "prompt": "The eigenvectors of $B$ are $(1, 1)$ for 5 and $(1, -2)$ for 2. Compute $(1, 1) \\cdot (1, -2)$.",
+      "answer": {
+        "fields": [{ "name": "d", "label": "dot product =", "key": "-1" }],
+        "verify": "dot(v1, v2)",
+        "slips": [
+          { "detect": "known", "when": { "d": "3" }, "say": "$1 \\cdot (-2)$ is $-2$, not $+2$." },
+          { "detect": "known", "when": { "d": "0" }, "say": "$1 \\cdot 1 + 1 \\cdot (-2)$ is not 0. Add the two products again." }
+        ]
+      },
+      "hints": [
+        "Multiply entry by entry, then add.",
+        "$1 \\cdot 1 + 1 \\cdot (-2)$.",
+        "$1 - 2$."
+      ],
+      "check": { "say": "Perpendicular vectors have dot product 0. Sketch the lines $y = x$ and $y = -2x$: is the angle between them a right angle?" },
+      "solution": "$-1 \\ne 0$, so they are not perpendicular. $B$ is not symmetric (its 1 and 2 differ). Next lesson: for a symmetric matrix they always are, and that is what the SVD uses.",
+      "next": "Finish the lesson"
+    }
+  ]
+}

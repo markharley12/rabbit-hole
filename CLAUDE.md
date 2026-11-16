@@ -6,14 +6,14 @@ the app's own content files. Personal project of Mark's; public on GitHub in the
 built around his setup (Claude Code on his PC, phone over Tailscale), so it is not meant to
 be turnkey for anyone else. **"rabbit-hole" is a working name** — rename freely.
 
-## Status: three courses, review, quizzes, and an AI server that has not yet run against the real Claude (16 Nov 2026)
+## Status: four courses (one built by the app's own AI), review, quizzes, and an AI server that works against the real Claude (16 Nov 2026)
 
 The map, plus one real course: **"Least squares to the pseudo-inverse"** on `15Axx` (Basic
 linear algebra), five lessons resuming where Mark's chat stopped; and a second,
 **"Principal components from the SVD"** (`principal-components-from-the-svd`) on `62Hxx`
 (Multivariate analysis), five lessons of PCA on one five-point data set, with 7 reading links; and a third,
 **"Gradient descent on a bowl"** (`gradient-descent-on-a-bowl`) on `65Kxx`, five lessons from the gradient to least
-squares by walking downhill, with the widget `descent-path` and 7 reading links. The AI server (Ask, new course) is built but has only run against a fake `claude`: the CLI on the PC was signed out. No photo
+squares by walking downhill, with the widget `descent-path` and 7 reading links. A fourth, **"Eigenvalues and eigenvectors of a 2×2 matrix"** (`eigenvalues-and-eigenvectors-of-a-2x2-matrix`) on `15Axx`, four lessons, was built by the app's own new-course flow on 16 Nov (the smoke test) and has been read by nobody. The AI server (Ask, new course, build) passed its smoke tests against the real `claude` on 16 Nov, from the PC only, never from the phone. No photo
 marking, no Capacitor yet. What is where:
 
 - **Map.** `tools/build_maths_map.py` → `public/content/maths/map.json` (593 nodes, 517
@@ -73,13 +73,13 @@ marking, no Capacitor yet. What is where:
   `dist/` and `/api/`, runs `claude -p` per turn, kinds table, answers every tool permission itself;
   tests use `server/tests/fake_claude.py`), tutor prompt `docs/agents/ask.md`, dock tool "Ask"
   (`src/tools/Chat.tsx`, `src/ai/`) shown only when `./api/state` answers. As built and open points:
-  docs/ai-sessions.md section 10. Not yet run against the real CLI (it was not signed in).
+  docs/ai-sessions.md section 10. `server/smoke_ask.py` passed against the real CLI on 16 Nov (two replies streamed, key held back).
 - **New course by talking** (stage D, step 4): "New course" in the Courses menu and "Make a course
   here" on an empty sheet (only when the server offers `new-course`), route `#<node>/new-course`
   (`src/ai/NewCourse.tsx`): chat (kind `new-course`, writes only `data/drafts/<id>/brief.md`), brief
   card, Build this; build job (kind `build-course`, Opus, writes only one new course folder; the
   server validates, up to 3 repair rounds, publishes, copies into `dist/content/`, sets a failure
-  aside in `data/drafts/<id>/failed-course/`). Only run against the fake claude; `server/smoke_new_course.py`.
+  aside in `data/drafts/<id>/failed-course/`). `server/smoke_new_course.py --build` passed against the real CLI on 16 Nov: brief in one turn, course built in 9 minutes with one repair round.
 - **Review** (stage C): lessons mark steps `review: true` (11 in the first course; `--publish` lists
   them in the index as `review`), plus cheat-sheet formulas as recall cards. Pure ladder 1/3/7/16/35/90
   days, good/hard/again, local-calendar-day due rule, interleaved sessions of at most 10:
@@ -102,7 +102,7 @@ marking, no Capacitor yet. What is where:
   KaTeX bundled; typed answers only until photo marking (Phase 5).
 
 Run everything with `npm run check` (typecheck, lint, Vitest, Python tests, course
-validation). Build and phone access are in [README.md](README.md). **What to build next, and how work is delegated to subagents, is in [docs/ROADMAP.md](docs/ROADMAP.md)** (written from Mark's brain dump of 15 Nov; stages A to D are built; **next: sign the CLI in and run `server/smoke_ask.py` and `server/smoke_new_course.py`, switch `tailscale serve` to the server, Mark's phone test**, then stage E. The AI design and what was built is in [docs/ai-sessions.md](docs/ai-sessions.md)). Course content is written to the contract in [docs/course-authoring.md](docs/course-authoring.md). Older open points and next
+validation). Build and phone access are in [README.md](README.md). **What to build next, and how work is delegated to subagents, is in [docs/ROADMAP.md](docs/ROADMAP.md)** (written from Mark's brain dump of 15 Nov; stages A to D are built; **next: Mark switches `tailscale serve` to the server and tests on his phone, and reads the AI-built eigenvalues course**, then stage E. The AI design and what was built is in [docs/ai-sessions.md](docs/ai-sessions.md)). Course content is written to the contract in [docs/course-authoring.md](docs/course-authoring.md). Older open points and next
 steps are at the end of [docs/HANDOFF.md](docs/HANDOFF.md).
 
 The planning docs, still the reference for later phases. **Read in this order:**

@@ -151,7 +151,7 @@ brief to `data/drafts/<id>/brief.md`. The app shows the brief with **Build this*
 three times, publishes, and copies the result into `dist/content/`. A course that never passes is
 moved to `data/drafts/<id>/failed-course/`. Built courses stay uncommitted. Prompts:
 [docs/agents/new-course.md](docs/agents/new-course.md), [docs/agents/build-course.md](docs/agents/build-course.md).
-This has only run against the fake claude so far. The hand-run check with the real CLI (the build
+It passed against the real CLI on 16 Nov 2026 (a four-lesson course in 9 minutes). The hand-run check with the real CLI (the build
 is long and uses Opus):
 
 ```bash

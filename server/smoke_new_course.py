@@ -4,7 +4,7 @@ build job) against the REAL claude. Not part of `npm run check`.
 
 It spends plan usage: the talk is two or three Sonnet turns with web search;
 a build is one long Opus job (tens of minutes) plus up to three repair turns.
-As of 16 Nov 2026 this flow has only ever run against server/tests/fake_claude.py.
+First passed against the real claude on 16 Nov 2026 (talk and --build).
 
 Start the server first (`npm run server`, or with --port), then:
 

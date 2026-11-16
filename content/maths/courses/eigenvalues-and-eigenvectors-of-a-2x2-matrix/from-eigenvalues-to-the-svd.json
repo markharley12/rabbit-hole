@@ -1,0 +1,224 @@
+{
+  "format": 1,
+  "id": "from-eigenvalues-to-the-svd",
+  "title": "From eigenvalues to the SVD",
+  "summary": "Symmetric matrices have perpendicular eigenvectors; the eigenvalues of AᵀA are σ², and its unit eigenvectors are the right singular vectors.",
+  "data": {
+    "S": [[2, 1], [1, 2]],
+    "A": [[2, 2], [-1, 1]],
+    "u": [1, 1],
+    "w": [1, -1]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "symmetric-eigenvectors",
+      "title": "A symmetric matrix",
+      "define": [
+        { "term": "symmetric", "meaning": "$S^\\mathsf{T} = S$: the entry in row $i$, column $j$ equals the one in row $j$, column $i$. Its two off-diagonal entries are equal." }
+      ],
+      "why": "Lesson 3's $B$ had eigenvectors at an angle. Lesson 1's matrix is symmetric; see whether that changes things.",
+      "prompt": "$S = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$ has eigenvectors $(1, 1)$ for 3 and $(1, -1)$ for 1. Compute $(1, 1) \\cdot (1, -1)$.",
+      "answer": {
+        "fields": [{ "name": "d", "label": "dot product =", "key": "0" }],
+        "verify": "dot(nullvec(S - entry(eigs(S), 1)*eye(2)), nullvec(S - entry(eigs(S), 2)*eye(2)))",
+        "slips": [
+          { "detect": "known", "when": { "d": "2" }, "say": "$1 \\cdot (-1)$ is $-1$, so the second product cancels the first." }
+        ]
+      },
+      "hints": [
+        "Multiply entry by entry, then add.",
+        "$1 \\cdot 1 + 1 \\cdot (-1)$.",
+        "$1 - 1$."
+      ],
+      "check": { "say": "Sketch $y = x$ and $y = -x$: they cross at a right angle." },
+      "solution": "0: perpendicular. This always holds: for a symmetric matrix, eigenvectors with different eigenvalues are perpendicular. The SVD rests on it.",
+      "next": "Spot which matrix qualifies"
+    },
+    {
+      "type": "choice",
+      "id": "which-has-perpendicular-eigenvectors",
+      "title": "Which has perpendicular eigenvectors?",
+      "why": "The rule is about the matrix, so you can tell before finding a single eigenvector.",
+      "prompt": "Each of these matrices has two different eigenvalues. Which one is sure to have perpendicular eigenvectors?",
+      "options": [
+        { "id": "symmetric", "text": "$\\begin{bmatrix}5&3\\\\3&5\\end{bmatrix}$", "correct": true, "say": "Right. It is symmetric (both off-diagonal entries are 3). Its eigenvectors are $(1, 1)$ and $(1, -1)$, with dot product 0." },
+        { "id": "b-from-lesson-3", "text": "$\\begin{bmatrix}4&1\\\\2&3\\end{bmatrix}$", "correct": false, "say": "Not this one. It is lesson 3's $B$: the off-diagonal entries differ, and its eigenvectors $(1, 1)$ and $(1, -2)$ have dot product $-1$." },
+        { "id": "upper-triangular", "text": "$\\begin{bmatrix}2&1\\\\0&3\\end{bmatrix}$", "correct": false, "say": "Not this one. Not symmetric ($1 \\ne 0$). Its eigenvectors are $(1, 0)$ for 2 and $(1, 1)$ for 3, with dot product 1." },
+        { "id": "lower-triangular", "text": "$\\begin{bmatrix}3&0\\\\1&2\\end{bmatrix}$", "correct": false, "say": "Not this one. Not symmetric ($0 \\ne 1$). Its eigenvectors are $(1, 1)$ for 3 and $(0, 1)$ for 2, with dot product 1." }
+      ],
+      "hint": "Look for the matrix that equals its own transpose.",
+      "solution": "Symmetric means perpendicular eigenvectors. $A^\\mathsf{T}A$ is always symmetric, which is why the SVD starts from it.",
+      "next": "Build AᵀA"
+    },
+    {
+      "type": "step",
+      "id": "build-ata",
+      "title": "AᵀA",
+      "why": "Any matrix $A$, symmetric or not, gives a symmetric $A^\\mathsf{T}A$. Its eigenvalues and eigenvectors are where the SVD of $A$ comes from.",
+      "prompt": "Let $A = \\begin{bmatrix}2&2\\\\-1&1\\end{bmatrix}$. Compute $A^\\mathsf{T}A$.",
+      "answer": {
+        "fields": [
+          { "name": "a11", "key": "5" },
+          { "name": "a12", "key": "3" },
+          { "name": "a21", "key": "3" },
+          { "name": "a22", "key": "5" }
+        ],
+        "matrix": [2, 2],
+        "verify": "tr(A)*A",
+        "slips": [
+          { "detect": "symmetric", "name": "AᵀA" },
+          { "detect": "known", "when": { "a11": "8", "a12": "0", "a21": "0", "a22": "2" }, "say": "That is $AA^\\mathsf{T}$: rows dotted with rows. $A^\\mathsf{T}A$ dots columns with columns." }
+        ]
+      },
+      "hints": [
+        "Row $i$, column $j$ of $A^\\mathsf{T}A$ is (column $i$ of $A$) $\\cdot$ (column $j$ of $A$).",
+        "The columns of $A$ are $(2, -1)$ and $(2, 1)$.",
+        "Top-left: $(2, -1) \\cdot (2, -1) = 4 + 1$. Top-right: $(2, -1) \\cdot (2, 1) = 4 - 1$."
+      ],
+      "check": { "say": "It must be symmetric: top-right equals bottom-left. The diagonal entries are the squared lengths of the columns." },
+      "solution": "$\\begin{bmatrix}5&3\\\\3&5\\end{bmatrix}$: symmetric, as promised.",
+      "review": true,
+      "next": "Find its eigenvalues"
+    },
+    {
+      "type": "step",
+      "id": "eigenvalues-of-ata",
+      "title": "The eigenvalues of AᵀA",
+      "why": "These two numbers will be the squares of the stretches of $A$.",
+      "prompt": "For $A = \\begin{bmatrix}2&2\\\\-1&1\\end{bmatrix}$, $A^\\mathsf{T}A = \\begin{bmatrix}5&3\\\\3&5\\end{bmatrix}$. Find the eigenvalues of $A^\\mathsf{T}A$, largest first.",
+      "answer": {
+        "fields": [
+          { "name": "l1", "label": "$\\lambda_1$ =", "key": "8" },
+          { "name": "l2", "label": "$\\lambda_2$ =", "key": "2" }
+        ],
+        "verify": "eigs(tr(A)*A)",
+        "slips": [
+          { "detect": "swapped" },
+          { "detect": "known", "when": { "l1": "-2", "l2": "-8" }, "say": "The roots of $(\\lambda - 8)(\\lambda - 2)$ are $+8$ and $+2$." }
+        ]
+      },
+      "hints": [
+        "Use $\\lambda^2 - \\operatorname{tr}\\,\\lambda + \\det = 0$.",
+        "Trace $5 + 5$, determinant $5 \\cdot 5 - 3 \\cdot 3$: so $\\lambda^2 - 10\\lambda + 16 = 0$.",
+        "Two numbers that add to 10 and multiply to 16."
+      ],
+      "check": { "say": "They add to 10 and multiply to 16. Both should be positive or zero: the eigenvalues of an $A^\\mathsf{T}A$ always are." },
+      "solution": "8 and 2. The eigenvectors are $(1, 1)$ and $(1, -1)$, as for $\\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$: perpendicular, since $A^\\mathsf{T}A$ is symmetric.",
+      "review": true,
+      "next": "Find v₁"
+    },
+    {
+      "type": "step",
+      "id": "unit-eigenvector",
+      "title": "v₁, a unit eigenvector",
+      "define": [
+        { "term": "right singular vector", "meaning": "$v_i$, the unit eigenvector of $A^\\mathsf{T}A$ for its $i$-th largest eigenvalue. Unit means length 1." }
+      ],
+      "why": "The SVD needs a direction and a length of 1, so that $v_1$ and $v_2$ form a pair of perpendicular unit axes.",
+      "prompt": "$A^\\mathsf{T}A = \\begin{bmatrix}5&3\\\\3&5\\end{bmatrix}$ has largest eigenvalue 8. Find $v_1$, its unit eigenvector for 8.",
+      "answer": {
+        "fields": [
+          { "name": "x1", "key": "1/sqrt(2)" },
+          { "name": "x2", "key": "1/sqrt(2)" }
+        ],
+        "accept": ["negated"],
+        "acceptNote": "Either sign is right: $-v_1$ lies on the same line and also has length 1.",
+        "verify": "rsv(A, 1)",
+        "slips": [
+          { "detect": "known", "when": { "x1": "1", "x2": "1" }, "say": "The right direction. Now make it length 1: divide by its length, $\\sqrt{1^2 + 1^2}$." },
+          { "detect": "known", "when": { "x1": "1/2", "x2": "1/2" }, "say": "Divide by the length of $(1, 1)$, which is $\\sqrt2$, not 2." },
+          { "detect": "scaled" }
+        ]
+      },
+      "hints": [
+        "Solve $(A^\\mathsf{T}A - 8I)\\,v = 0$ for a direction, then scale it to length 1.",
+        "$A^\\mathsf{T}A - 8I = \\begin{bmatrix}-3&3\\\\3&-3\\end{bmatrix}$, so $y = x$.",
+        "The direction is $(1, 1)$, with length $\\sqrt2$."
+      ],
+      "check": { "say": "A unit vector has $x^2 + y^2 = 1$. And $A^\\mathsf{T}A$ times it should be 8 times it." },
+      "solution": "$v_1 = (1, 1)/\\sqrt2$. In the same way $v_2 = (1, -1)/\\sqrt2$, perpendicular to it.",
+      "next": "Find the singular values"
+    },
+    {
+      "type": "step",
+      "id": "singular-values",
+      "title": "The singular values",
+      "define": [
+        { "term": "singular values", "meaning": "$\\sigma_i = \\sqrt{\\lambda_i}$, where $\\lambda_1 \\ge \\lambda_2$ are the eigenvalues of $A^\\mathsf{T}A$." }
+      ],
+      "why": "$\\sigma_1$ and $\\sigma_2$ are the stretches in the rotate, stretch, rotate picture of $A$. They come straight from eigenvalues.",
+      "prompt": "$A = \\begin{bmatrix}2&2\\\\-1&1\\end{bmatrix}$, and $A^\\mathsf{T}A$ has eigenvalues 8 and 2. Find $\\sigma_1$ and $\\sigma_2$. Type a square root as sqrt( ).",
+      "answer": {
+        "fields": [
+          { "name": "s1", "label": "$\\sigma_1$ =", "key": "2sqrt(2)" },
+          { "name": "s2", "label": "$\\sigma_2$ =", "key": "sqrt(2)" }
+        ],
+        "verify": "vec(sv(A, 1), sv(A, 2))",
+        "slips": [
+          { "detect": "swapped" },
+          { "detect": "known", "when": { "s1": "8", "s2": "2" }, "say": "Those are the eigenvalues $\\lambda$ of $A^\\mathsf{T}A$. Each $\\sigma$ is the square root of one." },
+          { "detect": "known", "when": { "s1": "4", "s2": "1" }, "say": "That halves the eigenvalues. A singular value is the square root: $\\sigma = \\sqrt{\\lambda}$." }
+        ]
+      },
+      "hints": [
+        "Take the square root of each eigenvalue, largest first.",
+        "$\\sqrt8 = \\sqrt{4 \\cdot 2}$, and $\\sqrt4$ comes out.",
+        "$\\sigma_1 = 2\\sqrt2$."
+      ],
+      "check": { "say": "$\\sigma_1 \\sigma_2$ should equal $|\\det A| = |2 \\cdot 1 - 2 \\cdot (-1)| = 4$." },
+      "solution": "$\\sigma_1 = 2\\sqrt2$ and $\\sigma_2 = \\sqrt2$. With $v_1, v_2$ from the eigenvectors, that is the stretch half of the SVD, all from eigenvalues.",
+      "review": true,
+      "next": "See the stretch directly"
+    },
+    {
+      "type": "step",
+      "id": "a-times-one-one",
+      "title": "A times (1, 1)",
+      "why": "A singular value is a stretch. Send $v_1$'s direction through $A$ and watch the length change.",
+      "prompt": "With $A = \\begin{bmatrix}2&2\\\\-1&1\\end{bmatrix}$, compute $A\\,(1, 1)$.",
+      "answer": {
+        "fields": [
+          { "name": "y1", "key": "4" },
+          { "name": "y2", "key": "0" }
+        ],
+        "verify": "A*u",
+        "slips": [
+          { "detect": "known", "when": { "y1": "1", "y2": "3" }, "say": "That is $A^\\mathsf{T}(1, 1)$: you used the columns of $A$ as rows. Row 1 of $A$ is $(2, 2)$." },
+          { "detect": "known", "when": { "y2": "-2" }, "say": "Row 2 is $(-1, 1)$, and $(-1, 1) \\cdot (1, 1) = -1 + 1$." }
+        ]
+      },
+      "hints": [
+        "Each entry is a row of $A$ dotted with $(1, 1)$, which adds up that row.",
+        "Row 1 is $(2, 2)$, row 2 is $(-1, 1)$.",
+        "Row 1 gives $2 + 2$, row 2 gives $-1 + 1$."
+      ],
+      "check": { "say": "Its squared length should be $\\lambda_1 = 8$ times the squared length of $(1, 1)$, which is 2." },
+      "solution": "$(4, 0)$ has length 4; $(1, 1)$ has length $\\sqrt2$. So $A$ stretches this direction by $4/\\sqrt2 = 2\\sqrt2 = \\sigma_1$. Note $(4, 0)$ is not along $(1, 1)$: $A$ also turns it. $v_1$ is not an eigenvector of $A$, only of $A^\\mathsf{T}A$.",
+      "next": "Now the other direction"
+    },
+    {
+      "type": "step",
+      "id": "stretch-of-one-minus-one",
+      "title": "The stretch along (1, −1)",
+      "why": "The second right singular vector should be stretched by $\\sigma_2$. Check it with lengths alone.",
+      "prompt": "With $A = \\begin{bmatrix}2&2\\\\-1&1\\end{bmatrix}$: by what factor does $A$ stretch $(1, -1)$? That is, find $\\|A\\,(1, -1)\\| \\,/\\, \\|(1, -1)\\|$.",
+      "answer": {
+        "fields": [{ "name": "f", "label": "factor =", "key": "sqrt(2)" }],
+        "verify": "sqrt(sq(A*w)/sq(w))",
+        "slips": [
+          { "detect": "known", "when": { "f": "2" }, "say": "That is the length of $A\\,(1, -1)$. Divide by the length of $(1, -1)$ too." },
+          { "detect": "known", "when": { "f": "1" }, "say": "Compare lengths, not the vectors' entries. What is the length of $A\\,(1, -1)$?" }
+        ]
+      },
+      "hints": [
+        "First compute $A\\,(1, -1)$, then both lengths.",
+        "$A\\,(1, -1) = (0, -2)$, which has length 2.",
+        "The length of $(1, -1)$ is $\\sqrt{1 + 1}$."
+      ],
+      "check": { "say": "It should equal $\\sigma_2$ from two screens back: the square root of $A^\\mathsf{T}A$'s smaller eigenvalue." },
+      "solution": "$2/\\sqrt2 = \\sqrt2 = \\sigma_2$. And $(4, 0)$ and $(0, -2)$ are perpendicular: the left singular vectors $u_1, u_2$ point along them. Every piece of the SVD of $A$ came from an eigenvalue problem you can now do by hand.",
+      "next": "Finish the course"
+    }
+  ]
+}

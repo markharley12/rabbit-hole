@@ -1,0 +1,68 @@
+{
+  "format": 1,
+  "id": "eigenvalues-and-eigenvectors-of-a-2x2-matrix",
+  "nodeId": "15Axx",
+  "title": "Eigenvalues and eigenvectors of a 2×2 matrix",
+  "summary": "Eigenvalues and eigenvectors of 2×2 matrices by hand: Av = λv, the characteristic polynomial det(A − λI), solving (A − λI)v = 0, perpendicular eigenvectors of symmetric matrices, and the singular values of the singular value decomposition (SVD) from AᵀA.",
+  "written": "Written by Claude Code (Opus 5.5) on 16 Nov 2026 from a brief agreed in the app. Every example worked by hand to small integers or simple roots; every answer key is re-derived with sympy by tools/validate_courses.py.",
+  "sources": [
+    {
+      "name": "The brief agreed in the app (16 Nov 2026)",
+      "note": "The four lessons, the three matrices [[2,1],[1,2]], [[4,1],[2,3]] and [[2,2],[−1,1]] with their eigenvalues, eigenvectors and singular values, and what is left out (complex and repeated eigenvalues, diagonalisation, 3×3)."
+    },
+    {
+      "name": "Margalit and Rabinoff, Interactive Linear Algebra, 5.1 Eigenvalues and Eigenvectors (LibreTexts)",
+      "url": "https://math.libretexts.org/Bookshelves/Linear_Algebra/Interactive_Linear_Algebra_(Margalit_and_Rabinoff)/05%3A_Eigenvalues_and_Eigenvectors/5.01%3A_Eigenvalues_and_Eigenvectors",
+      "note": "The definitions: an eigenvector is a non-zero v with Av = λv, the zero vector never is one, an eigenvalue may be zero; the eigenspace is the null space of A − λI; checking a vector by testing whether Av is a multiple of v; non-zero multiples of an eigenvector are eigenvectors with the same eigenvalue."
+    },
+    {
+      "name": "Margalit and Rabinoff, Interactive Linear Algebra, 5.2 The Characteristic Polynomial (LibreTexts)",
+      "url": "https://math.libretexts.org/Bookshelves/Linear_Algebra/Interactive_Linear_Algebra_(Margalit_and_Rabinoff)/05%3A_Eigenvalues_and_Eigenvectors/5.02%3A_The_Characteristic_Polynomial",
+      "note": "The characteristic polynomial det(A − λI); λ is an eigenvalue exactly when it is a root, because A − λI is then not invertible; the 2×2 form λ² − Tr(A)λ + det(A) with Tr(A) = a + d and det(A) = ad − bc. Its example [[5,2],[2,1]] has irrational roots, so this course uses matrices with integer eigenvalues."
+    },
+    {
+      "name": "Symmetric matrix (Wikipedia)",
+      "url": "https://en.wikipedia.org/wiki/Symmetric_matrix",
+      "note": "A real symmetric matrix has real eigenvalues, and eigenvectors for distinct eigenvalues are orthogonal (with a proof); it can be diagonalised by an orthogonal matrix."
+    },
+    {
+      "name": "Singular value decomposition (Wikipedia)",
+      "url": "https://en.wikipedia.org/wiki/Singular_value_decomposition",
+      "note": "The right singular vectors are eigenvectors of MᵀM, and the non-zero singular values are the square roots of its non-zero eigenvalues."
+    }
+  ],
+  "tunnels": [
+    {
+      "to": "least-squares-to-the-pseudo-inverse",
+      "kind": "related",
+      "why": "Its SVD lessons find singular values and right singular vectors from the eigenvalues and eigenvectors of AᵀA, as the last lesson here does."
+    },
+    {
+      "to": "principal-components-from-the-svd",
+      "kind": "related",
+      "why": "The principal directions there are the eigenvectors of a symmetric 2×2 covariance matrix, found by the method of this course."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "what-an-eigenvector-does",
+      "title": "What an eigenvector does",
+      "summary": "Multiply one 2×2 matrix by three vectors, see which ones only get stretched, and read off the stretch."
+    },
+    {
+      "id": "the-characteristic-polynomial",
+      "title": "The characteristic polynomial",
+      "summary": "Turn Av = λv into det(A − λI) = 0, expand it for a 2×2, and solve it with the trace and determinant."
+    },
+    {
+      "id": "finding-the-eigenvectors",
+      "title": "Finding the eigenvectors",
+      "summary": "For each eigenvalue of B, solve (B − λI)v = 0 for a direction, check Bv = λv by hand, and see they are not perpendicular."
+    },
+    {
+      "id": "from-eigenvalues-to-the-svd",
+      "title": "From eigenvalues to the SVD",
+      "summary": "Symmetric matrices have perpendicular eigenvectors; the eigenvalues of AᵀA are σ², and its unit eigenvectors are the right singular vectors."
+    }
+  ]
+}

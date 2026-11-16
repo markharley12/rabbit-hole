@@ -1,0 +1,164 @@
+{
+  "format": 1,
+  "id": "what-an-eigenvector-does",
+  "title": "What an eigenvector does",
+  "summary": "Multiply one 2×2 matrix by three vectors, see which ones only get stretched, and read off the stretch.",
+  "data": {
+    "A": [[2, 1], [1, 2]],
+    "u": [1, 1],
+    "w": [1, -1],
+    "e1": [1, 0],
+    "z": [-2, 2]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "multiply-by-one-one",
+      "title": "A times (1, 1)",
+      "why": "A matrix moves vectors around. Most vectors get turned; a few only get stretched. Start by watching what this one does.",
+      "prompt": "Let $A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$. Compute $A\\,(1, 1)$.",
+      "answer": {
+        "fields": [
+          { "name": "x1", "key": "3" },
+          { "name": "x2", "key": "3" }
+        ],
+        "verify": "A*u",
+        "slips": [
+          { "detect": "known", "when": { "x1": "2", "x2": "1" }, "say": "That is only the first column of $A$. $(1, 1)$ takes one of each column: add both columns." }
+        ]
+      },
+      "hints": [
+        "Each entry of $A\\,(1, 1)$ is one row of $A$ dotted with $(1, 1)$.",
+        "Row 1 of $A$ is $(2, 1)$, row 2 is $(1, 2)$.",
+        "Row 1 gives $2 \\cdot 1 + 1 \\cdot 1$."
+      ],
+      "check": { "say": "Dotting a row with $(1, 1)$ just adds up that row. So each entry is a row sum of $A$." },
+      "solution": "$(3, 3) = 3\\,(1, 1)$: same direction, three times as long. $A$ only stretched it.",
+      "next": "Now try (1, −1)"
+    },
+    {
+      "type": "step",
+      "id": "multiply-by-one-minus-one",
+      "title": "A times (1, −1)",
+      "why": "A second direction to test. Watch whether the answer still points along the vector you started with.",
+      "prompt": "With $A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$, compute $A\\,(1, -1)$.",
+      "answer": {
+        "fields": [
+          { "name": "x1", "key": "1" },
+          { "name": "x2", "key": "-1" }
+        ],
+        "verify": "A*w",
+        "slips": [
+          { "detect": "sign" },
+          { "detect": "known", "when": { "x2": "1" }, "say": "Row 2 is $(1, 2)$, so its entry is $1 \\cdot 1 + 2 \\cdot (-1) = 1 - 2$." },
+          { "detect": "known", "when": { "x1": "3", "x2": "3" }, "say": "The minus sign was dropped: that is $A\\,(1, 1)$ again. The second entry of the vector is $-1$." }
+        ]
+      },
+      "hints": [
+        "Same as before: each entry is a row of $A$ dotted with the vector.",
+        "Row 1: $2 \\cdot 1 + 1 \\cdot (-1)$. Mind the sign.",
+        "Row 1 gives $2 - 1$, row 2 gives $1 - 2$."
+      ],
+      "check": { "say": "Is your answer a number times $(1, -1)$? Its two entries should be equal and opposite." },
+      "solution": "$(1, -1) = 1 \\cdot (1, -1)$: $A$ left this direction exactly as it was. A stretch by 1 still counts as only stretching.",
+      "next": "Now try (1, 0)"
+    },
+    {
+      "type": "step",
+      "id": "multiply-by-one-zero",
+      "title": "A times (1, 0)",
+      "why": "Now a vector that is not special, to see what \"turned\" looks like.",
+      "prompt": "With $A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$, compute $A\\,(1, 0)$.",
+      "answer": {
+        "fields": [
+          { "name": "x1", "key": "2" },
+          { "name": "x2", "key": "1" }
+        ],
+        "verify": "A*e1",
+        "slips": [
+          { "detect": "known", "when": { "x1": "1", "x2": "2" }, "say": "That is the second column of $A$. $(1, 0)$ picks out the first column." },
+          { "detect": "known", "when": { "x2": "0" }, "say": "Row 2 of $A$ is $(1, 2)$, and $(1, 2) \\cdot (1, 0)$ is $1$, not $0$." }
+        ]
+      },
+      "hints": [
+        "$A$ times $(1, 0)$ takes one of the first column and none of the second.",
+        "So the answer is a column of $A$. Which one?",
+        "Row 1: $2 \\cdot 1 + 1 \\cdot 0$. Row 2: $1 \\cdot 1 + 2 \\cdot 0$."
+      ],
+      "check": { "say": "It should equal the first column of $A$." },
+      "solution": "$(2, 1)$ is not a multiple of $(1, 0)$: its second entry is not 0. $A$ turned this vector, so it is not one of the special ones.",
+      "next": "Name the special ones"
+    },
+    {
+      "type": "step",
+      "id": "read-off-lambda",
+      "title": "The stretch factor",
+      "define": [
+        { "term": "eigenvector", "meaning": "A non-zero vector $v$ that $A$ only stretches: $Av = \\lambda v$ for some number $\\lambda$. The zero vector never counts." },
+        { "term": "eigenvalue", "meaning": "The number $\\lambda$ in $Av = \\lambda v$: how much $A$ stretches that eigenvector. It may be 1, 0 or negative." }
+      ],
+      "why": "Eigenvectors are the directions a matrix keeps. The eigenvalue says what it does along each one, and that is most of what the matrix does.",
+      "prompt": "For $A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$: $A\\,(1, 1) = (3, 3)$ and $A\\,(1, -1) = (1, -1)$. Give the eigenvalue for each vector.",
+      "answer": {
+        "fields": [
+          { "name": "l1", "label": "for $(1, 1)$: $\\lambda$ =", "key": "3" },
+          { "name": "l2", "label": "for $(1, -1)$: $\\lambda$ =", "key": "1" }
+        ],
+        "verify": "vec(entry(A*u, 1)/entry(u, 1), entry(A*w, 1)/entry(w, 1))",
+        "slips": [{ "detect": "swapped" }]
+      },
+      "hints": [
+        "$\\lambda$ is the number that turns $v$ into $Av$.",
+        "Compare first entries: $\\lambda$ times the first entry of $v$ is the first entry of $Av$.",
+        "For $(1, 1)$: $\\lambda \\cdot 1 = 3$."
+      ],
+      "check": { "say": "Multiply each vector by your $\\lambda$. You should get $Av$ back, in both entries." },
+      "solution": "$A$ stretches $(1, 1)$ by 3 and leaves $(1, -1)$ alone. Every other direction gets turned, as $(1, 0)$ did.",
+      "next": "Pick out the eigenvectors"
+    },
+    {
+      "type": "choice",
+      "id": "which-are-eigenvectors",
+      "title": "Which are eigenvectors?",
+      "why": "Being an eigenvector is about direction, not about length. This tests that, and the one exception.",
+      "prompt": "$A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$. Tick every eigenvector of $A$.",
+      "multiple": true,
+      "options": [
+        { "id": "three-three", "text": "$(3, 3)$", "correct": true, "say": "Right. $A\\,(3, 3) = (9, 9) = 3\\,(3, 3)$. It is $3\\,(1, 1)$, so it lies on the same line and has the same eigenvalue." },
+        { "id": "five-minus-five", "text": "$(5, -5)$", "correct": true, "say": "Right. $A\\,(5, -5) = (5, -5)$, eigenvalue 1, the same as for $(1, -1)$." },
+        { "id": "zero", "text": "$(0, 0)$", "correct": false, "say": "Not this one. $A\\,(0, 0) = (0, 0)$ for every matrix, so it would make every number an eigenvalue. The zero vector is ruled out by definition." },
+        { "id": "one-zero", "text": "$(1, 0)$", "correct": false, "say": "Not this one. $A\\,(1, 0) = (2, 1)$, which points somewhere else: $A$ turned it." },
+        { "id": "one-two", "text": "$(1, 2)$", "correct": false, "say": "Not this one. $A\\,(1, 2) = (4, 5)$, and no number times $(1, 2)$ gives $(4, 5)$: $4/1 \\ne 5/2$." }
+      ],
+      "hint": "Multiply each by $A$, or ask whether it lies on the line through $(1, 1)$ or the line through $(1, -1)$.",
+      "solution": "Any non-zero multiple of an eigenvector is an eigenvector, with the same eigenvalue. So an eigenvector is really a direction: a whole line through the origin.",
+      "review": true,
+      "next": "Try a negative multiple"
+    },
+    {
+      "type": "step",
+      "id": "a-negative-multiple",
+      "title": "A negative multiple",
+      "why": "A multiple may be negative. It flips the arrow but keeps the line, and the stretch stays the same.",
+      "prompt": "$A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$ and $v = (-2, 2)$. Find the eigenvalue $\\lambda$ with $Av = \\lambda v$.",
+      "answer": {
+        "fields": [{ "name": "l", "label": "$\\lambda$ =", "key": "1" }],
+        "verify": "entry(A*z, 1)/entry(z, 1)",
+        "slips": [
+          { "detect": "known", "when": { "l": "-2" }, "say": "$-2$ is how $v$ relates to $(1, -1)$: $v = -2\\,(1, -1)$. The eigenvalue is what $A$ multiplies $v$ by." },
+          { "detect": "known", "when": { "l": "3" }, "say": "3 belongs to the line through $(1, 1)$. Is $(-2, 2)$ on that line?" },
+          { "detect": "known", "when": { "l": "-1" }, "say": "Check the sign: $A\\,(-2, 2)$ has the same signs as $(-2, 2)$." }
+        ]
+      },
+      "hints": [
+        "Row 1 of $A$ dotted with $(-2, 2)$ gives the first entry of $Av$.",
+        "$Av = (2 \\cdot (-2) + 1 \\cdot 2,\\ 1 \\cdot (-2) + 2 \\cdot 2)$.",
+        "$Av = (-2, 2)$. What number times $v$ is that?"
+      ],
+      "check": { "say": "$(-2, 2) = -2\\,(1, -1)$. Multiples share an eigenvalue, so you can predict the answer before you multiply." },
+      "solution": "$Av = v$, so $\\lambda = 1$, the same as for $(1, -1)$. The sign of the multiple does not matter. Next lesson: how to find the eigenvalues without guessing vectors.",
+      "review": true,
+      "next": "Finish the lesson"
+    }
+  ]
+}

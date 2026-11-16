@@ -178,8 +178,8 @@ differs from the design above, and what was learned:
   `result` (`is_error`, `result`, `total_cost_usd`; the turn's cost is the difference from the
   session's last total). Confirmed against the real CLI only for the error path: the smoke test
   on 15 Nov got `result` with `is_error` and "Failed to authenticate: this login reached its time
-  limit", because the CLI on the PC was not signed in. **The streaming and permission shapes are
-  not yet confirmed against the real CLI**: run `server/smoke_ask.py` once signed in.
+  limit", because the CLI on the PC was not signed in. **Confirmed against the real CLI on 16 Nov
+  2026** (CLI 2.1.325): `server/smoke_ask.py` streamed two replies (66 and 35 deltas) and the tutor held the key back when asked "just tell me the answer".
 - **Service worker.** Its fetch handler only answered GETs for files in the build's list, so
   `/api/` was already never cached; an explicit pass-through now says so.
 - Open: `tailscale serve` and the systemd unit (`server/rabbit-hole.service`) are written but
@@ -191,8 +191,11 @@ differs from the design above, and what was learned:
 `new-course` and `build-course` rows in the kinds table, `docs/agents/new-course.md` and
 `build-course.md`, `server/tests/test_new_course.py`, `server/smoke_new_course.py`; in the app
 `src/ai/NewCourse.tsx` (route `#<node>/new-course`), `course-client.ts`, the shared
-`ChatParts.tsx`. **Only ever run against `fake_claude.py`**: the CLI was signed out, so nothing
-here has met the real CLI, WebSearch or WebFetch. What differs from sections 3 and 5:
+`ChatParts.tsx`. **Run against the real CLI on 16 Nov 2026** (`server/smoke_new_course.py --build`): the talk read the
+authoring doc, searched, opened pages and wrote a ready brief in one turn; the build wrote four lessons and a
+cheat sheet, the validator found 11 problems (all one cause: a known slip listing a box whose value was right),
+one repair round fixed them, and it published. One bug found: a source URL with a bracketed part was cut at
+"(" (fixed, tested). What differs from sections 3 and 5:
 
 - **The build has no Bash.** Section 3 gave it `npm run validate`; instead the server runs
   `tools/validate_courses.py` itself (subprocess, 300 s limit) after each turn, and sends this

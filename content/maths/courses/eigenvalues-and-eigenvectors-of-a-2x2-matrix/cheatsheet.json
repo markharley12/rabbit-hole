@@ -1,0 +1,121 @@
+{
+  "format": 1,
+  "sections": [
+    {
+      "title": "Eigenvectors",
+      "items": [
+        {
+          "id": "eigen-equation",
+          "name": "Eigenvector and eigenvalue",
+          "formula": "$Av = \\lambda v$, with $v \\ne 0$",
+          "when": "To test a vector: multiply it by $A$ and see whether you get a multiple of it. The multiple is $\\lambda$.",
+          "cue": "The equation that makes a non-zero $v$ an eigenvector of $A$ with eigenvalue $\\lambda$",
+          "lesson": "what-an-eigenvector-does"
+        },
+        {
+          "id": "multiples",
+          "name": "Multiples of an eigenvector",
+          "formula": "If $Av = \\lambda v$, then $A(cv) = \\lambda\\,(cv)$ for every $c \\ne 0$.",
+          "when": "An eigenvector is a whole line through the origin. Any non-zero multiple, negative ones too, has the same $\\lambda$.",
+          "cue": "What $A$ does to $cv$ when $v$ is an eigenvector for $\\lambda$",
+          "lesson": "what-an-eigenvector-does"
+        }
+      ]
+    },
+    {
+      "title": "Finding the eigenvalues",
+      "items": [
+        {
+          "id": "collect-v",
+          "name": "Collect v on one side",
+          "formula": "$(A - \\lambda I)\\,v = 0$",
+          "when": "$Av = \\lambda v$ rewritten as one matrix times $v$. $A - \\lambda I$ is $A$ with $\\lambda$ taken off the diagonal only.",
+          "cue": "$Av = \\lambda v$ rewritten as a single matrix times $v$",
+          "lesson": "the-characteristic-polynomial"
+        },
+        {
+          "id": "characteristic-equation",
+          "name": "The eigenvalue equation",
+          "formula": "$\\det(A - \\lambda I) = 0$",
+          "when": "To find every eigenvalue without guessing vectors: a non-zero $v$ is sent to 0 exactly when the determinant is 0.",
+          "cue": "The equation in $\\lambda$ alone whose roots are the eigenvalues of $A$",
+          "lesson": "the-characteristic-polynomial"
+        },
+        {
+          "id": "trace-and-determinant",
+          "name": "Trace and determinant",
+          "formula": "For $\\begin{bmatrix}a&b\\\\c&d\\end{bmatrix}$: $\\operatorname{tr} = a + d$, $\\det = ad - bc$.",
+          "when": "The two numbers the $2 \\times 2$ shortcut needs. The trace is the diagonal only; $bc$ is subtracted.",
+          "cue": "The trace and the determinant of a $2 \\times 2$ matrix, from its four entries",
+          "lesson": "the-characteristic-polynomial"
+        },
+        {
+          "id": "two-by-two-shortcut",
+          "name": "The 2×2 shortcut",
+          "formula": "$\\lambda^2 - \\operatorname{tr}(A)\\,\\lambda + \\det(A) = 0$",
+          "when": "To write $\\det(A - \\lambda I)$ for a $2 \\times 2$ at once, from the trace and the determinant.",
+          "cue": "The characteristic polynomial of a $2 \\times 2$ matrix in terms of its trace and determinant",
+          "lesson": "the-characteristic-polynomial"
+        },
+        {
+          "id": "sum-and-product",
+          "name": "Sum and product of eigenvalues",
+          "formula": "$\\lambda_1 + \\lambda_2 = \\operatorname{tr}(A)$ and $\\lambda_1 \\lambda_2 = \\det(A)$",
+          "when": "To check eigenvalues you found, or to guess them when they are integers.",
+          "cue": "What the two eigenvalues of a $2 \\times 2$ add up to and multiply to",
+          "lesson": "the-characteristic-polynomial"
+        }
+      ]
+    },
+    {
+      "title": "Finding the eigenvectors",
+      "items": [
+        {
+          "id": "solve-for-v",
+          "name": "Eigenvector from an eigenvalue",
+          "formula": "Solve $(A - \\lambda I)\\,v = 0$: both rows give one equation; pick $x = 1$.",
+          "when": "Once you have $\\lambda$. If the two rows do not say the same thing, $\\lambda$ or $A - \\lambda I$ has a slip.",
+          "cue": "How to get the eigenvector for a known eigenvalue $\\lambda$ of a $2 \\times 2$",
+          "lesson": "finding-the-eigenvectors"
+        },
+        {
+          "id": "check-by-multiplying",
+          "name": "Check by multiplying",
+          "formula": "$B\\,(1, -2) = (2, -4) = 2\\,(1, -2)$",
+          "when": "Always multiply back: if $Bv$ is not $\\lambda v$, something earlier went wrong.",
+          "cue": "In the course's example $B = \\begin{bmatrix}4&1\\\\2&3\\end{bmatrix}$: the check that $(1, -2)$ is an eigenvector for 2",
+          "lesson": "finding-the-eigenvectors"
+        }
+      ]
+    },
+    {
+      "title": "Symmetric matrices and the SVD",
+      "items": [
+        {
+          "id": "symmetric-perpendicular",
+          "name": "Symmetric means perpendicular",
+          "formula": "$S^\\mathsf{T} = S$: eigenvectors for different eigenvalues are perpendicular.",
+          "when": "For any symmetric matrix, including every $A^\\mathsf{T}A$. A non-symmetric one, like $B$, need not have them.",
+          "cue": "What is true of the eigenvectors of a symmetric matrix, for two different eigenvalues",
+          "lesson": "from-eigenvalues-to-the-svd"
+        },
+        {
+          "id": "singular-values",
+          "name": "Singular values",
+          "formula": "$\\sigma_i = \\sqrt{\\lambda_i}$, with $\\lambda_i$ the eigenvalues of $A^\\mathsf{T}A$",
+          "when": "To get the stretches of $A$ in its SVD, largest first. Do not stop at $\\lambda$: take the root.",
+          "cue": "How each singular value $\\sigma_i$ of $A$ comes from an eigenvalue",
+          "lesson": "from-eigenvalues-to-the-svd"
+        },
+        {
+          "id": "right-singular-vectors",
+          "name": "Right singular vectors",
+          "formula": "$v_i$ = unit eigenvector of $A^\\mathsf{T}A$; then $\\|A v_i\\| = \\sigma_i$.",
+          "when": "To get the input directions of the SVD. Scale each eigenvector to length 1.",
+          "cue": "Where the right singular vectors $v_i$ of $A$ come from, and how long $A v_i$ is",
+          "lesson": "from-eigenvalues-to-the-svd"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,210 @@
+{
+  "format": 1,
+  "id": "the-characteristic-polynomial",
+  "title": "The characteristic polynomial",
+  "summary": "Turn Av = λv into det(A − λI) = 0, expand it for a 2×2, and solve it with the trace and determinant.",
+  "data": {
+    "A": [[2, 1], [1, 2]],
+    "B": [[4, 1], [2, 3]]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "a-minus-three-i",
+      "title": "Collect v on one side",
+      "define": [
+        { "term": "identity matrix I", "meaning": "$I = \\begin{bmatrix}1&0\\\\0&1\\end{bmatrix}$. It leaves every vector as it is: $Iv = v$." },
+        { "term": "A − λI", "meaning": "$A$ with $\\lambda$ taken off each diagonal entry. The other entries stay." }
+      ],
+      "why": "$Av = \\lambda v$ has $v$ on both sides. Writing $\\lambda v$ as $\\lambda I v$ lets you collect it: $(A - \\lambda I)\\,v = 0$, one matrix times $v$.",
+      "prompt": "For $A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$ and $\\lambda = 3$, write out $A - 3I$.",
+      "answer": {
+        "fields": [
+          { "name": "a11", "key": "-1" },
+          { "name": "a12", "key": "1" },
+          { "name": "a21", "key": "1" },
+          { "name": "a22", "key": "-1" }
+        ],
+        "matrix": [2, 2],
+        "verify": "A - 3*eye(2)",
+        "slips": [
+          { "detect": "known", "when": { "a12": "-2", "a21": "-2" }, "say": "$3I$ has 3 on the diagonal and 0 off it. Only the diagonal of $A$ changes." }
+        ]
+      },
+      "hints": [
+        "$3I = \\begin{bmatrix}3&0\\\\0&3\\end{bmatrix}$.",
+        "Subtract entry by entry. Off the diagonal you subtract 0.",
+        "The diagonal entries become $2 - 3$; the off-diagonal ones stay as in $A$."
+      ],
+      "check": { "say": "Multiply your matrix by $(1, 1)$. Since $A\\,(1, 1) = 3\\,(1, 1)$, you should get $(0, 0)$." },
+      "solution": "$(A - 3I)\\,(1, 1) = (0, 0)$: the eigenvector from lesson 1 is sent to zero. That is $Av = \\lambda v$ rewritten.",
+      "next": "Take its determinant"
+    },
+    {
+      "type": "step",
+      "id": "determinant-is-zero",
+      "title": "Its determinant",
+      "define": [
+        { "term": "determinant", "meaning": "For $M = \\begin{bmatrix}a&b\\\\c&d\\end{bmatrix}$, $\\det M = ad - bc$." },
+        { "term": "zero determinant", "meaning": "A square $M$ sends some non-zero $v$ to 0 exactly when $\\det M = 0$ (then $M$ has no inverse)." }
+      ],
+      "why": "You don't know $v$ yet. The determinant tests whether a non-zero $v$ with $(A - \\lambda I)\\,v = 0$ exists, without finding it.",
+      "prompt": "$A - 3I = \\begin{bmatrix}-1&1\\\\1&-1\\end{bmatrix}$ for $A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$. Compute $\\det(A - 3I)$.",
+      "answer": {
+        "fields": [{ "name": "d", "label": "$\\det$ =", "key": "0" }],
+        "verify": "det(A - 3*eye(2))",
+        "slips": [
+          { "detect": "known", "when": { "d": "2" }, "say": "$ad - bc$: the off-diagonal product is subtracted. $(-1)(-1) - 1 \\cdot 1$." },
+          { "detect": "known", "when": { "d": "-2" }, "say": "$(-1)(-1)$ is $+1$, not $-1$." }
+        ]
+      },
+      "hints": [
+        "$ad - bc$, with $a$ and $d$ on the diagonal.",
+        "$ad = (-1)(-1)$ and $bc = 1 \\cdot 1$.",
+        "$ad = 1$ and $bc = 1$."
+      ],
+      "check": { "say": "It must come out so that a non-zero $v$ can exist: you already know one, $(1, 1)$." },
+      "solution": "0, as it must be. Compare $\\lambda = 4$: $A - 4I = \\begin{bmatrix}-2&1\\\\1&-2\\end{bmatrix}$ has determinant $4 - 1 = 3 \\ne 0$, so 4 is not an eigenvalue. The eigenvalues are exactly the $\\lambda$ that make $\\det(A - \\lambda I) = 0$.",
+      "next": "Expand it with λ left in"
+    },
+    {
+      "type": "step",
+      "id": "expand-the-determinant",
+      "title": "Expand det(B − λI)",
+      "define": [
+        { "term": "characteristic polynomial", "meaning": "$\\det(A - \\lambda I)$, written out as a polynomial in $\\lambda$. Its roots are the eigenvalues." }
+      ],
+      "why": "Keep $\\lambda$ as an unknown and the determinant becomes a quadratic. Its roots are every eigenvalue at once.",
+      "prompt": "Let $B = \\begin{bmatrix}4&1\\\\2&3\\end{bmatrix}$. Expand $\\det(B - \\lambda I)$ as a polynomial in $\\lambda$. Type $\\lambda$ as the letter x.",
+      "answer": {
+        "fields": [{ "name": "p", "label": "$\\det(B - \\lambda I)$ =", "key": "x^2 - 7x + 10" }],
+        "vars": ["x"],
+        "verify": "expand(det(B - x*eye(2)))",
+        "slips": [
+          { "detect": "known", "when": { "p": "x^2 - 7x + 14" }, "say": "The off-diagonal product $1 \\cdot 2$ was added. In $ad - bc$ it is subtracted." },
+          { "detect": "known", "when": { "p": "x^2 - 7x + 12" }, "say": "That is $(4 - \\lambda)(3 - \\lambda)$ alone. Now subtract $bc = 1 \\cdot 2$." },
+          { "detect": "known", "when": { "p": "x^2 + 7x + 10" }, "say": "Both $\\lambda$ terms of $(4 - \\lambda)(3 - \\lambda)$ are negative: $-4\\lambda - 3\\lambda$." }
+        ]
+      },
+      "hints": [
+        "$B - \\lambda I = \\begin{bmatrix}4 - \\lambda&1\\\\2&3 - \\lambda\\end{bmatrix}$.",
+        "Its determinant is $(4 - \\lambda)(3 - \\lambda) - 1 \\cdot 2$.",
+        "$(4 - \\lambda)(3 - \\lambda) = 12 - 4\\lambda - 3\\lambda + \\lambda^2$."
+      ],
+      "check": { "say": "Put $\\lambda = 0$ into your polynomial: you should get $\\det B = 4 \\cdot 3 - 1 \\cdot 2$." },
+      "solution": "$\\lambda^2 - 7\\lambda + 10$. Look at the 7 and the 10: both come straight from $B$.",
+      "review": true,
+      "next": "Find where 7 and 10 come from"
+    },
+    {
+      "type": "step",
+      "id": "trace-and-determinant",
+      "title": "Trace and determinant",
+      "define": [
+        { "term": "trace", "meaning": "$\\operatorname{tr}(A)$, the sum of the diagonal entries: $a + d$ for $\\begin{bmatrix}a&b\\\\c&d\\end{bmatrix}$." }
+      ],
+      "why": "For every $2 \\times 2$, $\\det(A - \\lambda I) = \\lambda^2 - \\operatorname{tr}(A)\\,\\lambda + \\det(A)$. So two numbers give you the whole polynomial.",
+      "prompt": "For $B = \\begin{bmatrix}4&1\\\\2&3\\end{bmatrix}$, compute $\\operatorname{tr}(B)$ and $\\det(B)$.",
+      "answer": {
+        "fields": [
+          { "name": "t", "label": "$\\operatorname{tr}(B)$ =", "key": "7" },
+          { "name": "d", "label": "$\\det(B)$ =", "key": "10" }
+        ],
+        "verify": "vec(entry(B, 1, 1) + entry(B, 2, 2), det(B))",
+        "slips": [
+          { "detect": "known", "when": { "t": "10" }, "say": "That adds all four entries. The trace is the diagonal only: $4 + 3$." },
+          { "detect": "known", "when": { "d": "14" }, "say": "$ad - bc$: subtract the off-diagonal product $1 \\cdot 2$, don't add it." },
+          { "detect": "known", "when": { "t": "3" }, "say": "That is the other diagonal, $1 + 2$. The trace runs top-left to bottom-right: $4 + 3$." }
+        ]
+      },
+      "hints": [
+        "The trace uses the two entries on the diagonal from top-left to bottom-right.",
+        "$\\det(B) = 4 \\cdot 3 - 1 \\cdot 2$.",
+        "$\\operatorname{tr}(B) = 4 + 3$, and $\\det(B) = 12 - 2$."
+      ],
+      "check": { "say": "Compare with your polynomial $\\lambda^2 - 7\\lambda + 10$: the trace is the number after the minus sign, the determinant is the constant." },
+      "solution": "Why it works: $(a - \\lambda)(d - \\lambda) - bc = \\lambda^2 - (a + d)\\lambda + (ad - bc)$.",
+      "next": "Put the argument in order"
+    },
+    {
+      "type": "order",
+      "id": "from-av-to-the-polynomial",
+      "title": "From Av = λv to a quadratic",
+      "why": "This chain is the whole method. Putting it in order checks that each line really follows from the one before.",
+      "prompt": "Put these in order, from the definition of an eigenvector to the equation for a $2 \\times 2$ matrix $A$.",
+      "items": [
+        { "id": "start", "text": "$Av = \\lambda v$, with $v \\ne 0$." },
+        { "id": "insert-identity", "text": "Write $\\lambda v$ as $\\lambda I v$: then $Av - \\lambda I v = 0$." },
+        { "id": "factor", "text": "Both terms are a matrix times $v$, so $(A - \\lambda I)\\,v = 0$." },
+        { "id": "not-invertible", "text": "That matrix sends a non-zero $v$ to 0, so it has no inverse." },
+        { "id": "determinant", "text": "So its determinant is zero: $\\det(A - \\lambda I) = 0$." },
+        { "id": "quadratic", "text": "Expanded for a $2 \\times 2$: $\\lambda^2 - \\operatorname{tr}(A)\\,\\lambda + \\det(A) = 0$." }
+      ],
+      "fixed": ["start"],
+      "say": {
+        "insert-identity": "What must happen to $\\lambda v$ before it can be subtracted from $Av$?",
+        "factor": "You can only take $v$ out once both terms are a matrix times $v$. What makes $\\lambda v$ a matrix times $v$?",
+        "not-invertible": "This line is about a matrix sending $v$ to 0. Which line gives that matrix?",
+        "determinant": "A determinant of zero is the test for a matrix with no inverse. What must come before it?",
+        "quadratic": "This expands a determinant. Which line sets the determinant to zero?"
+      },
+      "hint": "Each line uses the object the line above it produced: first $\\lambda I v$, then $A - \\lambda I$, then its determinant.",
+      "solution": "The eigenvalues are the roots of $\\det(A - \\lambda I)$, and for a $2 \\times 2$ that is $\\lambda^2 - \\operatorname{tr}(A)\\,\\lambda + \\det(A)$.",
+      "review": true,
+      "next": "Solve it for B"
+    },
+    {
+      "type": "step",
+      "id": "eigenvalues-of-b",
+      "title": "The eigenvalues of B",
+      "why": "The roots of the characteristic polynomial are the eigenvalues. Now you can find them without guessing a single vector.",
+      "prompt": "$B = \\begin{bmatrix}4&1\\\\2&3\\end{bmatrix}$, with $\\det(B - \\lambda I) = \\lambda^2 - 7\\lambda + 10$. Find its eigenvalues, largest first.",
+      "answer": {
+        "fields": [
+          { "name": "l1", "label": "$\\lambda_1$ =", "key": "5" },
+          { "name": "l2", "label": "$\\lambda_2$ =", "key": "2" }
+        ],
+        "verify": "eigs(B)",
+        "slips": [
+          { "detect": "swapped" },
+          { "detect": "known", "when": { "l1": "-2", "l2": "-5" }, "say": "$(\\lambda - 5)(\\lambda - 2) = 0$ is solved by $\\lambda = 5$ and $\\lambda = 2$: the signs flip when you move them across." }
+        ]
+      },
+      "hints": [
+        "Factor it as $(\\lambda - a)(\\lambda - b)$.",
+        "You need $a + b = 7$ and $ab = 10$.",
+        "$10 = 1 \\cdot 10 = 2 \\cdot 5$. Which pair adds to 7?"
+      ],
+      "check": { "say": "The two eigenvalues add up to the trace (7) and multiply to the determinant (10)." },
+      "solution": "$\\lambda = 5$ and $\\lambda = 2$. They add to $\\operatorname{tr}(B)$ and multiply to $\\det(B)$, which is always true for a $2 \\times 2$.",
+      "review": true,
+      "next": "Check it on lesson 1's matrix"
+    },
+    {
+      "type": "step",
+      "id": "eigenvalues-of-a",
+      "title": "Back to A",
+      "why": "In lesson 1 you found the eigenvalues of $A$ by testing vectors. The shortcut should give the same two numbers with no vectors at all.",
+      "prompt": "Use $\\lambda^2 - \\operatorname{tr}(A)\\,\\lambda + \\det(A) = 0$ to find the eigenvalues of $A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$, largest first.",
+      "answer": {
+        "fields": [
+          { "name": "l1", "label": "$\\lambda_1$ =", "key": "3" },
+          { "name": "l2", "label": "$\\lambda_2$ =", "key": "1" }
+        ],
+        "verify": "eigs(A)",
+        "slips": [
+          { "detect": "swapped" },
+          { "detect": "known", "when": { "l1": "-1", "l2": "-3" }, "say": "The roots of $(\\lambda - 3)(\\lambda - 1)$ are $+3$ and $+1$." }
+        ]
+      },
+      "hints": [
+        "$\\operatorname{tr}(A) = 2 + 2$ and $\\det(A) = 2 \\cdot 2 - 1 \\cdot 1$.",
+        "So solve $\\lambda^2 - 4\\lambda + \\det(A) = 0$ with $\\det(A) = 4 - 1$.",
+        "Two numbers that add to 4 and multiply to 3."
+      ],
+      "check": { "say": "Lesson 1: $A\\,(1, 1) = 3\\,(1, 1)$ and $A\\,(1, -1) = 1\\,(1, -1)$." },
+      "solution": "3 and 1, the stretches you saw in lesson 1. The polynomial finds the eigenvalues; next lesson finds the vectors that go with them.",
+      "next": "Finish the lesson"
+    }
+  ]
+}
