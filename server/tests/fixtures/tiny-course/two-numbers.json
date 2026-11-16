@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "id": "two-numbers",
+  "title": "Adding two numbers",
+  "data": { "a": 2, "b": 3 },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "add-them",
+      "title": "Add them",
+      "why": "A sum is the smallest thing a test can check.",
+      "prompt": "Work out $a + b$ with $a = 2$ and $b = 3$.",
+      "answer": { "fields": [{ "name": "s", "label": "$a + b$ =", "key": "5" }], "verify": "a + b" },
+      "hints": ["Start from $2$ and count on.", "Count on three times.", "$2 + 3 = 5$."],
+      "next": "Done"
+    }
+  ]
+}

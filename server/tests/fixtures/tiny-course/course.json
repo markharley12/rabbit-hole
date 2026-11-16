@@ -1,0 +1,10 @@
+{
+  "format": 1,
+  "id": "tiny-course",
+  "nodeId": "15Axx",
+  "title": "A tiny test course",
+  "summary": "A one-lesson course the server's tests write through the fake claude.",
+  "written": "A fixture for server/tests, written into a temporary copy of the repo, never into the real content/.",
+  "sources": [{ "name": "server/tests/fixtures/tiny-course", "note": "Made up for the tests." }],
+  "lessons": [{ "id": "two-numbers", "title": "Adding two numbers" }]
+}

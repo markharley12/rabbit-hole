@@ -351,7 +351,8 @@ class Live(unittest.TestCase):
     # --- API ----------------------------------------------------------------
 
     def test_state(self):
-        self.assertEqual(self.api("GET", "/api/state"), (200, {"ok": True, "version": 1, "kinds": ["ask"], "busy": False}))
+        self.assertEqual(self.api("GET", "/api/state"),
+                         (200, {"ok": True, "version": 1, "kinds": ["ask", "build-course", "new-course"], "busy": False}))
 
     def test_session_refusals(self):
         self.assertEqual(self.api("POST", "/api/session", {"kind": "build", "context": context()})[0], 400)
