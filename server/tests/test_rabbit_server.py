@@ -19,6 +19,36 @@ sys.path.insert(0, os.path.dirname(HERE))
 
 import rabbit_server as rs  # noqa: E402
 
+
+# No test may touch the network: names resolve from this table only.
+FAKE_DNS = {"points-home.example.com": ["127.0.0.1"], "mixed.example.com": ["93.184.216.34", "10.0.0.5"]}
+
+
+def fake_resolve(host):
+    if host.endswith(".invalid"):
+        raise OSError("no such host")
+    return FAKE_DNS.get(host, ["93.184.216.34"])
+
+
+rs.RESOLVE = fake_resolve
+
+
+class UrlResolution(unittest.TestCase):
+    """A public-looking name is refused when it points at this PC (found 16 Nov 2026:
+    the check compared names only, so such a name reached the server's own API)."""
+
+    def test_public_name_is_allowed(self):
+        self.assertIsNone(rs.url_problem("https://en.wikipedia.org/wiki/Principal_component_analysis"))
+
+    def test_name_pointing_home_is_refused(self):
+        self.assertIn("points at this PC", rs.url_problem("https://points-home.example.com/api/sessions"))
+
+    def test_any_private_address_refuses_the_name(self):
+        self.assertIn("points at this PC", rs.url_problem("http://mixed.example.com/"))
+
+    def test_unresolvable_name_is_refused(self):
+        self.assertIn("does not resolve", rs.url_problem("https://nowhere.invalid/"))
+
 # The server's request and permission log lines, which would bury the test output.
 rs.log = lambda message: None
 

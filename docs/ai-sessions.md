@@ -210,9 +210,10 @@ here has met the real CLI, WebSearch or WebFetch. What differs from sections 3 a
   outranks everything: it denies every sibling on the way down to the brief by name instead
   (`private_denies`); siblings made after the turn starts are guarded by the server's answers only.
 - **WebFetch** only for http(s) URLs whose host is a public name or a global address: never
-  localhost, private or link-local ranges, `.local`, `.ts.net`, dotless names. Names are **not
-  resolved**, so a public name pointing at 127.0.0.1 would pass (the server's API would then be
-  readable by GET). WebSearch is allowed as is.
+  localhost, private or link-local ranges, `.local`, `.ts.net`, dotless names. A name is
+  resolved and refused if any of its addresses is not public (added in review, 16 Nov: before, a
+  public name pointing at 127.0.0.1 passed and the server's own API was readable by GET). Not
+  caught: a name that answers differently between the check and the fetch. WebSearch is allowed as is.
 - **The context** for the talk is built by the server, not the app: the app sends only the node it
   was opened from (dropped if not on the map). The server adds the brief's path, the existing courses
   (id, title, node, lesson titles) and the widget catalogue (names and summaries).

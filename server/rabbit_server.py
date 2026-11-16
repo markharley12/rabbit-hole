@@ -45,6 +45,7 @@ import secrets
 import shlex
 import shutil
 import signal
+import socket
 import subprocess
 import sys
 import tempfile
@@ -327,8 +328,10 @@ def wanted(tool, inp, repo):
 def url_problem(raw):
     """Why WebFetch may not open this URL, or None. Only public http(s) pages:
     never this PC, the tailnet or a private network (the server's own API is
-    on 127.0.0.1). Names are not resolved here, so a public name that points at
-    a private address is not caught (docs/ai-sessions.md section 10)."""
+    on 127.0.0.1). A name is resolved and refused if any of its addresses is
+    not public, so a public name pointing at 127.0.0.1 is caught. What is not
+    caught: a name that answers differently between this check and the fetch
+    (DNS rebinding); the session's tools and write paths limit what that gains."""
     if not isinstance(raw, str) or len(raw) > 2000 or not raw.strip():
         return "no usable URL"
     try:
@@ -353,7 +356,28 @@ def url_problem(raw):
         return "a name on this PC, the tailnet or a private network"
     if re.fullmatch(r"[0-9.]+|0x[0-9a-f.x]+", host):
         return "a numeric host that is not a plain address"
+    try:
+        found = RESOLVE(host)
+    except OSError:
+        return "a name that does not resolve"
+    if not found:
+        return "a name that does not resolve"
+    for text in found:
+        try:
+            if not ipaddress.ip_address(text.split("%")[0]).is_global:
+                return "a name that points at this PC or a private network"
+        except ValueError:
+            return "a name that does not resolve to an address"
     return None
+
+
+def _resolve(host):
+    """Every address a host name resolves to, as text."""
+    return sorted({info[4][0] for info in socket.getaddrinfo(host, None)})
+
+
+# Swapped by the tests, which must not touch the network.
+RESOLVE = _resolve
 
 
 def _granted_file(raw, repo, grant):
