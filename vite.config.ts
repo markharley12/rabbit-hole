@@ -109,5 +109,8 @@ export default defineConfig({
     restoreMocks: true,
     // .tsx too: without it a component test is silently not run.
     include: ['src/**/*.test.{ts,tsx}'],
+    // The whole-app flow tests take 3 to 5 s on a busy machine (several agents
+    // running checks at once), and the default 5 s limit failed them at random.
+    testTimeout: 20000,
   },
 })
