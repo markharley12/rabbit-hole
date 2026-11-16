@@ -6,14 +6,14 @@ the app's own content files. Personal project of Mark's; public on GitHub in the
 built around his setup (Claude Code on his PC, phone over Tailscale), so it is not meant to
 be turnkey for anyone else. **"rabbit-hole" is a working name** — rename freely.
 
-## Status: Phase 2 slice plus roadmap stages A and B built, waiting for Mark's phone test (15 Nov 2026)
+## Status: three courses, review, quizzes, and an AI server that has not yet run against the real Claude (16 Nov 2026)
 
 The map, plus one real course: **"Least squares to the pseudo-inverse"** on `15Axx` (Basic
 linear algebra), five lessons resuming where Mark's chat stopped; and a second,
 **"Principal components from the SVD"** (`principal-components-from-the-svd`) on `62Hxx`
 (Multivariate analysis), five lessons of PCA on one five-point data set, with 7 reading links; and a third,
 **"Gradient descent on a bowl"** (`gradient-descent-on-a-bowl`) on `65Kxx`, five lessons from the gradient to least
-squares by walking downhill, with the widget `descent-path` and 7 reading links. No server, no AI, no photo
+squares by walking downhill, with the widget `descent-path` and 7 reading links. The AI server (Ask, new course) is built but has only run against a fake `claude`: the CLI on the PC was signed out. No photo
 marking, no Capacitor yet. What is where:
 
 - **Map.** `tools/build_maths_map.py` → `public/content/maths/map.json` (593 nodes, 517
@@ -102,7 +102,7 @@ marking, no Capacitor yet. What is where:
   KaTeX bundled; typed answers only until photo marking (Phase 5).
 
 Run everything with `npm run check` (typecheck, lint, Vitest, Python tests, course
-validation). Build and phone access are in [README.md](README.md). **What to build next, and how work is delegated to subagents, is in [docs/ROADMAP.md](docs/ROADMAP.md)** (written from Mark's brain dump of 15 Nov; next are stage C, spaced review, and stage D, the PC server and AI sessions, designed in [docs/ai-sessions.md](docs/ai-sessions.md)). Course content is written to the contract in [docs/course-authoring.md](docs/course-authoring.md). Older open points and next
+validation). Build and phone access are in [README.md](README.md). **What to build next, and how work is delegated to subagents, is in [docs/ROADMAP.md](docs/ROADMAP.md)** (written from Mark's brain dump of 15 Nov; stages A to D are built; **next: sign the CLI in and run `server/smoke_ask.py` and `server/smoke_new_course.py`, switch `tailscale serve` to the server, Mark's phone test**, then stage E. The AI design and what was built is in [docs/ai-sessions.md](docs/ai-sessions.md)). Course content is written to the contract in [docs/course-authoring.md](docs/course-authoring.md). Older open points and next
 steps are at the end of [docs/HANDOFF.md](docs/HANDOFF.md).
 
 The planning docs, still the reference for later phases. **Read in this order:**
