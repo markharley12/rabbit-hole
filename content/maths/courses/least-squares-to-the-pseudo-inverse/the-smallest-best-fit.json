@@ -36,6 +36,7 @@
     {
       "type": "step",
       "id": "expand-the-norm",
+      "review": true,
       "title": "One variable",
       "why": "With $c$ replaced, $c^2 + m^2$ becomes a parabola in $m$, and parabolas are easy to minimise.",
       "prompt": "Put $c = 3 - 2m$ into $c^2 + m^2$ and expand. Type it as a polynomial in $m$, like `am^2 + bm + k`.",
@@ -62,6 +63,7 @@
     {
       "type": "step",
       "id": "minimise",
+      "review": true,
       "title": "The bottom of the parabola",
       "why": "A parabola that opens upwards is smallest where its slope is zero.",
       "prompt": "Where is $5m^2 - 12m + 9$ smallest? Give $m$.",

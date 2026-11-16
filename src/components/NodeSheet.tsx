@@ -23,6 +23,9 @@ interface Props {
   onOpenCourses: () => void
   /** Where to find reading; the sheet shows only the node's own. */
   reading?: ReadingSource
+  /** Items due for review today; the line on the root sheet shows only above zero. */
+  dueCount?: number
+  onOpenReview?: () => void
 }
 
 // "15 Nov 2026, 19:04", in the phone's own time zone.
@@ -113,7 +116,7 @@ function CourseSection({
  * is, how big, whether there is a course); opened it lists where the node sits
  * and what is in it.
  */
-export function NodeSheet({ node, document: doc, courses, counts, open, onOpenChange, onSelect, onOpenLesson, onOpenCourses, reading }: Props) {
+export function NodeSheet({ node, document: doc, courses, counts, open, onOpenChange, onSelect, onOpenLesson, onOpenCourses, reading, dueCount = 0, onOpenReview }: Props) {
   const inside = counts.get(node.id) ?? 0
   const course = courses.length === 1 ? courses[0] : undefined
   const drag = useRef<number | null>(null)
@@ -171,6 +174,11 @@ export function NodeSheet({ node, document: doc, courses, counts, open, onOpenCh
             <span className="course-none">{leaf ? 'No course yet' : 'No courses yet'}</span>
           )}
         </p>
+        {!node.parent && onOpenReview && dueCount > 0 && (
+          <button className="text-button review-line" onClick={onOpenReview}>
+            {dueCount} to review
+          </button>
+        )}
       </div>
 
       <div className="sheet-body" id="sheet-body" hidden={!open}>

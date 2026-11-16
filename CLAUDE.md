@@ -70,6 +70,14 @@ marking, no Capacitor yet. What is where:
   tests use `server/tests/fake_claude.py`), tutor prompt `docs/agents/ask.md`, dock tool "Ask"
   (`src/tools/Chat.tsx`, `src/ai/`) shown only when `./api/state` answers. As built and open points:
   docs/ai-sessions.md section 10. Not yet run against the real CLI (it was not signed in).
+- **Review** (stage C): lessons mark steps `review: true` (11 in the first course; `--publish` lists
+  them in the index as `review`), plus cheat-sheet formulas as recall cards. Pure ladder 1/3/7/16/35/90
+  days, good/hard/again, local-calendar-day due rule, interleaved sessions of at most 10:
+  `src/review/schedule.ts`; items are earned from the progress records (no hook in lessons), graded
+  state is one device key `rabbit-hole:review`. Route `#<node>/review`, `ReviewView.tsx` reuses
+  `StepScreen` with an in-memory record (course progress untouched); top-bar button with a due badge,
+  a "N to review" line on the root sheet and Courses menu. No scores. Evidence and its limits:
+  docs/learning-science.md; authoring: course-authoring.md section 11.
 - **Progress** is on the device only (`localStorage`, `rabbit-hole:progress:<course>`):
   attempts, hints, drafts, where he is. **No scores** (claimed is not scored).
 - `pwa/sw.js`: offline. A new build waits until the app is fully closed, so an update

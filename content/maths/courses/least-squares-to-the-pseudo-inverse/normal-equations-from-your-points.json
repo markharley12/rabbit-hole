@@ -11,6 +11,7 @@
     {
       "type": "step",
       "id": "guess-y-equals-x",
+      "review": true,
       "title": "A guess, scored",
       "define": [
         { "term": "residual", "meaning": "$r = b - Ax$: data minus fit, one entry per point." }
@@ -36,6 +37,7 @@
     {
       "type": "step",
       "id": "build-ata",
+      "review": true,
       "title": "AᵀA",
       "define": [
         { "term": "AᵀA", "meaning": "Each entry is a dot product of two columns of $A$: row $i$, column $j$ is (column $i$) · (column $j$)." }
@@ -90,6 +92,7 @@
     {
       "type": "step",
       "id": "solve-normal-equations",
+      "review": true,
       "title": "Solve them",
       "why": "Two equations, two unknowns, and $A^\\mathsf{T}A$ is invertible here: exactly one best line.",
       "prompt": "Solve $3c + 6m = 9$ and $6c + 14m = 23$.",

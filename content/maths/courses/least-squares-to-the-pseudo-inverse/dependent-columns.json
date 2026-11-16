@@ -11,6 +11,7 @@
     {
       "type": "step",
       "id": "dependent-ata",
+      "review": true,
       "title": "All three x are 2",
       "define": [
         { "term": "dependent columns", "meaning": "One column is a combination of the others. Here column 2 is $2 \\times$ column 1." }
@@ -60,6 +61,7 @@
     {
       "type": "step",
       "id": "same-equation",
+      "review": true,
       "title": "One equation, twice",
       "why": "Two equations that say the same thing pin down a line, not a point.",
       "prompt": "The normal equations are $3c + 6m = 9$ and $6c + 12m = 18$. Divide each by its first coefficient. Both become $c + k\\,m = d$. What are $k$ and $d$?",

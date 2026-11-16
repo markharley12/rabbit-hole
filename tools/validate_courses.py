@@ -9,6 +9,8 @@ What is checked, for every content/<field>/courses/<course-id>/:
 - course.json and each lesson against schema/course.schema.json and schema/lesson.schema.json;
 - an optional cheatsheet.json against schema/cheatsheet.schema.json: item ids unique, `lesson`
   one of the course's, Markdown checked as for lessons;
+- steps marked `review: true` (a boolean on a step, schema only). Publishing lists them in the
+  course's entry in index.json as `review: [{lesson, step}]`, for spaced review in the app;
 - the course hangs on a node that exists in public/content/<field>/map.json (any number of
   courses may share a node), its folder is named after the course's id, and ids are unique; every listed lesson has a file and every file is listed;
 - every widget is in schema/widgets.json and its params match the schema there;
@@ -735,6 +737,20 @@ def publish_resources(found: dict[str, list[tuple[Path, dict]]], public: Path, f
     return written
 
 
+def review_steps(course_dir: Path, course: dict) -> list[dict[str, str]]:
+    """The steps a course's lessons mark `review: true`, in lesson order, as {lesson, step}.
+
+    There is no rule here that a review step must not rest on a widget: nothing in a step says
+    reliably whether its prompt can be answered without one. Whether a prompt stands on its own
+    screen is for the author and the reviewer (course-authoring.md section 11).
+    """
+    marked = []
+    for entry in course["lessons"]:
+        lesson = json.loads((course_dir / f"{entry['id']}.json").read_text(encoding="utf-8"))
+        marked += [{"lesson": entry["id"], "step": b["id"]} for b in lesson["blocks"] if b.get("type") == "step" and b.get("review")]
+    return marked
+
+
 def publish(found: dict[str, list[tuple[Path, dict]]], public: Path) -> list[Path]:
     written = []
     for field, courses in found.items():
@@ -757,7 +773,15 @@ def publish(found: dict[str, list[tuple[Path, dict]]], public: Path) -> list[Pat
                 written.append(out / f"{name}.json")
         # `cheatsheet: true` is added here, in the published index only. It is not part of
         # course.schema.json: a course.json never says it, the folder does.
-        entries = [{**course, "cheatsheet": True} if (d / "cheatsheet.json").exists() else course for d, course in courses]
+        # `review` (the steps lessons mark `review: true`, for spaced review) is added the same
+        # way, and left out when empty.
+        entries = []
+        for d, course in courses:
+            entry = {**course, "cheatsheet": True} if (d / "cheatsheet.json").exists() else dict(course)
+            marked = review_steps(d, course)
+            if marked:
+                entry["review"] = marked
+            entries.append(entry)
         index = {"format": 1, "courses": entries}
         (target / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         written.append(target / "index.json")

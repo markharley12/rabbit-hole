@@ -23,6 +23,7 @@
     {
       "type": "step",
       "id": "null-space-dimension",
+      "review": true,
       "title": "How big is B's null space?",
       "define": [
         { "term": "rank–nullity", "meaning": "For a matrix with $n$ columns, rank + dimension of the null space $= n$." }
@@ -83,6 +84,7 @@
     {
       "type": "step",
       "id": "witness-lower-bound",
+      "review": true,
       "title": "What w forces",
       "define": [
         { "term": "spectral norm", "meaning": "$\\|M\\|_2$ is the largest $\\|Mx\\|$ over unit vectors $x$. So $\\|M\\|_2 \\ge \\|Mw\\|$ for any one unit $w$." }
@@ -145,6 +147,7 @@
     {
       "type": "step",
       "id": "the-bound",
+      "review": true,
       "title": "The bound",
       "why": "Together with your easy half, this is the whole theorem.",
       "prompt": "So for every $B$ of rank at most 1, $\\|A - B\\|_2$ is at least what number, for $A = \\mathrm{diag}(3, 2, 1)$?",

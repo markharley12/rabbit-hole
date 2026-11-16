@@ -29,6 +29,11 @@ export interface Course {
    * published index only; it is NOT part of course.schema.json or of course.json.
    */
   cheatsheet?: boolean
+  /**
+   * The steps its lessons mark `review: true`, for spaced review. Set by the validator in the
+   * published index only (omitted when there are none); not part of course.json.
+   */
+  review?: { lesson: string; step: string }[]
 }
 
 /** public/content/<field>/courses/index.json, written by the validator on publish. */
@@ -86,6 +91,8 @@ export interface StepBlock {
   check?: { say: string; widget?: WidgetRef }
   solution?: string
   next: string
+  /** Worth coming back to after days, weeks, months: it joins the spaced review once solved. */
+  review?: boolean
 }
 
 export interface TextBlock {

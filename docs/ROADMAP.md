@@ -213,3 +213,12 @@ Filled in as stages land (date, commit, what was not checked).
   (it was not signed in, so the smoke test got only "Failed to authenticate"); the tutor's replies
   and whether it keeps the answer back; `tailscale serve` and the systemd unit (not switched on);
   on the phone itself, including the on-screen keyboard over the input.
+- **C Spaced review** (16 Nov 2026). `review: true` on steps (11 marked in the first course, 1 to 3 a
+  lesson, only prompts that stand alone), index `review` list, pure scheduler and store, `#<node>/review`
+  session reusing `StepScreen`, top-bar badge and "N to review" lines, `docs/learning-science.md`. Looked at
+  in the built-in browser at 375x812, dark and light. Not checked: on the phone itself; offline with the
+  network really off (the service worker's file list was read: it covers everything under `public/` and the
+  built chunks, so lessons, cheat sheets and the review chunk are precached); a day actually passing on a
+  real clock; the step buttons read oddly in review (they keep each step's own `next` label, "Set up the normal
+  equations", since `StepScreen` is unchanged). The ladder numbers are a convention; sources were read as
+  records only, not full papers.

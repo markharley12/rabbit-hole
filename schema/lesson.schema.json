@@ -181,7 +181,11 @@
           }
         },
         "solution": { "description": "Shown once the step is right: what it means.", "$ref": "#/$defs/markdown" },
-        "next": { "description": "The one next action, as the button says it.", "type": "string", "minLength": 3, "maxLength": 50 }
+        "next": { "description": "The one next action, as the button says it.", "type": "string", "minLength": 3, "maxLength": 50 },
+        "review": {
+          "description": "True when the step is worth coming back to after days, weeks, months (spaced review). Mark a step only when its prompt can be answered from its own screen, without a result from an earlier one: it is shown on its own, with a fresh record. 1 to 3 per lesson.",
+          "type": "boolean"
+        }
       }
     },
     "text": {

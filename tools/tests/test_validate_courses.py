@@ -297,6 +297,55 @@ class Content(unittest.TestCase):
         # The flag belongs to the index only; course.json stays as written.
         self.assertNotIn("cheatsheet", json.loads((published / COURSE_ID / "course.json").read_text()))
 
+    # ---- steps marked for spaced review (`review: true`)
+
+    def publish_index(self):
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(vc.main(["--publish", "--content", str(self.content), "--public", str(self.public)]), 0)
+        published = self.public / "content" / "maths" / "courses"
+        return {c["id"]: c for c in json.loads((published / "index.json").read_text())["courses"]}, published
+
+    def test_the_real_course_marks_one_to_three_steps_per_lesson(self):
+        index, _ = self.publish_index()
+        marked = index[COURSE_ID]["review"]
+        per_lesson = {}
+        for entry in marked:
+            per_lesson[entry["lesson"]] = per_lesson.get(entry["lesson"], 0) + 1
+        self.assertEqual(set(per_lesson), {e["id"] for e in index[COURSE_ID]["lessons"]})
+        self.assertTrue(all(1 <= n <= 3 for n in per_lesson.values()), per_lesson)
+
+    def test_publish_lists_marked_steps_in_the_index_only(self):
+        self.copy_course("a-second-course")
+        # Unmark every step of the copy: its entry then has no `review` key at all.
+        copy = self.content / "maths" / "courses" / "a-second-course"
+        for path in copy.glob("*.json"):
+            if path.stem in ("course", "cheatsheet"):
+                continue
+            document = json.loads(path.read_text())
+            for block in document["blocks"]:
+                block.pop("review", None)
+            path.write_text(json.dumps(document, ensure_ascii=False))
+        self.edit("dependent-columns", lambda d: d["blocks"][1].update(review=True))
+        index, published = self.publish_index()
+        marked = index[COURSE_ID]["review"]
+        self.assertIn({"lesson": "dependent-columns", "step": "dependent-atb"}, marked)
+        self.assertEqual(marked[0], {"lesson": "normal-equations-from-your-points", "step": "guess-y-equals-x"})
+        self.assertNotIn("review", index["a-second-course"])
+        # Lesson order is kept, and course.json stays as written.
+        order = [e["id"] for e in index[COURSE_ID]["lessons"]]
+        self.assertEqual([m["lesson"] for m in marked], sorted([m["lesson"] for m in marked], key=order.index))
+        self.assertNotIn("review", json.loads((published / COURSE_ID / "course.json").read_text()))
+
+    def test_review_must_be_a_boolean_on_a_step(self):
+        self.edit("dependent-columns", lambda d: d["blocks"][0].update(review="yes"))
+        self.assertFails("is not of type 'boolean'")
+        self.edit("dependent-columns", lambda d: d["blocks"][0].update(review=True))
+        self.assertEqual(self.errors(), [])
+
+    def test_a_text_screen_cannot_be_marked_for_review(self):
+        self.edit("dependent-columns", lambda d: next(b for b in d["blocks"] if b["type"] == "text").update(review=True))
+        self.assertFails("dependent-columns.json")
+
     def test_publish_only_when_valid(self):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):

@@ -9,6 +9,10 @@ interface Props {
   onSelect: (id: string) => void
   onToggleTheme: () => void
   onOpenCourses: () => void
+  /** Items due for review today; the badge shows only above zero. */
+  dueCount?: number
+  /** Omitted where review is not offered (the button is then not drawn). */
+  onOpenReview?: () => void
 }
 
 const HomeIcon = () => (
@@ -23,6 +27,13 @@ const CoursesIcon = () => (
   <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
     <circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" strokeWidth="2" />
     <path d="M15 15l5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+)
+
+const ReviewIcon = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <path d="M19 8a7.5 7.5 0 0 0-13-2M5 16a7.5 7.5 0 0 0 13 2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M19.5 3v5h-5M4.5 21v-5h5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
 
@@ -45,7 +56,7 @@ const ThemeIcon = ({ theme }: { theme: Theme }) => (
 )
 
 /** Home, the trail from Mathematics down to where you are, courses and search, and the theme switch. */
-export function TopBar({ path, theme, onSelect, onToggleTheme, onOpenCourses }: Props) {
+export function TopBar({ path, theme, onSelect, onToggleTheme, onOpenCourses, dueCount = 0, onOpenReview }: Props) {
   const trail = useRef<HTMLOListElement>(null)
   const current = path[path.length - 1]
 
@@ -80,6 +91,20 @@ export function TopBar({ path, theme, onSelect, onToggleTheme, onOpenCourses }: 
       <button className="icon-button" onClick={onOpenCourses} aria-label="Courses and search">
         <CoursesIcon />
       </button>
+      {onOpenReview && (
+        <button
+          className="icon-button review-button"
+          onClick={onOpenReview}
+          aria-label={dueCount > 0 ? `Review, ${dueCount} due` : 'Review'}
+        >
+          <ReviewIcon />
+          {dueCount > 0 && (
+            <span className="review-badge" aria-hidden="true">
+              {dueCount > 99 ? '99+' : dueCount}
+            </span>
+          )}
+        </button>
+      )}
       <button
         className="icon-button"
         onClick={onToggleTheme}
