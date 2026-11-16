@@ -206,3 +206,10 @@ Filled in as stages land (date, commit, what was not checked).
   and a non-unit u; handle drag, slider, guess table), lesson 3 through to the reveal, dark and light.
   Not checked: lessons 2, 4 and 5 by hand in the browser (only by tests); on the phone itself; touch
   drag of the handle with a finger; read by Mark.
+- **D steps 1 to 3: AI server and Ask** (16 Nov 2026). `server/rabbit_server.py` with the `ask` kind,
+  tests against a fake claude, `docs/agents/ask.md`, the Ask dock tool. Looked at in the built-in
+  browser at 375x812, dark and light, against the fake claude (starter, typed message, notes and
+  refusals, typeset maths, reload restoring the chat). Not checked: **any turn with the real CLI**
+  (it was not signed in, so the smoke test got only "Failed to authenticate"); the tutor's replies
+  and whether it keeps the answer back; `tailscale serve` and the systemd unit (not switched on);
+  on the phone itself, including the on-screen keyboard over the input.

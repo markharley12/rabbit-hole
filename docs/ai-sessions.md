@@ -1,4 +1,4 @@
-# AI sessions: design (not built)
+# AI sessions: design (steps 1 to 3 built; see section 10)
 
 Design for ROADMAP.md stage D, written 15 Nov 2026 by the orchestrating session. Everything
 here is **Recommended** unless marked Decided. It turns PLAN.md 4.5 and Mark's brain dump
@@ -133,3 +133,55 @@ Session records live in `data/sessions/` (gitignored).
   course that the validator rejects or Mark deletes.
 - **Usage.** Builds are long. Default model per kind is in the table; show the session cost
   in the chat as Jarvis does.
+
+## 10. As built (16 Nov 2026: build-order steps 1 to 3)
+
+`server/rabbit_server.py`, `server/tests/` (with `fake_claude.py`), `docs/agents/ask.md`,
+`src/ai/` (context builder, client and SSE parser, chat store), `src/tools/Chat.tsx`. What
+differs from the design above, and what was learned:
+
+- **The command line.** `claude -p --input-format stream-json --output-format stream-json
+  --verbose --include-partial-messages --permission-mode default --permission-prompt-tool stdio
+  --tools Read,Grep,Glob --disallowedTools <the rest> --strict-mcp-config --disable-slash-commands
+  --settings <json> --append-system-prompt <docs/agents/ask.md> --model sonnet --effort medium
+  [--resume <id>]`, `cwd` = the repo. **No `--allowedTools`**: an allowed tool runs without
+  the server being asked. Instead `--tools` is the kind's whole toolset, the settings' `ask`
+  rules send every use to the server (an ask rule outranks an allow rule, Jarvis found), and
+  the settings' `deny` rules repeat the private folders and the sudo / git push / rm -r
+  prefixes as a second lock. User text goes on stdin only. `--permission-mode default` is
+  accepted by 2.1.325 though its help lists `manual` instead.
+- **Path rule.** Read, Grep and Glob are allowed only inside the repo after resolving symlinks
+  and `..`, never under `data/`, `Credentials/`, `.git/`, `.claude/` (other worktrees and
+  settings), `node_modules/` or any `.env*`. A search may not start at the repo root (it would
+  walk into those folders): Grep needs a `path`, Glob's literal prefix (`content/maths/**`) counts.
+- **The context block** is fenced by `[app-context <random>]` ... `[end app-context <random>]`,
+  random per session so no string in it can close it early. Later messages carry the step's
+  current state as a structured `update` that the server turns into one fenced
+  `[app-update <random>]` line (the brief had the app write that line; the server writing it
+  keeps the fence secret and the values validated).
+- **The answer rule** in the prompt also allows the answer once the step is solved or shown
+  (the app's own `canReveal` is false then, because the button is gone).
+- **Turns are not tied to the phone's connection.** If the phone drops mid-reply the turn
+  finishes and is kept in the transcript; reopening the chat reloads it. A failed turn's
+  message is marked and left out of the transcript, so Retry does not show it twice.
+- **Origin and host.** A POST must be JSON (a cross-origin page would need a CORS preflight,
+  which is never answered) and its `Origin`, when sent, must match `Host` or
+  `X-Forwarded-Host` (scheme not compared, since `tailscale serve` turns https into http). The
+  `Host` must be localhost, 127.0.0.1, `[::1]` or a `*.ts.net` name (stops DNS rebinding);
+  `--allow-host` adds one.
+- **Environment.** Started from inside a Claude Code session, the server would hand that
+  session's variables (`CLAUDECODE`, `CLAUDE_CODE_*`, `ANTHROPIC_BASE_URL`) to every turn; it
+  drops them in that case (`child_env`), keeping `CLAUDE_CODE_OAUTH_TOKEN`.
+- **Event shapes** handled (from Jarvis's parser and the fake): `system/init` (session id),
+  `stream_event` wrapping `content_block_delta`/`text_delta` and `message_start`,
+  `control_request` `can_use_tool` (answered with `control_response` `success`), `assistant`,
+  `result` (`is_error`, `result`, `total_cost_usd`; the turn's cost is the difference from the
+  session's last total). Confirmed against the real CLI only for the error path: the smoke test
+  on 15 Nov got `result` with `is_error` and "Failed to authenticate: this login reached its time
+  limit", because the CLI on the PC was not signed in. **The streaming and permission shapes are
+  not yet confirmed against the real CLI**: run `server/smoke_ask.py` once signed in.
+- **Service worker.** Its fetch handler only answered GETs for files in the build's list, so
+  `/api/` was already never cached; an explicit pass-through now says so.
+- Open: `tailscale serve` and the systemd unit (`server/rabbit-hole.service`) are written but
+  not switched on; whether `tailscale serve` keeps the `Host` header (the Origin check relies on
+  `Host` or `X-Forwarded-Host`) is untested.

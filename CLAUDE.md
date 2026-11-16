@@ -65,6 +65,11 @@ marking, no Capacitor yet. What is where:
   tool "Reading" (the course's node and ancestors, nearest first; `src/resources.ts`,
   `src/components/ReadingList.tsx`) and a "Reading" section on the sheet of a node that has its own.
   The app reads the index once and a node's file only when shown. 14 links on `15Axx`. course-authoring.md section 10.
+- **AI server and Ask** (stage D, steps 1 to 3): `server/rabbit_server.py` (stdlib, 127.0.0.1, serves
+  `dist/` and `/api/`, runs `claude -p` per turn, kinds table, answers every tool permission itself;
+  tests use `server/tests/fake_claude.py`), tutor prompt `docs/agents/ask.md`, dock tool "Ask"
+  (`src/tools/Chat.tsx`, `src/ai/`) shown only when `./api/state` answers. As built and open points:
+  docs/ai-sessions.md section 10. Not yet run against the real CLI (it was not signed in).
 - **Progress** is on the device only (`localStorage`, `rabbit-hole:progress:<course>`):
   attempts, hints, drafts, where he is. **No scores** (claimed is not scored).
 - `pwa/sw.js`: offline. A new build waits until the app is fully closed, so an update

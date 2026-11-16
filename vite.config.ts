@@ -102,6 +102,8 @@ export default defineConfig({
     host: true,
     // Reaching the dev server from the phone over Tailscale.
     allowedHosts: ['.ts.net'],
+    // The tutor's API, from a running `npm run server` (server/rabbit_server.py).
+    proxy: { '/api': 'http://127.0.0.1:8791' },
   },
   preview: { allowedHosts: ['.ts.net'] },
   test: {

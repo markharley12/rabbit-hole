@@ -2,7 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { LinksContext } from './links-context.ts'
 import { Md } from './Md.tsx'
 import { finishLesson, goTo, openLesson, recordAttempt, revealAnswer, saveDraft, takeHint } from './progress.ts'
-import { useProgress } from './progress-store.ts'
+import { readProgress, useProgress } from './progress-store.ts'
+import { ChatStore, chatKey, useTutorAvailable } from '../ai/chat-store.ts'
+import { createClient } from '../ai/client.ts'
+import type { ChatClient } from '../ai/client.ts'
+import { aboutLine, buildContext, snapshot } from '../ai/context.ts'
+import type { AskOption } from '../tools/lesson-tools.tsx'
 import { StepScreen } from './StepScreen.tsx'
 import type { Course, Lesson, TextBlock } from './types.ts'
 import { readingNodes } from '../resources.ts'
@@ -21,7 +26,11 @@ interface Props {
   onOpenLesson: (lessonId: string) => void
   /** Where to find reading for the course's node and its ancestors; omitted when the app has none. */
   reading?: ReadingSource
+  /** The tutor's server (tests pass a fake); by default the one this app is served from. */
+  tutor?: ChatClient
 }
+
+const defaultTutor = createClient()
 
 type Loaded = { state: 'loading' } | { state: 'failed'; reason: string } | { state: 'ready'; lesson: Lesson }
 
@@ -45,7 +54,7 @@ function TextScreen({ block, onNext }: { block: TextBlock; onNext: () => void })
 }
 
 /** A lesson, full screen over the map: one screen at a time, resuming where it was left. */
-export default function LessonView({ course, lessonId, base, onClose, onOpenLesson, reading }: Props) {
+export default function LessonView({ course, lessonId, base, onClose, onOpenLesson, reading, tutor = defaultTutor }: Props) {
   const [loaded, setLoaded] = useState<Loaded>({ state: 'loading' })
   const [record, update] = useProgress(course.id)
   const body = useRef<HTMLDivElement>(null)
@@ -85,7 +94,29 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
 
   const links = useMemo(() => ({ nodeId: course.nodeId, courseId: course.id }), [course.nodeId, course.id])
   const readingHere = useMemo(() => (reading ? readingNodes(reading.layout, course.nodeId, reading.counts) : []), [reading, course.nodeId])
-  const tools = useLessonTools({ course, lessonId, base, reading: reading && { nodes: readingHere, base: reading.base } })
+
+  // The Ask tutor: shown only when its server answered (a course works with no AI).
+  const [chats] = useState(() => new ChatStore(tutor))
+  useEffect(() => () => chats.dispose(), [chats])
+  const { available, recheck } = useTutorAvailable(tutor)
+  const nodeName = reading?.layout.byId.get(course.nodeId)?.node.name
+  const shownBlock = lesson?.blocks[at]
+  const ask = useMemo<AskOption | undefined>(() => {
+    if (!available || !lesson || !shownBlock) return undefined
+    // Read at the moment a message is sent, so the tutor sees the latest draft and attempts.
+    const stepRecord = () => readProgress(course.id).lessons[lesson.id]?.steps[shownBlock.id]
+    return {
+      store: chats,
+      about: aboutLine(lesson, at),
+      isStep: shownBlock.type === 'step',
+      target: {
+        key: chatKey(course.id, lesson.id, shownBlock.id),
+        context: () => buildContext({ course, lesson, at, record: stepRecord(), nodeName }),
+        snapshot: () => snapshot(stepRecord(), shownBlock.type === 'step'),
+      },
+    }
+  }, [available, lesson, shownBlock, at, course, nodeName, chats])
+  const tools = useLessonTools({ course, lessonId, base, reading: reading && { nodes: readingHere, base: reading.base }, ask, onOpen: recheck })
 
   const header = (subtitle: string) => (
     <header className="lesson-bar">

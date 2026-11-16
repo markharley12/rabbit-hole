@@ -80,6 +80,14 @@ export const SheetIcon = () => (
   </Icon>
 )
 
+export const AskIcon = () => (
+  <Icon>
+    <path d="M4 5h16v11H10l-4 4v-4H4z" />
+    <path d="M10 9.5a2 2 0 1 1 2.8 1.8c-.5.3-.8.7-.8 1.2" />
+    <path d="M12 14.5h.01" />
+  </Icon>
+)
+
 export const BookIcon = () => (
   <Icon>
     <path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2z" />
