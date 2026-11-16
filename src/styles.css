@@ -1201,33 +1201,24 @@ a {
 
 /* Lesson tools */
 
-/* The dock's anchor is a zero-height row between the lesson body and its footer
-   (order puts the footer last), so the dock rides on the footer's top edge
-   however tall the footer is. */
+/* The dock is its own row between the lesson body and its footer (order puts
+   the footer last). It used to float over the body's last lines, and covered an
+   answer box and then the last line of an ordering puzzle (15 and 16 Nov 2026);
+   in the flow it can cover nothing. */
 .lesson > .lesson-action {
   order: 2;
 }
 .tool-anchor {
   order: 1;
-  position: relative;
   flex: none;
-  height: 0;
   z-index: 1;
 }
-/* Room for the dock under the last line, so nothing is stuck behind it. */
-.lesson.has-tools .lesson-body {
-  padding-bottom: 72px;
-}
-/* One row along the footer's top edge. A column of four buttons stood over the
-   answer boxes (seen on "The singular values", 15 Nov 2026); a row covers only
-   the strip the padding above keeps empty. */
 .tool-dock {
-  position: absolute;
-  right: max(10px, env(safe-area-inset-right));
-  bottom: 10px;
   display: flex;
   flex-direction: row;
+  justify-content: flex-end;
   gap: 8px;
+  padding: 6px max(10px, env(safe-area-inset-right)) 6px 10px;
 }
 .tool-round {
   width: 44px;
