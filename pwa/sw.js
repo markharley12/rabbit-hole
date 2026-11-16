@@ -68,6 +68,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event
   if (request.method !== 'GET') return
+  // The tutor's API (server/rabbit_server.py): always the network, never a
+  // cache. Nothing under api/ is in FILES, so the code below would pass it on
+  // anyway; this says so outright, before anything else can match it.
+  if (request.url.startsWith(url('api/'))) return
   const target = new URL(request.url)
   target.search = ''
   const href = target.href

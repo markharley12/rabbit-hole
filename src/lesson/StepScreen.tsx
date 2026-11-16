@@ -5,6 +5,7 @@ import { check } from './check.ts'
 import type { Verdict } from './check.ts'
 import { Md } from './Md.tsx'
 import type { Attempt, StepRecord } from './progress.ts'
+import { canShowAnswer } from './reveal.ts'
 import type { StepBlock } from './types.ts'
 import { Widget } from '../widgets/Widget.tsx'
 
@@ -106,7 +107,7 @@ export function StepScreen({ block, record, onDraft, onAttempt, onHint, onReveal
   }
 
   const shown = revealed && !solved ? Object.fromEntries(answer.fields.map((field) => [field.name, field.key])) : values
-  const canReveal = !finished && hints >= 3 && (record?.attempts ?? 0) > 0
+  const canReveal = canShowAnswer(record)
 
   return (
     <>

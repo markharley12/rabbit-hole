@@ -102,6 +102,8 @@ export default defineConfig({
     host: true,
     // Reaching the dev server from the phone over Tailscale.
     allowedHosts: ['.ts.net'],
+    // The tutor's API, from a running `npm run server` (server/rabbit_server.py).
+    proxy: { '/api': 'http://127.0.0.1:8791' },
   },
   preview: { allowedHosts: ['.ts.net'] },
   test: {
@@ -109,5 +111,8 @@ export default defineConfig({
     restoreMocks: true,
     // .tsx too: without it a component test is silently not run.
     include: ['src/**/*.test.{ts,tsx}'],
+    // The whole-app tests take 2 to 3 s alone; with every file running in
+    // parallel (25 files on 16 Nov 2026) one went past the 5 s default.
+    testTimeout: 15000,
   },
 })

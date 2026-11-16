@@ -186,3 +186,10 @@ Filled in as stages land (date, commit, what was not checked).
   (nothing here fetched them again) and their `use` lines were rewritten for the node. Not checked: any
   URL in this stage; the offline message with the real network off; on the phone itself; the list now
   shows four links and a "Show 10 more" button (added by the orchestrator after review).
+- **D steps 1 to 3: AI server and Ask** (16 Nov 2026). `server/rabbit_server.py` with the `ask` kind,
+  tests against a fake claude, `docs/agents/ask.md`, the Ask dock tool. Looked at in the built-in
+  browser at 375x812, dark and light, against the fake claude (starter, typed message, notes and
+  refusals, typeset maths, reload restoring the chat). Not checked: **any turn with the real CLI**
+  (it was not signed in, so the smoke test got only "Failed to authenticate"); the tutor's replies
+  and whether it keeps the answer back; `tailscale serve` and the systemd unit (not switched on);
+  on the phone itself, including the on-screen keyboard over the input.

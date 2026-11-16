@@ -86,6 +86,62 @@ update up the second time the app is opened (the new version waits until the old
 To see which build is running, open the sheet on the home view: "This version" gives the build
 time and commit.
 
+## The AI server
+
+`server/rabbit_server.py` (Python standard library only) serves the built app **and** a small API
+that runs Claude Code sessions (`claude -p`, the owner's plan, no API keys) for the **Ask** tool on
+a lesson screen: a chat that already knows the course, the step, and what has been typed and tried.
+It binds `127.0.0.1` only. The design is in [docs/ai-sessions.md](docs/ai-sessions.md); the tutor's
+instructions are [docs/agents/ask.md](docs/agents/ask.md). Without the server the app is unchanged
+and the Ask button is simply not there.
+
+The Claude Code CLI must be signed in on the PC (`claude auth status` says `"loggedIn": true`).
+
+Build, then start the server (port 8791 by default):
+
+```bash
+npm run build
+```
+
+```bash
+npm run server
+```
+
+To reach it from the phone, switch port 8443 from serving the `dist` folder to proxying the server
+(the server then serves the app as well, so app and API share one origin):
+
+```bash
+tailscale serve --bg --https=8443 http://127.0.0.1:8791
+```
+
+To keep it running, install the systemd user unit (check the paths in it first):
+
+```bash
+mkdir -p ~/.config/systemd/user
+```
+
+```bash
+cp server/rabbit-hole.service ~/.config/systemd/user/
+```
+
+```bash
+systemctl --user daemon-reload
+```
+
+```bash
+systemctl --user enable --now rabbit-hole.service
+```
+
+During development, `npm run dev` proxies `/api` to a running `npm run server`. The server's
+tests never run the real `claude` (`npm run test:server`, part of `npm run check`). One hand-run
+check with the real CLI, two short Sonnet turns:
+
+```bash
+env -u PYTHONPATH python3 server/smoke_ask.py --port 8791
+```
+
+Session records (the chats) are kept in `data/sessions/`, which is not in git.
+
 ## Attribution
 
 The first map is built from the [MSC2020](https://msc2020.org) Mathematics Subject
