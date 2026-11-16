@@ -3,6 +3,8 @@
 // validator; registry.test.ts fails if the two lists differ.
 
 import type { ReactNode } from 'react'
+import { DescentPath } from './DescentPath.tsx'
+import type { DescentPathParams } from './DescentPath.tsx'
 import { DependentColumns } from './DependentColumns.tsx'
 import type { DependentColumnsParams } from './DependentColumns.tsx'
 import { LineFitter } from './LineFitter.tsx'
@@ -22,4 +24,5 @@ export const registry: Record<string, AnyWidget> = {
   'dependent-columns': DependentColumns satisfies (props: { params: DependentColumnsParams }) => ReactNode,
   'svd-geometry': SvdGeometry satisfies (props: { params: SvdGeometryParams }) => ReactNode,
   'pca-scatter': PcaScatter satisfies (props: { params: PcaScatterParams }) => ReactNode,
+  'descent-path': DescentPath satisfies (props: { params: DescentPathParams }) => ReactNode,
 }

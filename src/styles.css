@@ -2161,3 +2161,48 @@ a {
     width: 16px;
   }
 }
+
+/* Descent path */
+.descent-path .w-level {
+  fill: none;
+}
+.w-descent-curve {
+  fill: none;
+  stroke: var(--b4);
+  stroke-width: 2;
+}
+.w-descent-step {
+  stroke: var(--b1);
+  stroke-width: 2;
+}
+.w-descent-step.out {
+  stroke-dasharray: 4 3;
+}
+.w-descent-iterate {
+  fill: var(--b1);
+}
+.w-descent-arrow line {
+  stroke: var(--b2);
+  stroke-width: 2.5;
+}
+.w-descent-arrow circle,
+.w-descent-arrow text {
+  fill: var(--b2);
+}
+.w-descent-arrow text {
+  font-size: 12px;
+  font-weight: 650;
+}
+.w-descent-limit {
+  position: relative;
+  height: 10px;
+  margin: -6px 8px 0;
+}
+.w-descent-limit span {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 10px;
+  margin-left: -1px;
+  background: var(--b2);
+}

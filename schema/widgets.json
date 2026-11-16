@@ -95,6 +95,34 @@
           "showSecond": { "description": "Also draw the perpendicular direction, its variance, and that the two variances add up to the total.", "type": "boolean" }
         }
       }
+    },
+    "descent-path": {
+      "summary": "Gradient descent on a quadratic bowl f(x) = ½xᵀHx − gᵀx + c: level curves, a draggable start, the path of iterates for the step size η on a slider (or one step per tap), read-outs of η, the last iterate and f there, and whether η is below the limit 2/λmax; or the 1D parabola f = ½λx² with the iterates bouncing on it.",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["H"],
+        "properties": {
+          "H": {
+            "description": "A symmetric positive-definite 2×2 matrix. With oneD, H[0][0] is λ and the rest is ignored.",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 }
+          },
+          "g": { "description": "The linear term (default (0, 0)); the bottom of the bowl is where Hx = g.", "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 },
+          "c": { "description": "The constant term, so the f read-out matches the lesson's f (default 0).", "type": "number" },
+          "view": { "description": "Half-width of the picture around the bottom of the bowl (with oneD, around 0).", "type": "number", "exclusiveMinimum": 0 },
+          "start": { "description": "The start point x₀ (with oneD, its first entry).", "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 },
+          "eta": { "description": "The step size to start with.", "type": "number", "minimum": 0 },
+          "etaRange": { "description": "The η slider's range (default 0 to a little past 2/λmax).", "type": "array", "prefixItems": [{ "type": "number", "minimum": 0 }, { "type": "number", "exclusiveMinimum": 0 }], "items": false, "minItems": 2 },
+          "maxSteps": { "description": "How many steps can be shown (default 12).", "type": "integer", "minimum": 1, "maximum": 30 },
+          "showGradient": { "description": "Draw −∇f as an arrow at the start point.", "type": "boolean" },
+          "stepByStep": { "description": "A 'Take a step' button instead of the steps slider, so the learner predicts, then sees.", "type": "boolean" },
+          "revealLimit": { "description": "Offer a 'Show the limit' button that marks 2/λmax under the slider. Off until the learner has found it.", "type": "boolean" },
+          "oneD": { "description": "Draw f = ½λx² as a parabola, with λ = H[0][0], and the iterates bouncing on it.", "type": "boolean" }
+        }
+      }
     }
   }
 }
