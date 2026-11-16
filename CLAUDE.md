@@ -102,7 +102,7 @@ marking, no Capacitor yet. What is where:
   KaTeX bundled; typed answers only until photo marking (Phase 5).
 
 Run everything with `npm run check` (typecheck, lint, Vitest, Python tests, course
-validation). Build and phone access are in [README.md](README.md). **What to build next, and how work is delegated to subagents, is in [docs/ROADMAP.md](docs/ROADMAP.md)** (written from Mark's brain dump of 15 Nov; stages A to D are built; **next: Mark switches `tailscale serve` to the server and tests on his phone, and reads the AI-built eigenvalues course**, then stage E. The AI design and what was built is in [docs/ai-sessions.md](docs/ai-sessions.md)). Course content is written to the contract in [docs/course-authoring.md](docs/course-authoring.md). Older open points and next
+validation). Build and phone access are in [README.md](README.md). **What to build next, and how work is delegated to subagents, is in [docs/ROADMAP.md](docs/ROADMAP.md)** (written from Mark's brain dump of 15 Nov; stages A to D are built; **next: Mark tests on his phone (since 16 Nov the server runs as the user unit `rabbit-hole.service` and `tailscale serve` port 8443 proxies to it; app, API and a same-origin POST were checked through the tailnet address from the PC), and reads the AI-built eigenvalues course**, then stage E. The AI design and what was built is in [docs/ai-sessions.md](docs/ai-sessions.md)). Course content is written to the contract in [docs/course-authoring.md](docs/course-authoring.md). Older open points and next
 steps are at the end of [docs/HANDOFF.md](docs/HANDOFF.md).
 
 The planning docs, still the reference for later phases. **Read in this order:**
