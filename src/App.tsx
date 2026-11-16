@@ -9,7 +9,9 @@ import { applyTheme, initialTheme, saveTheme } from './theme.ts'
 import type { Theme } from './theme.ts'
 import type { Course, CourseIndex } from './lesson/types.ts'
 import { lessonHash, parseRoute, resolveLesson } from './route.ts'
-import { countCourses, groupByNode } from './courses.ts'
+import { countCourses, groupByNode, tunnelsOf } from './courses.ts'
+import { nextUp } from './lesson/progress.ts'
+import { readProgress } from './lesson/progress-store.ts'
 import { CoursesMenu } from './components/CoursesMenu.tsx'
 import { UpdateBar } from './components/UpdateBar.tsx'
 import { parseIndex } from './resources.ts'
@@ -218,6 +220,18 @@ export default function App() {
   // Lesson to lesson replaces the address, so Back still goes to the map.
   const nextLesson = (course: Course, lessonId: string) => window.location.replace(`#${lessonHash(course, lessonId)}`)
 
+  // A tunnel line on the sheet: go to that course's own node and open the sheet there.
+  const showCourse = (course: Course) => {
+    setSheetOpen(true)
+    if (course.nodeId === focus.id) setRefit((n) => n + 1)
+    else window.location.hash = course.nodeId
+  }
+  // "Next course" at the end of a course: its next lesson, replacing the address like lesson to lesson.
+  const openCourse = (course: Course) => {
+    const target = nextUp(course, readProgress(course.id))?.lessonId ?? course.lessons[0].id
+    window.location.replace(`#${lessonHash(course, target)}`)
+  }
+
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark'
     saveTheme(next)
@@ -259,6 +273,8 @@ export default function App() {
             onClose={closeLesson}
             onOpenLesson={(lessonId) => nextLesson(opened.course, lessonId)}
             reading={reading}
+            leadsTo={tunnelsOf(opened.course, courseList).leadsTo.map((link) => link.course)}
+            onOpenCourse={openCourse}
           />
         </Suspense>
       ) : (
@@ -285,6 +301,8 @@ export default function App() {
             reading={reading}
             dueCount={review.due}
             onOpenReview={openReview}
+            allCourses={courseList}
+            onShowCourse={showCourse}
             onMakeCourse={canMakeCourses ? openNewCourse : undefined}
           />
         </>

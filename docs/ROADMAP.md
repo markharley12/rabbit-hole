@@ -71,7 +71,7 @@ Limits found, each fixed by a stage below:
 | --- | --- | --- |
 | **Landscape** | The whole map of one field (maths first) | `map.json`, `src/map/` |
 | **Rabbit hole** | A place you go down: a node, and the courses under it | node, course |
-| **Tunnel** | A link between two rabbit holes: a prerequisite, or "this is the same idea as" | not built (E1) |
+| **Tunnel** | A link between two rabbit holes: a prerequisite, or "this is the same idea as" | built for courses (`tunnels` in `course.json`, `needs` or `related`); prerequisite levels between map nodes are still later (E1) |
 
 Use these words in the app's own text when a screen is next touched. Do not rename code
 identifiers for it.
@@ -139,7 +139,7 @@ Design first, in `docs/ai-sessions.md`, then build. Outline (Recommended):
 
 ### E. Later
 
-- **E1. Tunnels**: levels and prerequisites (PLAN.md 4.3), plus cross-links between courses.
+- **E1. Tunnels**: levels and prerequisites between map nodes (PLAN.md 4.3). Cross-links between courses are built.
 - **E2. Import the old maths routine** (1.10): Map.md scores, Mistakes, Derivations (these
   become review cards), the diagnostic. Learner data goes under `data/` (never in git).
   **Open:** see section 6.

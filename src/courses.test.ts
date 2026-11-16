@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { countCourses, fold, groupByNode, searchCourses, searchNodes } from './courses.ts'
+import { countCourses, courseFinished, fold, groupByNode, nextCourseAfter, searchCourses, searchNodes, tunnelsOf } from './courses.ts'
+import type { CourseRecord } from './lesson/progress.ts'
 import type { Course } from './lesson/types.ts'
 import { layoutMap } from './map/layout.ts'
 import type { MapDocument } from './map/types.ts'
@@ -71,5 +72,68 @@ describe('search', () => {
   it('waits for two letters before searching the map', () => {
     expect(searchNodes('a', layout)).toEqual([])
     expect(searchNodes('  ', layout)).toEqual([])
+  })
+})
+
+describe('tunnels', () => {
+  const make = (id: string, tunnels: Course['tunnels'] = undefined): Course => ({
+    ...course,
+    id,
+    title: `Title of ${id}`,
+    lessons: [{ id: 'l1', title: 'One' }, { id: 'l2', title: 'Two' }],
+    tunnels,
+  })
+  const base = make('base')
+  const mid = make('mid', [
+    { to: 'base', kind: 'needs', why: 'It uses base.' },
+    { to: 'side', kind: 'related', why: 'Same idea.' },
+  ])
+  const side = make('side')
+  const top = make('top', [{ to: 'mid', kind: 'needs', why: 'It uses mid.' }])
+  const top2 = make('top2', [{ to: 'mid', kind: 'needs', why: 'It also uses mid.' }])
+  const all = [base, mid, side, top, top2]
+  const lesson = { at: 2, done: true, started: 'x', steps: {} }
+  const done =
+    (...ids: string[]) =>
+    (courseId: string): CourseRecord => ({ format: 1, lessons: ids.includes(courseId) ? { l1: lesson, l2: lesson } : {} })
+
+  it('splits what a course needs, what is related, and derives what it leads to', () => {
+    const t = tunnelsOf(mid, all)
+    expect(t.needs.map((l) => [l.course.id, l.why])).toEqual([['base', 'It uses base.']])
+    expect(t.related.map((l) => l.course.id)).toEqual(['side'])
+    expect(t.leadsTo.map((l) => [l.course.id, l.why])).toEqual([
+      ['top', 'It uses mid.'],
+      ['top2', 'It also uses mid.'],
+    ])
+  })
+
+  it('derives "leads to" from needs only, never from related', () => {
+    expect(tunnelsOf(side, all)).toEqual({ needs: [], related: [], leadsTo: [] })
+    expect(tunnelsOf(base, all).leadsTo.map((l) => l.course.id)).toEqual(['mid'])
+  })
+
+  it('leaves out a tunnel to a course that is not in the app, and a course with no tunnels has none', () => {
+    const lonely = make('lonely', [{ to: 'gone', kind: 'needs', why: 'It uses gone.' }])
+    expect(tunnelsOf(lonely, [lonely, base])).toEqual({ needs: [], related: [], leadsTo: [] })
+    expect(tunnelsOf(base, [base])).toEqual({ needs: [], related: [], leadsTo: [] })
+  })
+
+  it('says a course is finished only when every lesson is done', () => {
+    expect(courseFinished(base, done('base')('base'))).toBe(true)
+    expect(courseFinished(base, done()('base'))).toBe(false)
+    expect(courseFinished(base, { format: 1, lessons: { l1: lesson } })).toBe(false)
+  })
+
+  it('recommends the first unfinished course it leads to, one only', () => {
+    expect(nextCourseAfter(mid, all, done())?.id).toBe('top')
+    expect(nextCourseAfter(mid, all, done('top'))?.id).toBe('top2')
+    expect(nextCourseAfter(mid, all, done('top', 'top2'))).toBeUndefined()
+    expect(nextCourseAfter(top, all, done())).toBeUndefined()
+  })
+
+  it('is in the real course index: PCA needs least squares, which leads to PCA', () => {
+    const pca = JSON.parse(readFileSync('content/maths/courses/principal-components-from-the-svd/course.json', 'utf8')) as Course
+    expect(tunnelsOf(pca, [course, pca]).needs.map((l) => l.course.id)).toEqual([course.id])
+    expect(tunnelsOf(course, [course, pca]).leadsTo.map((l) => l.course.id)).toEqual([pca.id])
   })
 })

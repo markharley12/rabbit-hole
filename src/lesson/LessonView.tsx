@@ -3,6 +3,7 @@ import { LinksContext } from './links-context.ts'
 import { Md } from './Md.tsx'
 import type { Attempt } from './progress.ts'
 import { finishLesson, goTo, openLesson, recordAttempt, revealAnswer, saveDraft, takeHint } from './progress.ts'
+import { courseFinished } from '../courses.ts'
 import { readProgress, useProgress } from './progress-store.ts'
 import { ChatStore, chatKey, useTutorAvailable } from '../ai/chat-store.ts'
 import { createClient } from '../ai/client.ts'
@@ -29,6 +30,12 @@ interface Props {
   onOpenLesson: (lessonId: string) => void
   /** Where to find reading for the course's node and its ancestors; omitted when the app has none. */
   reading?: ReadingSource
+  /**
+   * The courses that `need` this one (its tunnels, reversed). After the last lesson the first not
+   * finished becomes the one recommendation. Omitted or empty: the end of the course is as before.
+   */
+  leadsTo?: Course[]
+  onOpenCourse?: (course: Course) => void
   /** The tutor's server (tests pass a fake); by default the one this app is served from. */
   tutor?: ChatClient
 }
@@ -57,7 +64,7 @@ function TextScreen({ block, onNext }: { block: TextBlock; onNext: () => void })
 }
 
 /** A lesson, full screen over the map: one screen at a time, resuming where it was left. */
-export default function LessonView({ course, lessonId, base, onClose, onOpenLesson, reading, tutor = defaultTutor }: Props) {
+export default function LessonView({ course, lessonId, base, onClose, onOpenLesson, reading, leadsTo = [], onOpenCourse, tutor = defaultTutor }: Props) {
   const [loaded, setLoaded] = useState<Loaded>({ state: 'loading' })
   const [record, update] = useProgress(course.id)
   const body = useRef<HTMLDivElement>(null)
@@ -160,6 +167,9 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
   const block = lesson.blocks[at]
   const advance = () => update((r) => (at + 1 >= total ? finishLesson(r, lessonId, total, now()) : goTo(r, lessonId, at + 1, now())))
 
+  // Read now, not from App: finishing a course changes progress that App does not watch.
+  const nextCourse = !following ? leadsTo.find((c) => !courseFinished(c, readProgress(c.id))) : undefined
+
   let screen
   if (!block) {
     const steps = lesson.blocks.filter((b) => b.type !== 'text')
@@ -190,6 +200,16 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
             <button className="primary" onClick={() => onOpenLesson(following.id)}>
               Next lesson: {following.title}
             </button>
+          ) : nextCourse && onOpenCourse ? (
+            // One recommendation, never a list; the way back is a quiet second choice.
+            <>
+              <button className="primary" onClick={() => onOpenCourse(nextCourse)}>
+                Next course: {nextCourse.title}
+              </button>
+              <button className="text-button" onClick={onClose}>
+                Back to the map
+              </button>
+            </>
           ) : (
             <button className="primary" onClick={onClose}>
               Course finished: back to the map

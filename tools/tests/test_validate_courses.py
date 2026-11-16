@@ -218,6 +218,78 @@ class Content(unittest.TestCase):
         self.edit("dependent-columns", lambda d: d["blocks"][0].update(why="See [it](lesson:the-smallest-best-fit) on [the map](node:15Axx)."))
         self.assertEqual(self.errors(), [])
 
+    # ---- tunnels between courses (course.json "tunnels")
+
+    def tunnels(self, course_dir, *tunnels):
+        path = course_dir / "course.json"
+        document = json.loads(path.read_text())
+        document["tunnels"] = [{"to": to, "kind": kind, "why": "It uses the same idea."} for to, kind in tunnels]
+        path.write_text(json.dumps(document, ensure_ascii=False))
+
+    def test_tunnels_between_real_courses_pass(self):
+        second = self.copy_course("a-second-course")
+        self.tunnels(second, (COURSE_ID, "needs"))
+        self.tunnels(self.course, ("a-second-course", "related"))
+        self.assertEqual(self.errors(), [])
+
+    def test_a_tunnel_must_name_a_course_that_exists(self):
+        self.tunnels(self.course, ("no-such-course", "needs"))
+        self.assertFails("to 'no-such-course' is not a course in this field")
+
+    def test_a_course_cannot_tunnel_to_itself(self):
+        self.tunnels(self.course, (COURSE_ID, "related"))
+        self.assertFails("cannot have a tunnel to itself")
+
+    def test_a_tunnel_to_the_same_course_twice_is_caught(self):
+        second = self.copy_course("a-second-course")
+        self.tunnels(second, (COURSE_ID, "needs"), (COURSE_ID, "related"))
+        self.assertFails(f"a second tunnel to '{COURSE_ID}'")
+
+    def test_needs_tunnels_may_not_form_a_loop(self):
+        second = self.copy_course("a-second-course")
+        third = self.copy_course("a-third-course")
+        self.tunnels(self.course, ("a-second-course", "needs"))
+        self.tunnels(second, ("a-third-course", "needs"))
+        self.assertEqual(self.errors(), [])
+        self.tunnels(third, (COURSE_ID, "needs"))
+        self.assertFails("the `needs` tunnels form a loop")
+        # Two courses that need each other are the shortest loop.
+        self.tunnels(third)
+        self.tunnels(second, (COURSE_ID, "needs"))
+        self.assertFails("the `needs` tunnels form a loop")
+
+    def test_related_tunnels_may_point_both_ways(self):
+        second = self.copy_course("a-second-course")
+        self.tunnels(self.course, ("a-second-course", "related"))
+        self.tunnels(second, (COURSE_ID, "related"))
+        self.assertEqual(self.errors(), [])
+
+    def test_at_most_five_tunnels_a_kind_and_a_short_reason(self):
+        for name in ("c-one", "c-two", "c-three", "c-four", "c-five", "c-six"):
+            self.copy_course(name)
+        names = ("c-one", "c-two", "c-three", "c-four", "c-five", "c-six")
+        self.tunnels(self.course, *[(n, "related") for n in names])
+        self.assertFails("is too long")
+        self.tunnels(self.course, *[(n, "related") for n in names[:5]])
+        self.assertEqual(self.errors(), [])
+        self.edit("course", lambda d: d["tunnels"][0].update(why="w" * 161))
+        self.assertFails("is too long")
+        self.edit("course", lambda d: d["tunnels"][0].update(why="Fine.", kind="after"))
+        self.assertFails("course.json")
+
+    def test_tunnels_are_published_in_the_index(self):
+        second = self.copy_course("a-second-course")
+        self.tunnels(second, (COURSE_ID, "needs"))
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(vc.main(["--publish", "--content", str(self.content), "--public", str(self.public)]), 0)
+        index = json.loads((self.public / "content" / "maths" / "courses" / "index.json").read_text())
+        entry = next(c for c in index["courses"] if c["id"] == "a-second-course")
+        self.assertEqual(entry["tunnels"][0]["to"], COURSE_ID)
+
+    def test_the_real_pca_course_needs_least_squares(self):
+        pca = json.loads((ROOT / "content/maths/courses/principal-components-from-the-svd/course.json").read_text())
+        self.assertEqual([(t["to"], t["kind"]) for t in pca["tunnels"]], [(COURSE_ID, "needs")])
+
     # ---- the cheat sheet (cheatsheet.json beside course.json)
 
     def sheet(self, change):

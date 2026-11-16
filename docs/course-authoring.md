@@ -163,6 +163,21 @@ lines under "My notes", on his device, so nothing he types is ever in this file.
 - The published `index.json` gets `"cheatsheet": true` for a course that has one. That flag is
   written by `--publish`; never put it in `course.json`.
 
+### Tunnels to other courses
+
+A tunnel joins two rabbit holes. Optional in `course.json`, at most 5:
+`"tunnels": [{ "to": "<course-id>", "kind": "needs", "why": "One sentence, at most 160." }]`.
+
+- `needs`: do that course first. Add it only for a **real prerequisite**: this course uses
+  something from there without teaching it again (the PCA course uses the SVD and Eckart–Young
+  from the least-squares one). If the learner could follow without it, it is not a `needs`.
+  `needs` links may not form a loop; the validator checks.
+- `related`: the same idea shows up there. Use it sparingly; one or two are plenty.
+- `to` is another course in the same field; no repeats. Only the earlier course is named by the
+  later one: "leads to" is worked out by the app from other courses' `needs`, so never write it.
+- The app shows them as quiet lines on the node sheet ("Builds on", "Leads to") and offers the
+  next course after the last lesson. A needed course that is not finished never blocks starting.
+
 ## 10. Reading for a node
 
 Outside links belong to a **map node**, not to a course: `content/<field>/resources/<node-id>.json`
@@ -299,4 +314,4 @@ that distractors are good or that the order is unique: that is for the author an
 
 ## 13. Parts that arrive with later stages
 
-Added to this file when they exist (ROADMAP.md): tunnels to other courses (E1).
+Added to this file when they exist (ROADMAP.md): prerequisite levels between map nodes (E1).

@@ -9,6 +9,8 @@ What is checked, for every content/<field>/courses/<course-id>/:
 - course.json and each lesson against schema/course.schema.json and schema/lesson.schema.json;
 - an optional cheatsheet.json against schema/cheatsheet.schema.json: item ids unique, `lesson`
   one of the course's, Markdown checked as for lessons;
+- optional `tunnels` in course.json: each `to` is another course of the same field, none repeats,
+  and the `needs` tunnels never form a loop (a cycle of "do that first");
 - steps, choice and order screens marked `review: true` (a boolean, schema only). Publishing lists
   them in the course's entry in index.json as `review: [{lesson, step}]`, for spaced review in the app;
 - choice screens: exactly one right option (at least one when `multiple`), at least one wrong,
@@ -668,6 +670,49 @@ def check_cheatsheet(sheet: dict, where: str, lesson_ids: set[str], node_ids: se
                 check_markdown(item[key], f"{at} {key}", lesson_ids, node_ids, report)
 
 
+def check_tunnels(courses: list[tuple[str, dict]], report: Report):
+    """Tunnels between the courses of one field: `to` is another course here, none repeats, and
+    the `needs` links lead somewhere: following them never comes back to where it started."""
+    ids = {course["id"] for _, course in courses}
+    needs: dict[str, list[str]] = {}
+    for where, course in courses:
+        seen: set[str] = set()
+        for i, tunnel in enumerate(course.get("tunnels", [])):
+            at = f"{where}/course.json tunnels/{i}"
+            if tunnel["to"] == course["id"]:
+                report.add(at, "a course cannot have a tunnel to itself")
+            elif tunnel["to"] not in ids:
+                report.add(at, f"to {tunnel['to']!r} is not a course in this field")
+            if tunnel["to"] in seen:
+                report.add(at, f"a second tunnel to {tunnel['to']!r}")
+            seen.add(tunnel["to"])
+            if tunnel["kind"] == "needs" and tunnel["to"] in ids and tunnel["to"] != course["id"]:
+                needs.setdefault(course["id"], []).append(tunnel["to"])
+    # Depth-first over `needs`; a node met again while still on the path closes a loop.
+    state: dict[str, int] = {}
+    path: list[str] = []
+    reported: set[str] = set()
+
+    def visit(node: str):
+        state[node] = 1
+        path.append(node)
+        for target in needs.get(node, []):
+            if state.get(target) == 1:
+                loop = path[path.index(target):] + [target]
+                key = min(loop[:-1])
+                if key not in reported:
+                    reported.add(key)
+                    report.add(f"course {node!r}", f"the `needs` tunnels form a loop: {' -> '.join(loop)}")
+            elif target not in state:
+                visit(target)
+        path.pop()
+        state[node] = 2
+
+    for _, course in courses:
+        if course["id"] not in state:
+            visit(course["id"])
+
+
 def map_ids(map_path: Path) -> set[str]:
     document = json.loads(map_path.read_text(encoding="utf-8"))
     ids = set()
@@ -731,6 +776,7 @@ def validate(content: Path, public: Path, schema_dir: Path, report: Report | Non
                 if sheet is not None and not schema_errors(cheatsheet_validator, sheet, f"{where}/cheatsheet.json", report):
                     check_cheatsheet(sheet, f"{where}/cheatsheet.json", set(lesson_ids), nodes, report)
             found[field].append((course_dir, course))
+        check_tunnels([(str(d.relative_to(content.parent)) if content.parent in d.parents else str(d), c) for d, c in found[field]], report)
     return report, found
 
 
