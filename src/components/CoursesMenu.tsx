@@ -15,6 +15,8 @@ interface Props {
   /** Items due for review today; the line under the search box shows only above zero. */
   dueCount?: number
   onOpenReview?: () => void
+  /** Opens "Where I am"; the quiet button under the title shows only when given. */
+  onOpenProgress?: () => void
   /** Given only when the server on the PC offers the new-course chat: the "New course" button. */
   onNewCourse?: () => void
 }
@@ -40,7 +42,7 @@ function progressText(course: Course) {
  * Every course in the app, and a search over courses and the map's sections
  * and topics. Full screen over the map; Back or × closes it.
  */
-export function CoursesMenu({ layout, courses, onClose, onOpenLesson, onShowNode, dueCount = 0, onOpenReview, onNewCourse }: Props) {
+export function CoursesMenu({ layout, courses, onClose, onOpenLesson, onShowNode, dueCount = 0, onOpenReview, onOpenProgress, onNewCourse }: Props) {
   const [query, setQuery] = useState('')
   const courseHits = useMemo(() => searchCourses(query, courses, layout), [query, courses, layout])
   const nodeHits = useMemo(() => searchNodes(query, layout), [query, layout])
@@ -60,7 +62,13 @@ export function CoursesMenu({ layout, courses, onClose, onOpenLesson, onShowNode
             {courses.length} in the app
           </p>
         </div>
-        <span className="icon-spacer" />
+        {onOpenProgress ? (
+          <button className="text-button where-link" onClick={onOpenProgress}>
+            Where I am
+          </button>
+        ) : (
+          <span className="icon-spacer" />
+        )}
       </header>
       <div className="lesson-body">
         <input

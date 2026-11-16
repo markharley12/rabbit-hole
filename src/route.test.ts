@@ -34,6 +34,12 @@ describe('parseRoute', () => {
     expect(resolveLesson(parseRoute('15Axx/new-course'), [course('a', 'one')])).toBeUndefined()
   })
 
+  it('reads the progress form ("Where I am"), from any node', () => {
+    expect(parseRoute('mathematics/progress')).toEqual({ nodeId: 'mathematics', progress: true })
+    expect(parseRoute('15Axx/progress')).toEqual({ nodeId: '15Axx', progress: true })
+    expect(resolveLesson(parseRoute('15Axx/progress'), [course('a', 'one')])).toBeUndefined()
+  })
+
   it('does not take review for a lesson or a course', () => {
     expect(resolveLesson(parseRoute('15Axx/review'), [course('a', 'one')])).toBeUndefined()
   })

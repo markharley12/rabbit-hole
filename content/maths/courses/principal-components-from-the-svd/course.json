@@ -26,6 +26,13 @@
       "note": "From the lecture transcript: centre the data, divide by n − 1 for the sample covariance, the best line minimises perpendicular distances where least squares minimises vertical ones, and Eckart–Young holds in the 2-norm and the Frobenius norm."
     }
   ],
+  "tunnels": [
+    {
+      "to": "least-squares-to-the-pseudo-inverse",
+      "kind": "needs",
+      "why": "It uses the SVD and the Eckart–Young result from there."
+    }
+  ],
   "lessons": [
     {
       "id": "spread-along-a-direction",

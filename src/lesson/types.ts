@@ -15,6 +15,13 @@ export interface LessonEntry {
   badge?: string
 }
 
+/** A link between two courses. `needs`: do that one first. `related`: the same idea shows up there. */
+export interface Tunnel {
+  to: string
+  kind: 'needs' | 'related'
+  why: string
+}
+
 export interface Course {
   format: 1
   id: string
@@ -24,6 +31,8 @@ export interface Course {
   written: string
   sources: CourseSource[]
   lessons: LessonEntry[]
+  /** Links to other courses in the same field; see schema/course.schema.json. */
+  tunnels?: Tunnel[]
   /**
    * True when the course folder has a cheatsheet.json. Set by the validator in the
    * published index only; it is NOT part of course.schema.json or of course.json.
@@ -181,6 +190,8 @@ export interface CheatItem {
   name: string
   formula: string
   when: string
+  /** The review card's front, besides the name: what to recall, without the formula. */
+  cue?: string
   lesson?: string
 }
 

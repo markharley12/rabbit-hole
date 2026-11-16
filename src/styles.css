@@ -2162,6 +2162,47 @@ a {
   }
 }
 
+/* Tunnels and Where I am */
+
+/* Quiet lines under a course summary: "Builds on", "Leads to". */
+.tunnel-line {
+  margin: 2px 0;
+}
+.tunnel-line .link {
+  padding: 6px 0;
+  font-size: inherit;
+  color: inherit;
+}
+/* The way back after "Next course": a quiet second choice under the one recommendation. */
+.lesson-action .text-button {
+  display: block;
+  margin: 4px auto 0;
+  color: var(--muted);
+}
+
+/* "Where I am" opens from the courses menu header; its cards are read-only. */
+.where-link {
+  flex: none;
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.where-card {
+  padding-bottom: 10px;
+}
+.where-card .course-card-title {
+  margin: 8px 0 2px;
+}
+.where-card .course-card-meta {
+  margin: 0;
+}
+.where-slips {
+  margin: 0 0 4px;
+  padding-left: 20px;
+  font-size: 15px;
+}
+
 /* Descent path */
 .descent-path .w-level {
   fill: none;

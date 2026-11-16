@@ -4,7 +4,9 @@ import { ancestry, shortCode } from '../map/layout.ts'
 import type { Placed } from '../map/layout.ts'
 import type { MapDocument } from '../map/types.ts'
 import { lessonState, nextUp } from '../lesson/progress.ts'
-import { useProgress } from '../lesson/progress-store.ts'
+import { readProgress, useProgress } from '../lesson/progress-store.ts'
+import { courseFinished, tunnelsOf } from '../courses.ts'
+import type { TunnelLink } from '../courses.ts'
 import type { Course } from '../lesson/types.ts'
 import { ReadingList } from './ReadingList.tsx'
 import type { ReadingSource } from '../resources.ts'
@@ -26,6 +28,10 @@ interface Props {
   /** Items due for review today; the line on the root sheet shows only above zero. */
   dueCount?: number
   onOpenReview?: () => void
+  /** Every course in the app, so a course's part of the sheet can show its tunnels. */
+  allCourses?: Course[]
+  /** Go to a course's own node and open its sheet (what a tunnel line does when tapped). */
+  onShowCourse?: (course: Course) => void
   /** Given only when the server on the PC offers the new-course chat: the "Make a course here" line. */
   onMakeCourse?: () => void
 }
@@ -69,21 +75,56 @@ function CourseButton({ course, onOpenLesson }: { course: Course; onOpenLesson: 
   )
 }
 
+/**
+ * A course's tunnels as quiet lines: at most one per kind. "Builds on" says when a needed course
+ * is not finished, and never blocks starting; "Leads to" is derived from the other courses' `needs`.
+ */
+function TunnelLines({ course, all, onShow }: { course: Course; all: Course[]; onShow: (course: Course) => void }) {
+  const { needs, related, leadsTo } = tunnelsOf(course, all)
+  const line = (label: string, links: TunnelLink[], showUnfinished: boolean) =>
+    links.length > 0 && (
+      <p className="note small tunnel-line">
+        {label}:{' '}
+        {links.map(({ course: other, why }, i) => (
+          <span key={other.id}>
+            {i > 0 && ', '}
+            <button className="link" title={why} onClick={() => onShow(other)}>
+              {other.title}
+            </button>
+            {showUnfinished && !courseFinished(other, readProgress(other.id)) && ' (not finished yet)'}
+          </span>
+        ))}
+      </p>
+    )
+  return (
+    <>
+      {line('Builds on', needs, true)}
+      {line('Leads to', leadsTo, false)}
+      {line('Related', related, false)}
+    </>
+  )
+}
+
 /** One course: title, summary, lessons. With several courses on a node each carries its own button; with one, the header has it. */
 function CourseSection({
   course,
   withButton,
   onOpenLesson,
+  allCourses,
+  onShowCourse,
 }: {
   course: Course
   withButton: boolean
   onOpenLesson: (course: Course, lessonId: string) => void
+  allCourses?: Course[]
+  onShowCourse?: (course: Course) => void
 }) {
   const [record] = useProgress(course.id)
   return (
     <>
       <p className="note course-title">{course.title}</p>
       <p className="note">{course.summary}</p>
+      {allCourses && onShowCourse && <TunnelLines course={course} all={allCourses} onShow={onShowCourse} />}
       {withButton && <CourseButton course={course} onOpenLesson={onOpenLesson} />}
       <ol className="lessons">
         {course.lessons.map((lesson, i) => {
@@ -118,7 +159,7 @@ function CourseSection({
  * is, how big, whether there is a course); opened it lists where the node sits
  * and what is in it.
  */
-export function NodeSheet({ node, document: doc, courses, counts, open, onOpenChange, onSelect, onOpenLesson, onOpenCourses, reading, dueCount = 0, onOpenReview, onMakeCourse }: Props) {
+export function NodeSheet({ node, document: doc, courses, counts, open, onOpenChange, onSelect, onOpenLesson, onOpenCourses, reading, dueCount = 0, onOpenReview, allCourses, onShowCourse, onMakeCourse }: Props) {
   const inside = counts.get(node.id) ?? 0
   const course = courses.length === 1 ? courses[0] : undefined
   const drag = useRef<number | null>(null)
@@ -234,7 +275,7 @@ export function NodeSheet({ node, document: doc, courses, counts, open, onOpenCh
 
         <h2>{courses.length > 1 ? 'Courses' : leaf || course ? 'Course' : 'Courses'}</h2>
         {courses.length > 0 ? (
-          courses.map((c) => <CourseSection key={c.id} course={c} withButton={courses.length > 1} onOpenLesson={onOpenLesson} />)
+          courses.map((c) => <CourseSection key={c.id} course={c} withButton={courses.length > 1} onOpenLesson={onOpenLesson} allCourses={allCourses} onShowCourse={onShowCourse} />)
         ) : inside > 0 ? (
           <p className="note">
             {plural(inside, 'course')} in here.{' '}

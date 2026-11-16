@@ -28,6 +28,21 @@
         }
       }
     },
+    "tunnels": {
+      "description": "Optional links to other courses in the same field (a tunnel joins two rabbit holes). `needs`: do that course first; add it only for a real prerequisite, one this course uses without re-teaching. `related`: the same idea shows up there. The validator checks that `to` is another course, that none repeats, and that the `needs` links never form a loop. The app shows them as quiet lines on the node sheet and, after the last lesson, offers the course that needs this one; a needed course that is not finished never blocks starting.",
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["to", "kind", "why"],
+        "properties": {
+          "to": { "description": "The id of the other course.", "$ref": "lesson.schema.json#/$defs/slug" },
+          "kind": { "enum": ["needs", "related"] },
+          "why": { "description": "One sentence for the learner: what this course takes from that one, or what they share.", "type": "string", "minLength": 5, "maxLength": 160 }
+        }
+      }
+    },
     "lessons": {
       "type": "array",
       "minItems": 1,

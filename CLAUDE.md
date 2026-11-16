@@ -86,6 +86,10 @@ marking, no Capacitor yet. What is where:
   `StepScreen` with an in-memory record (course progress untouched); top-bar button with a due badge,
   a "N to review" line on the root sheet and Courses menu. No scores. Evidence and its limits:
   docs/learning-science.md; authoring: course-authoring.md section 11.
+- **Tunnels and Where I am:** optional `tunnels` in `course.json` (`needs` / `related`, validated; shown as "Builds on" / "Leads to"
+  lines on the sheet and one "Next course" at the end of a last lesson; pure logic in `src/courses.ts`). "Where I am"
+  (`#<node>/progress`, button in the Courses menu header; `src/where-i-am.ts`, `WhereIAm.tsx`): next action, counts per course,
+  slips seen twice, review line; counts never scores. Cheat-sheet items have a `cue` that is the review card's front.
 - **Progress** is on the device only (`localStorage`, `rabbit-hole:progress:<course>`):
   attempts, hints, drafts, where he is. **No scores** (claimed is not scored).
 - `pwa/sw.js`: offline. A new build waits until the app is fully closed, so an update

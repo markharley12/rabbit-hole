@@ -9,6 +9,7 @@
           "name": "Residual",
           "formula": "$r = b - Ax$",
           "when": "Data minus fit, one entry per point. A fit is scored by $\\|r\\|^2$; the best fit makes it smallest.",
+          "cue": "The residual of a fit, in terms of $A$, $x$ and $b$",
           "lesson": "normal-equations-from-your-points"
         },
         {
@@ -16,6 +17,7 @@
           "name": "Normal equations",
           "formula": "$A^\\mathsf{T}A\\,x = A^\\mathsf{T}b$",
           "when": "To find the best fit. There is exactly one best line when $A^\\mathsf{T}A$ is invertible.",
+          "cue": "The equations whose solution $x$ is the best fit, in terms of $A$ and $b$",
           "lesson": "normal-equations-from-your-points"
         },
         {
@@ -23,6 +25,7 @@
           "name": "Perpendicular check",
           "formula": "$r \\perp$ every column of $A$",
           "when": "To check a fit: dot $r$ with each column of $A$. At the best fit every one comes to 0.",
+          "cue": "The check that a fit is the best one, using $r$ and the columns of $A$",
           "lesson": "normal-equations-from-your-points"
         },
         {
@@ -30,6 +33,7 @@
           "name": "Entries of AᵀA",
           "formula": "Row $i$, column $j$ of $A^\\mathsf{T}A$ is (column $i$) · (column $j$).",
           "when": "To build $A^\\mathsf{T}A$. It equals its own transpose, and its top-left entry is the number of points.",
+          "cue": "How to compute any one entry of $A^\\mathsf{T}A$ from the columns of $A$",
           "lesson": "normal-equations-from-your-points"
         },
         {
@@ -37,6 +41,7 @@
           "name": "Entries of Aᵀb",
           "formula": "Entry $i$ of $A^\\mathsf{T}b$ is (column $i$ of $A$) · $b$.",
           "when": "To build the right-hand side. Add the products one at a time; addition slips are easy here.",
+          "cue": "How to compute any one entry of $A^\\mathsf{T}b$ from the columns of $A$ and $b$",
           "lesson": "normal-equations-from-your-points"
         }
       ]
@@ -49,6 +54,7 @@
           "name": "A line of best fits",
           "formula": "$c + 2m = 3$",
           "when": "In the course's example (column 2 is $2 \\times$ column 1) the normal equations say this twice. Every point on it is a best fit, all with $\\|r\\|^2 = 14$.",
+          "cue": "In the dependent-columns example: the one equation in $c$ and $m$ that every best fit satisfies",
           "lesson": "dependent-columns"
         },
         {
@@ -56,6 +62,7 @@
           "name": "Null space",
           "formula": "$Ad = 0$",
           "when": "The directions $A$ can't see. Adding one to a best fit changes nothing $A$ can see.",
+          "cue": "What it means, as an equation, for a direction $d$ to be in the null space of $A$",
           "lesson": "the-smallest-best-fit"
         },
         {
@@ -63,6 +70,7 @@
           "name": "Smallest best fit",
           "formula": "$\\|p + t\\,d\\|^2 = \\|p\\|^2 + t^2\\|d\\|^2$ when $p \\perp d$",
           "when": "Every best fit is $p + t\\,d$ with $Ad = 0$. If $p \\perp d$, the smallest one is at $t = 0$.",
+          "cue": "The squared length of $p + t\\,d$ when $p \\perp d$, and why $t = 0$ is the smallest",
           "lesson": "the-smallest-best-fit"
         }
       ]
@@ -75,6 +83,7 @@
           "name": "Singular values",
           "formula": "$\\sigma_i = \\sqrt{\\lambda_i}$",
           "when": "The $\\lambda_i$ are the eigenvalues of $A^\\mathsf{T}A$, largest first. Its unit eigenvectors are the right singular vectors $v_i$.",
+          "cue": "How each singular value $\\sigma_i$ comes from the matrix $A^\\mathsf{T}A$",
           "lesson": "pseudo-inverse-from-the-svd"
         },
         {
@@ -82,6 +91,7 @@
           "name": "Left singular vector",
           "formula": "$u_1 = A v_1 / \\sigma_1$",
           "when": "Where $A$ sends $v_1$, scaled to unit length: $A v_1 = \\sigma_1 u_1$.",
+          "cue": "Where the left singular vector $u_1$ comes from, given $A$, $v_1$ and $\\sigma_1$",
           "lesson": "pseudo-inverse-from-the-svd"
         }
       ]
@@ -94,6 +104,7 @@
           "name": "Pseudo-inverse from the SVD",
           "formula": "$A^+ = V\\,\\Sigma^+\\,U^\\mathsf{T}$",
           "when": "To undo $A$ where it stretches, and send the direction it can't see to zero.",
+          "cue": "The pseudo-inverse $A^+$ in terms of the three factors of the SVD",
           "lesson": "pseudo-inverse-from-the-svd"
         },
         {
@@ -101,6 +112,7 @@
           "name": "The 1/σ rule",
           "formula": "In $\\Sigma^+$, each non-zero $\\sigma$ becomes $1/\\sigma$ and each zero stays $0$.",
           "when": "A zero singular value goes to zero, not to infinity.",
+          "cue": "How $\\Sigma^+$ is built from $\\Sigma$: what happens to a non-zero and to a zero singular value",
           "lesson": "pseudo-inverse-from-the-svd"
         },
         {
@@ -108,6 +120,7 @@
           "name": "The smallest best fit from A⁺",
           "formula": "$A^+ b$ is the smallest best fit. At rank 1: $A^+ b = \\frac{1}{\\sigma_1}(u_1 \\cdot b)\\,v_1$.",
           "when": "It has no part along a direction with $\\sigma = 0$, and that is what makes it the smallest.",
+          "cue": "Which vector $A^+ b$ is, and how to write it at rank 1 with $\\sigma_1$, $u_1$, $v_1$ and $b$",
           "lesson": "pseudo-inverse-from-the-svd"
         }
       ]
@@ -120,6 +133,7 @@
           "name": "The easy half",
           "formula": "$\\|A - A_k\\|_2 = \\sigma_{k+1}$",
           "when": "$A_k$ is the SVD cut to $k$ terms. It reaches this error.",
+          "cue": "How far the rank-$k$ cut $A_k$ is from $A$ in the 2-norm",
           "lesson": "why-no-rank-k-matrix-does-better"
         },
         {
@@ -127,6 +141,7 @@
           "name": "The hard half",
           "formula": "$\\|A - B\\|_2 \\ge \\sigma_{k+1}$ for every $B$ of rank at most $k$",
           "when": "So no matrix of rank at most $k$ does better than $A_k$ in the 2-norm.",
+          "cue": "The lower bound on $\\|A - B\\|_2$ for every $B$ of rank at most $k$",
           "lesson": "why-no-rank-k-matrix-does-better"
         },
         {
@@ -134,6 +149,7 @@
           "name": "The witness behind it",
           "formula": "$Bw = 0$, so $\\|A - B\\|_2 \\ge \\|Aw\\| \\ge \\sigma_{k+1}$",
           "when": "$w$ is a unit vector in both $N(B)$ and span$(v_1, \\ldots, v_{k+1})$. Their dimensions add to $n + 1 > n$, so one exists.",
+          "cue": "The witness $w$ in the hard half: the chain of inequalities that bounds $\\|A - B\\|_2$ from below",
           "lesson": "why-no-rank-k-matrix-does-better"
         }
       ]
