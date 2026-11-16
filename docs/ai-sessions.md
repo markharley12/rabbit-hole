@@ -1,4 +1,4 @@
-# AI sessions: design (steps 1 to 3 built; see section 10)
+# AI sessions: design (steps 1 to 4 built; see section 10)
 
 Design for ROADMAP.md stage D, written 15 Nov 2026 by the orchestrating session. Everything
 here is **Recommended** unless marked Decided. It turns PLAN.md 4.5 and Mark's brain dump
@@ -185,3 +185,54 @@ differs from the design above, and what was learned:
 - Open: `tailscale serve` and the systemd unit (`server/rabbit-hole.service`) are written but
   not switched on; whether `tailscale serve` keeps the `Host` header (the Origin check relies on
   `Host` or `X-Forwarded-Host`) is untested.
+
+### Step 4: new course, talk and build (16 Nov 2026)
+
+`new-course` and `build-course` rows in the kinds table, `docs/agents/new-course.md` and
+`build-course.md`, `server/tests/test_new_course.py`, `server/smoke_new_course.py`; in the app
+`src/ai/NewCourse.tsx` (route `#<node>/new-course`), `course-client.ts`, the shared
+`ChatParts.tsx`. **Only ever run against `fake_claude.py`**: the CLI was signed out, so nothing
+here has met the real CLI, WebSearch or WebFetch. What differs from sections 3 and 5:
+
+- **The build has no Bash.** Section 3 gave it `npm run validate`; instead the server runs
+  `tools/validate_courses.py` itself (subprocess, 300 s limit) after each turn, and sends this
+  course's problems back as the next turn (`--resume`), at most 3 repair rounds, under a 2-hour cap
+  on the whole job (30 min per turn). Problems are this course's when the validator's line names
+  `courses/<id>/` (or the reading file it wrote); problems only elsewhere in `content/` end the
+  build as failed with the course kept (it passed) and nothing published.
+- **Writes are granted per session, not per kind.** The table's `grant` says which: `brief` is
+  exactly `data/drafts/<draftId>/brief.md` (draft id made by the server at session start; the
+  session may also Read that one file, since Claude Code's Write wants a read first); `course` is
+  files named like `<slug>.json` directly inside `content/maths/courses/<courseId>/` (refused at
+  start if the name exists in any form), plus `content/maths/resources/<nodeId>.json` only if it did
+  not exist at start. Both the resolved and the lexical path must match, so links and `..` fail. The
+  second lock (settings `deny` rules) cannot deny `data/**` for a brief session, since deny
+  outranks everything: it denies every sibling on the way down to the brief by name instead
+  (`private_denies`); siblings made after the turn starts are guarded by the server's answers only.
+- **WebFetch** only for http(s) URLs whose host is a public name or a global address: never
+  localhost, private or link-local ranges, `.local`, `.ts.net`, dotless names. Names are **not
+  resolved**, so a public name pointing at 127.0.0.1 would pass (the server's API would then be
+  readable by GET). WebSearch is allowed as is.
+- **The context** for the talk is built by the server, not the app: the app sends only the node it
+  was opened from (dropped if not on the map). The server adds the brief's path, the existing courses
+  (id, title, node, lesson titles) and the widget catalogue (names and summaries).
+- **The brief** is `key: value` lines (title, courseId, nodeId), then `##` sections matched by
+  keyword. Problems (id taken, node missing, 3 to 8 lessons, unknown widget, no sources, no URL) are
+  shown in the app and put in front of the learner's next message as one fenced `[app-update]`
+  line, once per version of the brief. Not sent as a turn of their own: that needs no extra turn
+  and no message he did not write.
+- **One claude process at a time**: a build holds the turn lock for its whole run, so a chat turn
+  during a build and a build during a chat reply both get 409 with a plain message.
+- **Publishing**: on success `validate_courses.py --publish`, then `public/content/<field>/courses`
+  and `resources` are copied whole into `dist/content/` (swapped by rename). The service worker now
+  fetches the two content indexes network-first (cache when offline); the new course's files are
+  not precached, so they come from the network and are not available offline until the next real
+  build. The app reloads the index before opening the new course.
+- **Failure and stop** move the course folder to `data/drafts/<draftId>/failed-course/` (and a
+  reading file it wrote to `failed-reading/`), so `content/` never holds an invalid course. A build
+  found running when the server starts (it was killed mid-build) is marked failed and set aside.
+- **"New, not yet read"** is `unread: true` on the build record (`data/builds/<id>.json`), cleared
+  by `POST /api/build/seen` when he opens the course from the ready screen. Nothing else shows it yet.
+- Routes added: `GET /api/draft?id=`, `GET /api/drafts`, `POST /api/build {draftId}`,
+  `GET /api/build?id=`, `POST /api/build/stop {buildId}`, `POST /api/build/seen {buildId}`,
+  `GET /api/builds`. `--root` points the server at another copy of the repo (the tests' temp copy).

@@ -1865,3 +1865,80 @@ a {
   color: var(--fg);
   box-shadow: inset 0 0 0 2px var(--fg);
 }
+
+/* New course */
+
+/* The chat fills the screen under the bar; the box stays above the phone's keyboard. */
+.new-course {
+  height: 100dvh;
+  bottom: auto;
+}
+.new-course-talk .ask-form,
+.new-course > .ask-form {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+.new-course-entry {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.new-course-lead {
+  margin: 12px 0;
+  font-size: 18px;
+}
+.new-course-continue {
+  display: block;
+  text-align: left;
+}
+.new-course-button {
+  margin: 4px 0 8px;
+}
+.brief-card {
+  margin: 14px 0 6px;
+  padding: 4px 12px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.brief-card .menu-heading {
+  margin-top: 8px;
+}
+.brief-lessons,
+.brief-problems {
+  margin: 8px 0;
+  padding-left: 22px;
+  font-size: 15px;
+}
+.brief-lessons li,
+.brief-problems li {
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+.brief-actions {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+}
+.brief-actions .text-button {
+  justify-self: center;
+}
+.build-log {
+  margin: 12px 0;
+  padding-left: 22px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.build-log li:last-child {
+  color: var(--fg);
+}
+.new-course-done {
+  margin: 16px 0 6px;
+  font-size: 19px;
+}
+.primary.outline.armed {
+  box-shadow: inset 0 0 0 2px var(--b1);
+  color: var(--b1);
+}

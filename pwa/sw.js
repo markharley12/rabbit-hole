@@ -31,6 +31,8 @@ const PREFIX = `rabbit-hole-app-${new URL(SCOPE).pathname}-`
 const CACHE = PREFIX + VERSION
 
 const url = (name) => new URL(name, SCOPE).href
+// content/<field>/courses/index.json and content/<field>/resources/index.json, relative to the scope.
+const CONTENT_INDEX = /^content\/[a-z0-9-]+\/(courses|resources)\/index\.json$/
 const PRECACHED = new Set(FILES.map(url))
 
 // index.html is fetched as the scope's own address, not by name. `tailscale
@@ -80,6 +82,22 @@ self.addEventListener('fetch', (event) => {
   if (request.mode === 'navigate') {
     if (href !== SCOPE && href !== url('index.html')) return
     event.respondWith(caches.open(CACHE).then((cache) => cache.match(url('index.html'))).then((hit) => hit ?? fetch(request)))
+    return
+  }
+
+  // The content indexes (which courses and reading lists exist) are the one
+  // exception to "a page is one build": the server on the PC publishes a
+  // course it has just built (server/rabbit_server.py) without a new app
+  // build, so these come from the network first and from the cache only when
+  // offline. The new course's own files are not in FILES, so they come from
+  // the network below; offline, until the next real build precaches them, a
+  // new course is listed but cannot open.
+  if (CONTENT_INDEX.test(target.pathname.slice(new URL(SCOPE).pathname.length))) {
+    event.respondWith(
+      fetch(request).catch(() =>
+        caches.open(CACHE).then((cache) => cache.match(href, { ignoreVary: true, ignoreSearch: true })).then((hit) => hit ?? Response.error()),
+      ),
+    )
     return
   }
 

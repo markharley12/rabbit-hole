@@ -222,3 +222,14 @@ Filled in as stages land (date, commit, what was not checked).
   real clock; the step buttons read oddly in review (they keep each step's own `next` label, "Set up the normal
   equations", since `StepScreen` is unchanged). The ladder numbers are a convention; sources were read as
   records only, not full papers.
+- **D step 4: new course by talking** (16 Nov 2026). Kinds `new-course` (talk, writes only its brief) and
+  `build-course` (background job, writes only one new course folder; the server validates, repairs up to 3
+  rounds, publishes, copies into `dist/content/`), `docs/agents/new-course.md` and `build-course.md`, the
+  New course view with brief card and build progress, entries in the Courses menu and on an empty sheet,
+  content indexes network-first in the service worker. Walked in the built-in browser at 375x812 against the
+  fake claude on a temporary copy of the repo (talk, brief card, build with one repair round, open the new
+  course). Not checked: **anything with the real CLI** (signed out: no real brief, no real course, no real
+  WebSearch/WebFetch; `server/smoke_new_course.py` is for that); the service worker path in a browser (it
+  was not controlling the page on localhost; only the unit test covers it); offline; dark/light (dark only);
+  on the phone itself; a build lasting the real tens of minutes; Stop and failure screens in the browser
+  (tests only); whether WebFetch could reach a private address through a public DNS name.

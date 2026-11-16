@@ -142,6 +142,26 @@ env -u PYTHONPATH python3 server/smoke_ask.py --port 8791
 
 Session records (the chats) are kept in `data/sessions/`, which is not in git.
 
+**Making a course by talking.** With the server running, the Courses menu ends with **New course**
+and an empty node's sheet offers **Make a course here**. That opens a chat (kind `new-course`,
+Sonnet, may search the web) that asks one question at a time and, when the shape is clear, writes a
+brief to `data/drafts/<id>/brief.md`. The app shows the brief with **Build this**. The build (kind
+`build-course`, Opus) runs in the background and writes only the new folder
+`content/maths/courses/<course-id>/`; the server then runs the validator, sends problems back up to
+three times, publishes, and copies the result into `dist/content/`. A course that never passes is
+moved to `data/drafts/<id>/failed-course/`. Built courses stay uncommitted. Prompts:
+[docs/agents/new-course.md](docs/agents/new-course.md), [docs/agents/build-course.md](docs/agents/build-course.md).
+This has only run against the fake claude so far. The hand-run check with the real CLI (the build
+is long and uses Opus):
+
+```bash
+env -u PYTHONPATH python3 server/smoke_new_course.py --port 8791
+```
+
+```bash
+env -u PYTHONPATH python3 server/smoke_new_course.py --port 8791 --build
+```
+
 ## Attribution
 
 The first map is built from the [MSC2020](https://msc2020.org) Mathematics Subject

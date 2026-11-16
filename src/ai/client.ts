@@ -98,24 +98,34 @@ export const SESSION_ID = /^[A-Za-z0-9_-]{16,64}$/
 
 const STATE_TIMEOUT = 2000
 
+/**
+ * The session kinds the server offers, from GET state; [] when it is not
+ * there, not ours, or slower than two seconds. Never throws. The Ask chat and
+ * the new-course entry buttons both decide from this.
+ */
+export async function serverKinds(base = './api/', fetcher: typeof fetch = (...args) => fetch(...args)): Promise<string[]> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), STATE_TIMEOUT)
+  try {
+    const response = await fetcher(`${base}state`, { signal: controller.signal, cache: 'no-store' })
+    if (!response.ok) return []
+    const state = (await response.json()) as { ok?: unknown; kinds?: unknown }
+    if (state?.ok !== true || !Array.isArray(state.kinds)) return []
+    return state.kinds.filter((k): k is string => typeof k === 'string')
+  } catch {
+    return []
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 export function createClient(base = './api/', fetcher: typeof fetch = (...args) => fetch(...args)): ChatClient {
   const post = (path: string, body: unknown, signal?: AbortSignal) =>
     fetcher(`${base}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal })
 
   return {
     async available() {
-      const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), STATE_TIMEOUT)
-      try {
-        const response = await fetcher(`${base}state`, { signal: controller.signal, cache: 'no-store' })
-        if (!response.ok) return false
-        const state = (await response.json()) as { ok?: unknown; kinds?: unknown }
-        return state?.ok === true && Array.isArray(state.kinds) && state.kinds.includes('ask')
-      } catch {
-        return false
-      } finally {
-        clearTimeout(timer)
-      }
+      return (await serverKinds(base, fetcher)).includes('ask')
     },
 
     async createSession(context) {

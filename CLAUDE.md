@@ -70,6 +70,12 @@ marking, no Capacitor yet. What is where:
   tests use `server/tests/fake_claude.py`), tutor prompt `docs/agents/ask.md`, dock tool "Ask"
   (`src/tools/Chat.tsx`, `src/ai/`) shown only when `./api/state` answers. As built and open points:
   docs/ai-sessions.md section 10. Not yet run against the real CLI (it was not signed in).
+- **New course by talking** (stage D, step 4): "New course" in the Courses menu and "Make a course
+  here" on an empty sheet (only when the server offers `new-course`), route `#<node>/new-course`
+  (`src/ai/NewCourse.tsx`): chat (kind `new-course`, writes only `data/drafts/<id>/brief.md`), brief
+  card, Build this; build job (kind `build-course`, Opus, writes only one new course folder; the
+  server validates, up to 3 repair rounds, publishes, copies into `dist/content/`, sets a failure
+  aside in `data/drafts/<id>/failed-course/`). Only run against the fake claude; `server/smoke_new_course.py`.
 - **Review** (stage C): lessons mark steps `review: true` (11 in the first course; `--publish` lists
   them in the index as `review`), plus cheat-sheet formulas as recall cards. Pure ladder 1/3/7/16/35/90
   days, good/hard/again, local-calendar-day due rule, interleaved sessions of at most 10:

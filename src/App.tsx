@@ -15,11 +15,14 @@ import { UpdateBar } from './components/UpdateBar.tsx'
 import { parseIndex } from './resources.ts'
 import type { ReadingSource } from './resources.ts'
 import { useReviewQueue } from './review/use-review-queue.ts'
+import { useServerOffers } from './ai/server-offers.ts'
 
 // The lesson screens, KaTeX and the widgets load only when a lesson opens.
 const LessonView = lazy(() => import('./lesson/LessonView.tsx'))
 // Review shows lessons' steps, so it needs KaTeX too.
 const ReviewView = lazy(() => import('./review/ReviewView.tsx'))
+// Making a course by talking to the server on the PC: the chat and KaTeX.
+const NewCourse = lazy(() => import('./ai/NewCourse.tsx'))
 
 const MAP_URL = './content/maths/map.json'
 // Written by tools/validate_courses.py --publish, only from content that passed.
@@ -46,6 +49,18 @@ const subscribeResize = (changed: () => void) => {
 // One string, so the snapshot is stable between resizes.
 const readSize = () => `${window.innerWidth}x${window.innerHeight}`
 
+
+/**
+ * The published course index. `no-cache` asks the network first (the service
+ * worker also fetches the content indexes network-first), so a course the
+ * server has just built and published appears without a new app build.
+ */
+async function loadCourseIndex(): Promise<Course[]> {
+  const response = await fetch(`${COURSES_URL}index.json`, { cache: 'no-cache' })
+  if (!response.ok) return []
+  const index = (await response.json()) as CourseIndex
+  return Array.isArray(index.courses) ? index.courses : []
+}
 
 type Loaded = { state: 'loading' } | { state: 'failed'; reason: string } | { state: 'ready'; document: MapDocument }
 
@@ -83,9 +98,8 @@ export default function App() {
   // Courses are an extra: if the index is missing, the map still works.
   useEffect(() => {
     let live = true
-    fetch(`${COURSES_URL}index.json`)
-      .then((response) => (response.ok ? (response.json() as Promise<CourseIndex>) : { format: 1 as const, courses: [] }))
-      .then((index) => live && setCourseList(Array.isArray(index.courses) ? index.courses : []))
+    loadCourseIndex()
+      .then((courses) => live && setCourseList(courses))
       .catch((error: unknown) => console.warn('No course index; the map shows no courses.', error))
     return () => {
       live = false
@@ -104,6 +118,10 @@ export default function App() {
       live = false
     }
   }, [])
+
+  // The new-course entries show only when the server offers that kind; checked
+  // at start and again on every change of address (opening the menu, a node).
+  const canMakeCourses = useServerOffers('new-course', hash)
 
   const document = loaded.state === 'ready' ? loaded.document : null
   const layout = useMemo(() => (document ? layoutMap(document.root) : null), [document])
@@ -138,6 +156,7 @@ export default function App() {
   const opened = resolveLesson(route, onNode)
   const menuOpen = !!route.menu
   const reviewOpen = !!route.review
+  const newCourseOpen = !!route.newCourse
 
   const select = (id: string) => {
     setSheetOpen(false)
@@ -164,6 +183,26 @@ export default function App() {
   // where the menu was opened, not to the menu.
   const menuToLesson = (course: Course, lessonId: string) => window.location.replace(`#${lessonHash(course, lessonId)}`)
   const menuToReview = () => window.location.replace(`#${focus.id}/review`)
+  const openNewCourse = () => {
+    setSheetOpen(false)
+    openedHere.current = true
+    window.location.hash = `${focus.id}/new-course`
+  }
+  const menuToNewCourse = () => window.location.replace(`#${focus.id}/new-course`)
+  // A course just built: read the index again (the server has republished it), then open it.
+  const openBuiltCourse = async (courseId: string) => {
+    let fresh: Course[]
+    try {
+      fresh = await loadCourseIndex()
+    } catch {
+      return false
+    }
+    setCourseList(fresh)
+    const course = fresh.find((c) => c.id === courseId)
+    if (!course) return false
+    window.location.replace(`#${lessonHash(course, course.lessons[0].id)}`)
+    return true
+  }
   const menuToNode = (id: string) => {
     openedHere.current = false
     window.location.replace(`#${id}`)
@@ -188,7 +227,11 @@ export default function App() {
   return (
     <>
       <MapView layout={layout} focusId={focus.id} refit={refit} screen={screen} area={area} courseIds={courses} onSelect={select} />
-      {reviewOpen ? (
+      {newCourseOpen ? (
+        <Suspense fallback={<p className="status lesson-loading">Opening…</p>}>
+          <NewCourse node={focus.parent ? { id: focus.id, name: focus.node.name } : null} onClose={closeLesson} onOpenCourse={openBuiltCourse} />
+        </Suspense>
+      ) : reviewOpen ? (
         review.ready ? (
           <Suspense fallback={<p className="status lesson-loading">Opening review…</p>}>
             <ReviewView items={review.items} base={COURSES_URL} unavailable={review.unavailable} onClose={closeLesson} />
@@ -205,6 +248,7 @@ export default function App() {
           onShowNode={menuToNode}
           dueCount={review.due}
           onOpenReview={menuToReview}
+          onNewCourse={canMakeCourses ? menuToNewCourse : undefined}
         />
       ) : opened ? (
         <Suspense fallback={<p className="status lesson-loading">Opening the lesson…</p>}>
@@ -241,6 +285,7 @@ export default function App() {
             reading={reading}
             dueCount={review.due}
             onOpenReview={openReview}
+            onMakeCourse={canMakeCourses ? openNewCourse : undefined}
           />
         </>
       )}

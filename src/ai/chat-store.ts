@@ -31,12 +31,20 @@ export interface ChatState {
   opened: boolean
 }
 
-/** What a chat is about: its key, and how to read the step at the moment a message is sent. */
+/**
+ * What a chat is about: its key, and how its session starts. An Ask chat gives
+ * `context` and `snapshot` (the step, read at the moment a message is sent);
+ * another kind gives `start`, which opens the session on the server itself.
+ */
 export interface ChatTarget {
-  /** `<course>:<lesson>:<block>` */
+  /** `<course>:<lesson>:<block>` for Ask; any unique key otherwise. */
   key: string
-  context: () => AskContext
-  snapshot: () => StepSnapshot
+  context?: () => AskContext
+  snapshot?: () => StepSnapshot
+  /** Opens a session of another kind and returns its id (the new-course chat). */
+  start?: () => Promise<string>
+  /** Keep the session id on the device under this key (default true). */
+  remember?: boolean
 }
 
 export const chatKey = (courseId: string, lessonId: string, blockId: string) => `${courseId}:${lessonId}:${blockId}`
@@ -94,10 +102,14 @@ export class ChatStore {
     return { id: this.nextId++, role, text, ...extra }
   }
 
-  /** Look up the stored session once, and load its messages from the server. */
-  async open(key: string) {
+  /**
+   * Look up the stored session once, and load its messages from the server.
+   * `sessionId` names the session instead of the device's stored one (a
+   * new-course draft found again from the server's list).
+   */
+  async open(key: string, sessionId?: string) {
     if (this.get(key).opened) return
-    const id = readId(key)
+    const id = sessionId && SESSION_ID.test(sessionId) ? sessionId : sessionId ? null : readId(key)
     if (!id) {
       this.set(key, { opened: true })
       return
@@ -107,7 +119,7 @@ export class ChatStore {
       const messages = await this.client.transcript(id)
       if (messages === null) {
         // The server no longer has it: start afresh.
-        writeId(key, null)
+        if (!sessionId) writeId(key, null)
         this.set(key, { sessionId: null, status: 'idle' })
         return
       }
@@ -142,15 +154,18 @@ export class ChatStore {
     try {
       let sessionId = this.get(key).sessionId
       let update: StepSnapshot | null = null
-      let now: StepSnapshot
+      let now: StepSnapshot | undefined
       if (!sessionId) {
         // The context is built now, at the first message, so it is as fresh as can be.
-        const context = target.context()
-        now = target.snapshot()
-        sessionId = await this.client.createSession(context)
-        writeId(key, sessionId)
+        if (target.start) sessionId = await target.start()
+        else if (target.context) {
+          const context = target.context()
+          now = target.snapshot?.()
+          sessionId = await this.client.createSession(context)
+        } else throw new Error('a chat target needs start or context')
+        if (target.remember !== false) writeId(key, sessionId)
         this.set(key, { sessionId })
-      } else {
+      } else if (target.snapshot) {
         now = target.snapshot()
         update = stepUpdate(this.told.get(key), now)
       }
@@ -164,7 +179,7 @@ export class ChatStore {
         },
         job.controller.signal,
       )
-      this.told.set(key, now)
+      if (now) this.told.set(key, now)
       const { notes } = pending()
       const reply = result.text || pending().text
       this.set(key, {
@@ -204,6 +219,19 @@ export class ChatStore {
     writeId(key, null)
     this.told.delete(key)
     this.states.set(key, { ...EMPTY, opened: true })
+    this.listeners.forEach((listener) => listener())
+  }
+
+  /** Whether a reply is being written for this key. */
+  busy(key: string) {
+    return this.running.has(key)
+  }
+
+  /** Forget a chat kept only in memory (a new-course chat closed for good). */
+  forget(key: string) {
+    if (this.running.has(key)) return
+    this.states.delete(key)
+    this.told.delete(key)
     this.listeners.forEach((listener) => listener())
   }
 

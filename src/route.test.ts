@@ -28,6 +28,12 @@ describe('parseRoute', () => {
     expect(parseRoute('15Axx/review')).toEqual({ nodeId: '15Axx', review: true })
   })
 
+  it('reads the new-course form, from any node', () => {
+    expect(parseRoute('mathematics/new-course')).toEqual({ nodeId: 'mathematics', newCourse: true })
+    expect(parseRoute('15Axx/new-course')).toEqual({ nodeId: '15Axx', newCourse: true })
+    expect(resolveLesson(parseRoute('15Axx/new-course'), [course('a', 'one')])).toBeUndefined()
+  })
+
   it('does not take review for a lesson or a course', () => {
     expect(resolveLesson(parseRoute('15Axx/review'), [course('a', 'one')])).toBeUndefined()
   })

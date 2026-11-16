@@ -26,6 +26,8 @@ interface Props {
   /** Items due for review today; the line on the root sheet shows only above zero. */
   dueCount?: number
   onOpenReview?: () => void
+  /** Given only when the server on the PC offers the new-course chat: the "Make a course here" line. */
+  onMakeCourse?: () => void
 }
 
 // "15 Nov 2026, 19:04", in the phone's own time zone.
@@ -116,7 +118,7 @@ function CourseSection({
  * is, how big, whether there is a course); opened it lists where the node sits
  * and what is in it.
  */
-export function NodeSheet({ node, document: doc, courses, counts, open, onOpenChange, onSelect, onOpenLesson, onOpenCourses, reading, dueCount = 0, onOpenReview }: Props) {
+export function NodeSheet({ node, document: doc, courses, counts, open, onOpenChange, onSelect, onOpenLesson, onOpenCourses, reading, dueCount = 0, onOpenReview, onMakeCourse }: Props) {
   const inside = counts.get(node.id) ?? 0
   const course = courses.length === 1 ? courses[0] : undefined
   const drag = useRef<number | null>(null)
@@ -242,9 +244,14 @@ export function NodeSheet({ node, document: doc, courses, counts, open, onOpenCh
             , or follow the marked circles on the map.
           </p>
         ) : (
-          <p className="note">
-            {leaf ? 'No course yet.' : 'No courses in here yet.'} Generating courses is a later phase; nothing here can make one today.
-          </p>
+          <>
+            <p className="note">{leaf ? 'No course yet.' : 'No courses in here yet.'}</p>
+            {onMakeCourse && (
+              <button className="text-button review-line" onClick={onMakeCourse}>
+                Make a course here
+              </button>
+            )}
+          </>
         )}
 
         {open && reading && (reading.counts[node.id] ?? 0) > 0 && (
