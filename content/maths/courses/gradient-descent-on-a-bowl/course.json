@@ -36,6 +36,18 @@
       "note": "From the lecture page's summary: stochastic gradient descent uses a random minibatch per step instead of all the data, and is the main method for training large machine-learning models. Used only for the last screen's two sentences."
     }
   ],
+  "tunnels": [
+    {
+      "to": "least-squares-to-the-pseudo-inverse",
+      "kind": "needs",
+      "why": "It starts from the least-squares bowl ‖Ax − b‖², the residual and the normal equations, and walks down to the fit you solved for there."
+    },
+    {
+      "to": "principal-components-from-the-svd",
+      "kind": "related",
+      "why": "The steep and shallow directions of a bowl are the eigenvectors of a symmetric 2×2 matrix, found the way the PCA course finds them for C."
+    }
+  ],
   "lessons": [
     {
       "id": "the-gradient-points-uphill",

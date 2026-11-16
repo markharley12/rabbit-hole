@@ -15,6 +15,7 @@
       "review": true,
       "title": "One η for two directions",
       "define": [
+        { "term": "eigenvector, eigenvalue", "meaning": "As in the PCA course: a non-zero $v$ with $Hv = \\lambda v$. $H$ only stretches it, by the eigenvalue $\\lambda$. A diagonal $H$ has the axes as eigenvectors and its diagonal entries as eigenvalues." },
         { "term": "½xᵀHx", "meaning": "A bowl in the plane, for a symmetric matrix $H$ with positive eigenvalues. Its gradient is $\\nabla f = Hx$. For $H = \\begin{bmatrix}4&0\\\\0&1\\end{bmatrix}$ it is $f = 2x^2 + \\frac12 y^2$ with $\\nabla f = (4x, y)$." }
       ],
       "why": "One $\\eta$ has to suit every direction at once. The last lesson's rule, applied to each, says which direction sets the limit.",

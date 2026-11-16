@@ -11,7 +11,9 @@ be turnkey for anyone else. **"rabbit-hole" is a working name** — rename freel
 The map, plus one real course: **"Least squares to the pseudo-inverse"** on `15Axx` (Basic
 linear algebra), five lessons resuming where Mark's chat stopped; and a second,
 **"Principal components from the SVD"** (`principal-components-from-the-svd`) on `62Hxx`
-(Multivariate analysis), five lessons of PCA on one five-point data set, with 7 reading links. No server, no AI, no photo
+(Multivariate analysis), five lessons of PCA on one five-point data set, with 7 reading links; and a third,
+**"Gradient descent on a bowl"** (`gradient-descent-on-a-bowl`) on `65Kxx`, five lessons from the gradient to least
+squares by walking downhill, with the widget `descent-path` and 7 reading links. No server, no AI, no photo
 marking, no Capacitor yet. What is where:
 
 - **Map.** `tools/build_maths_map.py` → `public/content/maths/map.json` (593 nodes, 517

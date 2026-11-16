@@ -7,6 +7,7 @@
         {
           "id": "partial-derivative",
           "name": "Partial derivative",
+          "cue": "What $\\partial f/\\partial x$ means, and what you hold fixed while taking it",
           "formula": "$\\partial f/\\partial x$: differentiate in $x$ with $y$ held fixed",
           "when": "To get the slope in one direction. On $x^2 + 2y^2$ the two are $2x$ and $4y$.",
           "lesson": "the-gradient-points-uphill"
@@ -14,6 +15,7 @@
         {
           "id": "gradient",
           "name": "Gradient",
+          "cue": "The gradient of $f(x, y)$, built from its partial derivatives",
           "formula": "$\\nabla f = (\\partial f/\\partial x,\\; \\partial f/\\partial y)$",
           "when": "It points the way $f$ rises fastest, so $-\\nabla f$ is the way down.",
           "lesson": "the-gradient-points-uphill"
@@ -21,6 +23,7 @@
         {
           "id": "flat-bottom",
           "name": "Bottom of a bowl",
+          "cue": "The condition that holds at the bottom of a bowl, in terms of the gradient",
           "formula": "$\\nabla f = 0$",
           "when": "To find a minimum by algebra: set every partial derivative to 0 and solve.",
           "lesson": "the-gradient-points-uphill"
@@ -33,6 +36,7 @@
         {
           "id": "update",
           "name": "Gradient descent step",
+          "cue": "The update rule for one gradient-descent step, in terms of $x_k$, $\\eta$ and the gradient",
           "formula": "$x_{k+1} = x_k - \\eta\\,\\nabla f(x_k)$",
           "when": "Every step, with the gradient at the point you are at now. Subtract; never add.",
           "lesson": "one-step-downhill"
@@ -40,6 +44,7 @@
         {
           "id": "check-f-falls",
           "name": "Check the step",
+          "cue": "The check to make after every step, comparing heights",
           "formula": "$f(x_{k+1}) < f(x_k)$",
           "when": "After every step. If $f$ went up, $\\eta$ is too big or the sign is wrong.",
           "lesson": "one-step-downhill"
@@ -52,6 +57,7 @@
         {
           "id": "factor",
           "name": "Factor per step",
+          "cue": "What one step does to $x$ on a parabola of curvature $\\lambda$, as a factor in $\\eta$ and $\\lambda$",
           "formula": "$x_{k+1} = (1 - \\eta\\lambda)\\,x_k$ on $f = \\frac12\\lambda x^2$",
           "when": "To predict a run of steps in one direction: negative factor bounces, size above 1 blows up.",
           "lesson": "how-big-a-step"
@@ -59,6 +65,7 @@
         {
           "id": "limit",
           "name": "When it converges",
+          "cue": "The range of step sizes for which gradient descent on a bowl converges",
           "formula": "$0 < \\eta < 2/\\lambda_{\\max}$",
           "when": "To choose $\\eta$: the largest eigenvalue (the steepest direction) sets the limit for every direction.",
           "lesson": "how-big-a-step"
@@ -66,6 +73,7 @@
         {
           "id": "f-factor",
           "name": "How f shrinks",
+          "cue": "How the height after a step compares with the height before, on a parabola of curvature $\\lambda$",
           "formula": "$f(x_{k+1}) = (1 - \\eta\\lambda)^2 f(x_k)$ on $f = \\frac12\\lambda x^2$",
           "when": "To see that $f$ falls every step even while $x$ bounces, as long as $|1 - \\eta\\lambda| < 1$.",
           "lesson": "how-big-a-step"
@@ -78,6 +86,7 @@
         {
           "id": "quadratic-gradient",
           "name": "Gradient of a bowl",
+          "cue": "The gradient of the bowl $\\frac12 x^\\mathsf{T}Hx$ for a symmetric $H$",
           "formula": "$\\nabla\\left(\\tfrac12 x^\\mathsf{T}Hx\\right) = Hx$",
           "when": "For any bowl given by a symmetric $H$. Its eigenvectors are the steep and shallow directions.",
           "lesson": "two-directions-at-once"
@@ -85,6 +94,7 @@
         {
           "id": "condition-number",
           "name": "Condition number",
+          "cue": "The condition number $\\kappa$ of a bowl, from the eigenvalues of $H$",
           "formula": "$\\kappa = \\lambda_{\\max}/\\lambda_{\\min}$",
           "when": "To predict how slow descent will be. Large $\\kappa$ means a narrow valley and a zig-zag.",
           "lesson": "two-directions-at-once"
@@ -92,6 +102,7 @@
         {
           "id": "best-step",
           "name": "Best single step",
+          "cue": "The best fixed step size for a bowl with two curvatures, and the rate it gives",
           "formula": "$\\eta^* = 2/(\\lambda_{\\max} + \\lambda_{\\min})$, rate $(\\kappa - 1)/(\\kappa + 1)$",
           "when": "When one fixed $\\eta$ must serve both directions: both factors then have the same size.",
           "lesson": "two-directions-at-once"
@@ -104,6 +115,7 @@
         {
           "id": "ls-gradient",
           "name": "Least-squares gradient",
+          "cue": "The gradient of $\\frac12\\|Ax - b\\|^2$, in terms of $A$, $x$ and $b$ (mind the sign)",
           "formula": "$\\nabla\\tfrac12\\|Ax - b\\|^2 = A^\\mathsf{T}(Ax - b)$",
           "when": "To train a least-squares fit. $A^\\mathsf{T}(b - Ax)$ is minus this: it points uphill.",
           "lesson": "least-squares-by-walking-downhill"
@@ -111,6 +123,7 @@
         {
           "id": "ls-normal",
           "name": "Where the walk stops",
+          "cue": "The equations that zero gradient of $\\frac12\\|Ax - b\\|^2$ gives",
           "formula": "$A^\\mathsf{T}Ax = A^\\mathsf{T}b$",
           "when": "Zero gradient is the normal equations: walking down and solving reach the same point.",
           "lesson": "least-squares-by-walking-downhill"
@@ -118,6 +131,7 @@
         {
           "id": "ls-hessian",
           "name": "Least-squares Hessian",
+          "cue": "The Hessian of $\\frac12\\|Ax - b\\|^2$, and what its eigenvalues are in terms of $A$",
           "formula": "$H = A^\\mathsf{T}A$, eigenvalues $\\sigma_i^2$",
           "when": "To choose $\\eta$ for least squares: $\\eta < 2/\\sigma_1^2$.",
           "lesson": "least-squares-by-walking-downhill"
