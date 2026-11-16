@@ -186,3 +186,10 @@ Filled in as stages land (date, commit, what was not checked).
   (nothing here fetched them again) and their `use` lines were rewritten for the node. Not checked: any
   URL in this stage; the offline message with the real network off; on the phone itself; the list now
   shows four links and a "Show 10 more" button (added by the orchestrator after review).
+- **Second course: PCA** (16 Nov 2026). "Principal components from the SVD" on `62Hxx`: five lessons,
+  cheat sheet (13 items), `62Hxx.json` with 7 links opened on 15 Nov; widget `pca-scatter` (pure maths
+  tested). Every key re-derived by sympy; the data set's whole chain checked in sympy first. Lesson 1
+  done end to end in the built-in browser at 375x812 (named slips for the mean, the sign, the raw x's
+  and a non-unit u; handle drag, slider, guess table), lesson 3 through to the reveal, dark and light.
+  Not checked: lessons 2, 4 and 5 by hand in the browser (only by tests); on the phone itself; touch
+  drag of the handle with a finger; read by Mark.

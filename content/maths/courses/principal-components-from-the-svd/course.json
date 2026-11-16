@@ -1,0 +1,56 @@
+{
+  "format": 1,
+  "id": "principal-components-from-the-svd",
+  "nodeId": "62Hxx",
+  "title": "Principal components from the SVD",
+  "summary": "Principal component analysis (PCA) by hand on five points: centring, variance along a direction, the covariance matrix, the top eigenvector as the best direction, the same answer from the SVD, and what keeping one component loses.",
+  "written": "Written by Claude Code (Opus 5.5) on 15 Nov 2026, after the least-squares course and docs/seed-context.md. One data set throughout, designed and checked in sympy first. Every answer key is re-derived with sympy by tools/validate_courses.py.",
+  "sources": [
+    {
+      "name": "Mark's notes and chats (seed context)",
+      "note": "docs/seed-context.md: PCA not yet taught; SVD, the pseudo-inverse and Eckart–Young already worked; he compares guesses before optimising; his slips (non-symmetric AᵀA, transposed rows, sums, scale factors)."
+    },
+    {
+      "name": "Principal component analysis (Wikipedia)",
+      "url": "https://en.wikipedia.org/wiki/Principal_component_analysis",
+      "note": "Centre the columns first; covariance with 1/(n − 1); principal directions as the eigenvectors of the covariance matrix and as the right singular vectors of X, with eigenvalues the squared singular values; scores T = XW = UΣ; explained variance as an eigenvalue over their sum; truncation as the best low-rank approximation (Eckart–Young, Frobenius norm)."
+    },
+    {
+      "name": "Jonathon Shlens, A Tutorial on Principal Component Analysis (arXiv:1404.1100)",
+      "url": "https://arxiv.org/abs/1404.1100",
+      "note": "Subtract each measurement's mean, then use the covariance with 1/(n − 1); the eigenvector route and the SVD route to the same principal components. (Shlens puts measurements in rows; this course puts points in rows, as Wikipedia does.)"
+    },
+    {
+      "name": "Gilbert Strang, MIT 18.065 (Spring 2018), Lecture 7: Eckart–Young, with a review of PCA",
+      "url": "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/resources/lecture-7-eckart-young-the-closest-rank-k-matrix-to-a/",
+      "note": "From the lecture transcript: centre the data, divide by n − 1 for the sample covariance, the best line minimises perpendicular distances where least squares minimises vertical ones, and Eckart–Young holds in the 2-norm and the Frobenius norm."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "spread-along-a-direction",
+      "title": "Spread along a direction",
+      "summary": "Centre five points, then compare how far they spread along a few guessed directions."
+    },
+    {
+      "id": "the-covariance-matrix",
+      "title": "The covariance matrix",
+      "summary": "C = XᵀX/(n − 1): every variance from one symmetric 2×2 matrix."
+    },
+    {
+      "id": "the-best-direction-is-an-eigenvector",
+      "title": "The best direction is an eigenvector",
+      "summary": "The eigenvector of C with the largest eigenvalue spreads the points most, and its line is the closest to them."
+    },
+    {
+      "id": "the-same-answer-from-the-svd",
+      "title": "The same answer from the SVD",
+      "summary": "The SVD of the centred data gives the directions, the variances σ²/(n − 1) and the scores."
+    },
+    {
+      "id": "keeping-one-component",
+      "title": "Keeping one component",
+      "summary": "Rebuild each point from one number, measure what is lost, and meet Eckart–Young again."
+    }
+  ]
+}

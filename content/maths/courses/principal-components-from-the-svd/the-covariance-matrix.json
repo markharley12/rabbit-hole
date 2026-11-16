@@ -1,0 +1,137 @@
+{
+  "format": 1,
+  "id": "the-covariance-matrix",
+  "title": "The covariance matrix",
+  "summary": "C = XᵀX/(n − 1): every variance from one symmetric 2×2 matrix.",
+  "data": {
+    "P": [[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]],
+    "X": [[-4, 0], [-1, -2], [1, -2], [1, 2], [3, 2]]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "build-xtx",
+      "title": "XᵀX",
+      "define": [
+        { "term": "XᵀX", "meaning": "For the $5 \\times 2$ matrix $X$, a $2 \\times 2$ matrix: row $i$, column $j$ is (column $i$ of $X$) · (column $j$ of $X$). The same bookkeeping as $A^\\mathsf{T}A$ in least squares." }
+      ],
+      "why": "Scoring each direction point by point is slow. $X^\\mathsf{T}X$ does all the adding once, for every direction at the same time.",
+      "prompt": "$X = \\begin{bmatrix}-4&0\\\\-1&-2\\\\1&-2\\\\1&2\\\\3&2\\end{bmatrix}$, the centred points. Write $X^\\mathsf{T}X$.",
+      "answer": {
+        "fields": [
+          { "name": "a11", "key": "28" },
+          { "name": "a12", "key": "8" },
+          { "name": "a21", "key": "8" },
+          { "name": "a22", "key": "16" }
+        ],
+        "matrix": [2, 2],
+        "verify": "tr(X)*X",
+        "slips": [
+          { "detect": "symmetric", "name": "XᵀX" },
+          { "detect": "known", "when": { "a11": "108", "a12": "48", "a21": "48", "a22": "36" }, "say": "That is $P^\\mathsf{T}P$ from the raw points. Use the centred ones, the rows of $X$." }
+        ]
+      },
+      "hints": [
+        "Row 1, column 1 is column 1 · column 1: the sum of squares of the centred $x$'s, which you have already found.",
+        "Row 1, column 2 is $(-4, -1, 1, 1, 3) \\cdot (0, -2, -2, 2, 2)$.",
+        "That dot product is $0 + 2 - 2 + 2 + 6$. Row 2, column 2 is $0 + 4 + 4 + 4 + 4$."
+      ],
+      "check": { "say": "$X^\\mathsf{T}X$ equals its own transpose, so the two off-diagonal entries must match. Add the products one at a time in the calculator." },
+      "solution": "Symmetric, as it must be. The diagonal holds the sums of squares you found point by point.",
+      "next": "Divide by n − 1"
+    },
+    {
+      "type": "step",
+      "id": "build-c",
+      "title": "The covariance matrix C",
+      "define": [
+        { "term": "covariance matrix", "meaning": "$C = \\frac{1}{n-1}X^\\mathsf{T}X$, for centred $X$. Its diagonal entries are the variances along the axes; the off-diagonal entry is the covariance of $x$ and $y$." }
+      ],
+      "why": "Dividing by $n - 1$ turns sums of squares into variances, the same convention as the last lesson.",
+      "prompt": "Write $C$, with $n - 1 = 4$.",
+      "answer": {
+        "fields": [
+          { "name": "c11", "key": "7" },
+          { "name": "c12", "key": "2" },
+          { "name": "c21", "key": "2" },
+          { "name": "c22", "key": "4" }
+        ],
+        "matrix": [2, 2],
+        "verify": "tr(X)*X/(5 - 1)",
+        "slips": [
+          { "detect": "symmetric", "name": "C" },
+          { "detect": "known", "when": { "c11": "27", "c12": "12", "c21": "12", "c22": "9" }, "say": "That comes from the raw points. Centre first: $C$ is built from $X$." },
+          { "detect": "scaled" }
+        ]
+      },
+      "hints": [
+        "Divide every entry of $X^\\mathsf{T}X$ by the same number.",
+        "That number is $n - 1$, with $n = 5$ points.",
+        "$28/4$, $8/4$ and $16/4$."
+      ],
+      "check": { "say": "The diagonal should be your two variances from the last lesson, along $(1, 0)$ and $(0, 1)$." },
+      "solution": "The covariance 2 is positive: when a point is right of the mean it tends to be above it too. That is the lean you saw.",
+      "next": "Use C on a direction"
+    },
+    {
+      "type": "step",
+      "id": "variance-from-c",
+      "title": "Variance along u from C",
+      "define": [
+        { "term": "uᵀCu", "meaning": "For a unit $u$: $u^\\mathsf{T}Cu = \\frac{1}{n-1}\\,u^\\mathsf{T}X^\\mathsf{T}Xu = \\frac{1}{n-1}\\|Xu\\|^2$, and $Xu$ lists the five $x_i \\cdot u$. So it is the variance along $u$." }
+      ],
+      "why": "This is the payoff: one small matrix gives the variance along any direction, without going back to the points.",
+      "prompt": "Compute $u^\\mathsf{T}Cu$ for $u = (1, 1)/\\sqrt2$.",
+      "answer": {
+        "fields": [{ "name": "v", "label": "$u^\\mathsf{T}Cu$ =", "key": "15/2" }],
+        "verify": "dot(unit(vec(1, 1)), tr(X)*X/(5 - 1)*unit(vec(1, 1)))",
+        "slips": [
+          { "detect": "known", "when": { "v": "15" }, "say": "That is $w^\\mathsf{T}Cw$ for $w = (1, 1)$. Use the unit vector: its two factors $1/\\sqrt2$ halve it." }
+        ]
+      },
+      "hints": [
+        "Work with $w = (1, 1)$ first: compute $Cw$, then $w \\cdot Cw$.",
+        "$Cw = (7 + 2,\\; 2 + 4)$.",
+        "$w \\cdot Cw = 9 + 6$. Since $u = w/\\sqrt2$, $u^\\mathsf{T}Cu = w^\\mathsf{T}Cw/2$."
+      ],
+      "check": { "say": "It should be the variance along the diagonal you found in the last lesson from the five points." },
+      "solution": "The same 7.5, from a $2 \\times 2$ matrix instead of five dot products.",
+      "next": "Find the total"
+    },
+    {
+      "type": "step",
+      "id": "total-variance",
+      "title": "The total variance",
+      "define": [
+        { "term": "total variance", "meaning": "$\\frac{1}{n-1}\\sum_i \\|x_i\\|^2$: how spread out the points are in all directions together." }
+      ],
+      "why": "Each point's $\\|x_i\\|^2$ splits into a part along a line and a part across it (Pythagoras). So any direction and its perpendicular share the same total.",
+      "prompt": "What is the total variance of the five centred points?",
+      "widget": {
+        "name": "pca-scatter",
+        "params": { "points": [[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]], "centre": true, "start": 45, "showSecond": true },
+        "caption": "The dashed line is perpendicular to the solid one. Turn them: the two variances change, their sum does not."
+      },
+      "answer": {
+        "fields": [{ "name": "t", "label": "total =", "key": "11" }],
+        "verify": "sq(X)/(5 - 1)",
+        "slips": [
+          { "detect": "known", "when": { "t": "44" }, "say": "That is the sum of squares. Now divide by $n - 1$." },
+          { "detect": "known", "when": { "t": "15" }, "say": "That adds all four entries of $C$. The total is the diagonal only: $C_{11} + C_{22}$." }
+        ]
+      },
+      "hints": [
+        "$\\|x_i\\|^2 = x^2 + y^2$ for each centred point. Add all five, then divide by $n - 1$.",
+        "Or add the variance along $(1, 0)$ and along $(0, 1)$: the diagonal of $C$.",
+        "$7 + 4$."
+      ],
+      "check": { "say": "The picture's last line adds the two variances; it should show your total at every angle." },
+      "solution": "11, whatever pair of perpendicular directions you use. The best direction takes as much of 11 as it can, and leaves the rest to its perpendicular.",
+      "next": "Finish the lesson"
+    }
+  ],
+  "sideQuest": {
+    "title": "Check it in numpy",
+    "body": "Only if you want to.\n\n```\nimport numpy as np\nP = np.array([[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]])\nprint(np.cov(P, rowvar=False))  # [[7, 2], [2, 4]]; np.cov divides by n - 1\n```"
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "format": 1,
+  "sections": [
+    {
+      "title": "Spread",
+      "items": [
+        {
+          "id": "centring",
+          "name": "Centring",
+          "formula": "$x_i \\to x_i - \\bar x$; the rows of $X$ are the centred points",
+          "when": "Always first: every variance in this course is spread around the mean $\\bar x$.",
+          "lesson": "spread-along-a-direction"
+        },
+        {
+          "id": "variance-along-u",
+          "name": "Variance along a unit u",
+          "formula": "$\\frac{1}{n-1}\\sum_i (x_i \\cdot u)^2$",
+          "when": "To score one direction from the points. $u$ must be a unit vector; this course divides by $n - 1$.",
+          "lesson": "spread-along-a-direction"
+        },
+        {
+          "id": "total-variance",
+          "name": "Total variance",
+          "formula": "$\\frac{1}{n-1}\\sum_i \\|x_i\\|^2 = C_{11} + C_{22}$",
+          "when": "Any direction and its perpendicular split this between them: along + across is always the total.",
+          "lesson": "the-covariance-matrix"
+        }
+      ]
+    },
+    {
+      "title": "The covariance matrix",
+      "items": [
+        {
+          "id": "covariance-matrix",
+          "name": "Covariance matrix",
+          "formula": "$C = \\frac{1}{n-1}X^\\mathsf{T}X$",
+          "when": "To get every variance at once. Row $i$, column $j$ of $X^\\mathsf{T}X$ is (column $i$) · (column $j$); it equals its own transpose.",
+          "lesson": "the-covariance-matrix"
+        },
+        {
+          "id": "quadratic-form",
+          "name": "Variance from C",
+          "formula": "$u^\\mathsf{T}Cu$",
+          "when": "The variance along a unit $u$, straight from $C$ without going back to the points.",
+          "lesson": "the-covariance-matrix"
+        }
+      ]
+    },
+    {
+      "title": "Principal directions",
+      "items": [
+        {
+          "id": "top-eigenvector",
+          "name": "The best direction",
+          "formula": "$Cv_1 = \\lambda_1 v_1$, with $\\lambda_1$ the largest eigenvalue",
+          "when": "The variance along $u$ is largest at $u = \\pm v_1$, and there it equals $\\lambda_1$.",
+          "lesson": "the-best-direction-is-an-eigenvector"
+        },
+        {
+          "id": "why-v1-wins",
+          "name": "Why nothing beats v₁",
+          "formula": "$u = a v_1 + b v_2 \\Rightarrow u^\\mathsf{T}Cu = \\lambda_1 a^2 + \\lambda_2 b^2$",
+          "when": "With $a^2 + b^2 = 1$ this is at most $\\lambda_1$. $v_1 \\perp v_2$ because $C$ is symmetric.",
+          "lesson": "the-best-direction-is-an-eigenvector"
+        },
+        {
+          "id": "closest-line",
+          "name": "The closest line",
+          "formula": "mean sq. distance to the line along $v_1$ $= \\lambda_2$",
+          "when": "The line with the most spread along it is the one closest to the points, measured perpendicular (not vertically, as in least squares).",
+          "lesson": "the-best-direction-is-an-eigenvector"
+        }
+      ]
+    },
+    {
+      "title": "From the SVD",
+      "items": [
+        {
+          "id": "sigma-and-lambda",
+          "name": "Singular values and variances",
+          "formula": "$\\lambda_i = \\sigma_i^2/(n - 1)$",
+          "when": "$X^\\mathsf{T}X = (n - 1)C$, so the SVD of the centred $X$ gives the PCA variances. Its right singular vectors $v_i$ are the principal directions.",
+          "lesson": "the-same-answer-from-the-svd"
+        },
+        {
+          "id": "scores",
+          "name": "Scores",
+          "formula": "$Xv_1 = \\sigma_1 u_1$",
+          "when": "Each point's one-number summary. Their squares add to $\\sigma_1^2$.",
+          "lesson": "the-same-answer-from-the-svd"
+        }
+      ]
+    },
+    {
+      "title": "Keeping one component",
+      "items": [
+        {
+          "id": "reconstruction",
+          "name": "Rebuilding a point",
+          "formula": "$\\hat x_i = (x_i \\cdot v_1)\\,v_1$, then add $\\bar x$",
+          "when": "To read a point back from its score: the foot of $x_i$ on the line along $v_1$.",
+          "lesson": "keeping-one-component"
+        },
+        {
+          "id": "total-error",
+          "name": "What one component loses",
+          "formula": "$\\sum_i \\|x_i - \\hat x_i\\|^2 = \\sigma_2^2$, with $X_1 = \\sigma_1 u_1 v_1^\\mathsf{T}$",
+          "when": "Eckart–Young: no rank-1 matrix is closer to $X$. Divided by $n - 1$ it is $\\lambda_2$.",
+          "lesson": "keeping-one-component"
+        },
+        {
+          "id": "explained-variance",
+          "name": "Explained variance ratio",
+          "formula": "$\\frac{\\lambda_1}{\\lambda_1 + \\lambda_2} = \\frac{\\sigma_1^2}{\\sigma_1^2 + \\sigma_2^2}$",
+          "when": "To say how much of the spread one component keeps.",
+          "lesson": "keeping-one-component"
+        }
+      ]
+    }
+  ]
+}

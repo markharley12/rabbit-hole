@@ -1,0 +1,201 @@
+{
+  "format": 1,
+  "id": "spread-along-a-direction",
+  "title": "Spread along a direction",
+  "summary": "Centre five points, then compare how far they spread along a few guessed directions.",
+  "data": {
+    "P": [[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]],
+    "X": [[-4, 0], [-1, -2], [1, -2], [1, 2], [3, 2]]
+  },
+  "blocks": [
+    {
+      "type": "text",
+      "id": "the-question",
+      "title": "Five points, one question",
+      "body": "Five points: $(0, 2)$, $(3, 0)$, $(5, 0)$, $(5, 4)$, $(7, 4)$.\n\nPrincipal component analysis (PCA) asks: **along which direction do they spread out most?** That direction is the best one-number summary of each point.\n\nYou will guess a few directions and score them, as you did with lines. Then the next lessons find the best one, and it turns out to be the SVD you already know. Every number here works out by hand.",
+      "widget": {
+        "name": "pca-scatter",
+        "params": { "points": [[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]], "start": 0 },
+        "caption": "Drag a handle to turn the line; the dashes drop each point onto it."
+      },
+      "next": "Find the mean"
+    },
+    {
+      "type": "step",
+      "id": "the-mean",
+      "title": "The mean",
+      "define": [
+        { "term": "mean", "meaning": "The average point: the average of the $x$-coordinates and the average of the $y$-coordinates. Write it $\\bar x$." }
+      ],
+      "why": "PCA measures spread around the middle of the data, so the middle comes first.",
+      "prompt": "What is the mean of the five points $(0, 2)$, $(3, 0)$, $(5, 0)$, $(5, 4)$, $(7, 4)$?",
+      "answer": {
+        "fields": [
+          { "name": "mx", "label": "mean $x$ =", "key": "4" },
+          { "name": "my", "label": "mean $y$ =", "key": "2" }
+        ],
+        "verify": "tr(P)*vec(1, 1, 1, 1, 1)/5",
+        "slips": [
+          { "detect": "known", "when": { "mx": "5", "my": "5/2" }, "say": "Divide by the number of points, 5. The $n - 1$ comes later, for variances." },
+          { "detect": "swapped" }
+        ]
+      },
+      "hints": [
+        "Add the five $x$-coordinates, then divide by how many points there are. Then the same for $y$.",
+        "The $x$-coordinates are $0 + 3 + 5 + 5 + 7$.",
+        "The $x$'s add to 20 and the $y$'s to 10."
+      ],
+      "check": { "say": "The mean is the cross in the first picture. It should sit in the middle of the cloud." },
+      "next": "Centre the x-coordinates"
+    },
+    {
+      "type": "step",
+      "id": "centre-x",
+      "title": "Centre the x's",
+      "define": [
+        { "term": "centring", "meaning": "Subtracting the mean from every point. The centred points have mean $(0, 0)$: the cloud is moved so its middle is the origin." }
+      ],
+      "why": "Variance is spread around the mean. Centring puts the mean at the origin, so every direction can start from $(0, 0)$.",
+      "prompt": "Subtract the mean $x$ (which is 4) from each $x$-coordinate, in the order the points are listed.",
+      "answer": {
+        "fields": [
+          { "name": "x1", "key": "-4" },
+          { "name": "x2", "key": "-1" },
+          { "name": "x3", "key": "1" },
+          { "name": "x4", "key": "1" },
+          { "name": "x5", "key": "3" }
+        ],
+        "verify": "(P - vec(1, 1, 1, 1, 1)*tr(tr(P)*vec(1, 1, 1, 1, 1))/5)*vec(1, 0)",
+        "slips": [{ "detect": "sign" }]
+      },
+      "hints": [
+        "Take 4 from each $x$: point minus mean.",
+        "The $x$'s are $0, 3, 5, 5, 7$. Start with $0 - 4$.",
+        "$0 - 4$, $3 - 4$, $5 - 4$, $5 - 4$, $7 - 4$."
+      ],
+      "check": { "say": "Centred values always add up to 0. Add yours." },
+      "next": "Now the y's"
+    },
+    {
+      "type": "step",
+      "id": "centre-y",
+      "title": "Centre the y's",
+      "why": "With both columns centred you have the data matrix every later step uses.",
+      "prompt": "Subtract the mean $y$ (which is 2) from each $y$-coordinate, in the same order.",
+      "answer": {
+        "fields": [
+          { "name": "y1", "key": "0" },
+          { "name": "y2", "key": "-2" },
+          { "name": "y3", "key": "-2" },
+          { "name": "y4", "key": "2" },
+          { "name": "y5", "key": "2" }
+        ],
+        "verify": "(P - vec(1, 1, 1, 1, 1)*tr(tr(P)*vec(1, 1, 1, 1, 1))/5)*vec(0, 1)",
+        "slips": [{ "detect": "sign" }]
+      },
+      "hints": [
+        "Take 2 from each $y$.",
+        "The $y$'s are $2, 0, 0, 4, 4$.",
+        "$2 - 2$, $0 - 2$, $0 - 2$, $4 - 2$, $4 - 2$."
+      ],
+      "check": { "say": "These add up to 0 too." },
+      "solution": "The centred points, one per row, are the matrix $X = \\begin{bmatrix}-4&0\\\\-1&-2\\\\1&-2\\\\1&2\\\\3&2\\end{bmatrix}$. Write its rows $x_1, \\ldots, x_5$.",
+      "next": "Measure the spread along each axis"
+    },
+    {
+      "type": "step",
+      "id": "variance-along-the-axes",
+      "title": "Spread along x and along y",
+      "define": [
+        { "term": "variance along u", "meaning": "For a unit vector $u$, each centred point's coordinate along $u$ is $x_i \\cdot u$. The variance along $u$ is $\\frac{1}{n-1}\\sum_i (x_i \\cdot u)^2$." },
+        { "term": "n − 1", "meaning": "This course divides by $n - 1 = 4$, the sample convention (numpy's `np.cov` does the same). Dividing by $n$ would scale every variance by $\\frac45$ and pick the same best direction." }
+      ],
+      "why": "The two axes are the first two guesses. Their scores are what the best direction has to beat.",
+      "prompt": "For $u = (1, 0)$, $x_i \\cdot u$ is just the centred $x$. Find the variance along $(1, 0)$ and along $(0, 1)$.",
+      "answer": {
+        "fields": [
+          { "name": "vx", "label": "along $(1, 0)$:", "key": "7" },
+          { "name": "vy", "label": "along $(0, 1)$:", "key": "4" }
+        ],
+        "verify": "vec(sq(X*vec(1, 0)), sq(X*vec(0, 1)))/(5 - 1)",
+        "slips": [
+          { "detect": "known", "when": { "vx": "28/5" }, "say": "That divides by $n = 5$. This course divides by $n - 1 = 4$." },
+          { "detect": "known", "when": { "vx": "27" }, "say": "That uses the raw $x$'s. Square the centred ones: variance is spread around the mean." },
+          { "detect": "known", "when": { "vx": "28" }, "say": "That is the sum of squares. Now divide by $n - 1$." },
+          { "detect": "swapped" }
+        ]
+      },
+      "hints": [
+        "Square each centred $x$, add, and divide by $n - 1$.",
+        "$(-4)^2 + (-1)^2 + 1^2 + 1^2 + 3^2$, then divide.",
+        "The centred $x$'s square to a sum of 28, the centred $y$'s to 16."
+      ],
+      "check": {
+        "say": "Read \"Variance along u\" in the picture with the line at 0°, then at 90°.",
+        "widget": { "name": "pca-scatter", "params": { "points": [[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]], "start": 0 } }
+      },
+      "solution": "The points spread more across ($x$) than up ($y$). But the cloud leans, so a tilted line might do better.",
+      "next": "Try the diagonal"
+    },
+    {
+      "type": "step",
+      "id": "variance-along-the-diagonal",
+      "title": "A tilted guess",
+      "why": "The cloud leans up to the right. A diagonal line follows the lean; is it better than the $x$-axis?",
+      "prompt": "Find the variance along the unit vector $u = (1, 1)/\\sqrt2$.",
+      "widget": {
+        "name": "pca-scatter",
+        "params": { "points": [[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]], "centre": true, "start": 45, "table": true },
+        "caption": "Keep this guess, then turn to 0° and 90° and keep those too, to compare."
+      },
+      "answer": {
+        "fields": [{ "name": "v", "label": "variance =", "key": "15/2" }],
+        "verify": "sq(X*unit(vec(1, 1)))/(5 - 1)",
+        "slips": [
+          { "detect": "known", "when": { "v": "15" }, "say": "$u$ must be a unit vector: each $x_i \\cdot u$ is $(x + y)/\\sqrt2$, so each square is halved." },
+          { "detect": "known", "when": { "v": "30" }, "say": "That is the sum of squares. Now divide by $n - 1$." }
+        ]
+      },
+      "hints": [
+        "For each centred point, $x_i \\cdot u = (x + y)/\\sqrt2$.",
+        "The sums $x + y$ are $-4, -3, -1, 3, 5$.",
+        "Their squares add to 60. Dividing by $\\sqrt2$ before squaring halves that; then divide by $n - 1$."
+      ],
+      "check": { "say": "Read the variance in the picture at 45°." },
+      "solution": "7.5 beats the $x$-axis's 7, by a little. The lean is real, but $45°$ is steeper than the cloud.",
+      "next": "Try a shallower tilt"
+    },
+    {
+      "type": "step",
+      "id": "variance-along-two-one",
+      "title": "A better guess",
+      "why": "Between 0° and 45° there is a direction that does better than both. Score one of them.",
+      "prompt": "Find the variance along the unit vector $u = (2, 1)/\\sqrt5$, about 27° up.",
+      "widget": {
+        "name": "pca-scatter",
+        "params": { "points": [[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]], "centre": true, "start": 27, "table": true },
+        "caption": "Keep this guess, then turn the line and look for anything that beats it."
+      },
+      "answer": {
+        "fields": [{ "name": "v", "label": "variance =", "key": "8" }],
+        "verify": "sq(X*unit(vec(2, 1)))/(5 - 1)",
+        "slips": [
+          { "detect": "known", "when": { "v": "40" }, "say": "$u$ must be a unit vector: divide each $x_i \\cdot (2, 1)$ by $\\sqrt5$ before squaring, so the sum is divided by 5." },
+          { "detect": "known", "when": { "v": "32" }, "say": "That is the sum of squares. Now divide by $n - 1$." }
+        ]
+      },
+      "hints": [
+        "For each centred point, $x_i \\cdot u = (2x + y)/\\sqrt5$.",
+        "The values $2x + y$ are $-8, -4, 0, 4, 8$.",
+        "Their squares add to 160. Dividing by $\\sqrt5$ before squaring divides that by 5; then divide by $n - 1$."
+      ],
+      "check": { "say": "The picture should read about 8.00 near 27°." },
+      "solution": "8 beats 7, 4 and 7.5. Turn the line in the picture: nothing gets past 8. The next two lessons show why, and what this direction is.",
+      "next": "Finish the lesson"
+    }
+  ],
+  "sideQuest": {
+    "title": "Check it in numpy",
+    "body": "Only if you want to; nothing in the course needs it.\n\n```\nimport numpy as np\nP = np.array([[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]])\nX = P - P.mean(axis=0)\nfor u in ([1, 0], [0, 1], [1, 1], [2, 1]):\n    u = np.array(u) / np.linalg.norm(u)\n    print(u, (X @ u) @ (X @ u) / (len(X) - 1))  # 7, 4, 7.5, 8\n```"
+  }
+}

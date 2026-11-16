@@ -1,0 +1,151 @@
+{
+  "format": 1,
+  "id": "the-best-direction-is-an-eigenvector",
+  "title": "The best direction is an eigenvector",
+  "summary": "The eigenvector of C with the largest eigenvalue spreads the points most, and its line is the closest to them.",
+  "data": {
+    "X": [[-4, 0], [-1, -2], [1, -2], [1, 2], [3, 2]]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "eigenvalues-of-c",
+      "title": "The eigenvalues of C",
+      "define": [
+        { "term": "eigenvector, eigenvalue", "meaning": "A non-zero $v$ with $Cv = \\lambda v$: $C$ only stretches it, by the eigenvalue $\\lambda$." }
+      ],
+      "why": "The best direction will turn out to be an eigenvector of $C$, and its variance an eigenvalue. Find the eigenvalues first.",
+      "prompt": "$C = \\begin{bmatrix}7&2\\\\2&4\\end{bmatrix}$. Find its eigenvalues, largest first.",
+      "answer": {
+        "fields": [
+          { "name": "l1", "label": "$\\lambda_1$ =", "key": "8" },
+          { "name": "l2", "label": "$\\lambda_2$ =", "key": "3" }
+        ],
+        "verify": "eigs(tr(X)*X/(5 - 1))",
+        "slips": [
+          { "detect": "swapped" },
+          { "detect": "known", "when": { "l1": "32", "l2": "12" }, "say": "Those are the eigenvalues of $X^\\mathsf{T}X = 4C$. Divide by $n - 1$, or work with $C$ itself." }
+        ]
+      },
+      "hints": [
+        "The eigenvalues add up to the trace ($7 + 4$) and multiply to the determinant.",
+        "The determinant is $7 \\cdot 4 - 2 \\cdot 2$, so $\\lambda^2 - 11\\lambda + 24 = 0$.",
+        "$\\lambda^2 - 11\\lambda + 24 = (\\lambda - a)(\\lambda - b)$ with $a + b = 11$ and $ab = 24$."
+      ],
+      "check": { "say": "They should add up to 11, your total variance." },
+      "solution": "8 is the variance your best guess reached. That is not a coincidence.",
+      "next": "Find v₁"
+    },
+    {
+      "type": "step",
+      "id": "top-eigenvector",
+      "title": "v₁",
+      "why": "$v_1$, the unit eigenvector for the largest eigenvalue, is the candidate for the best direction.",
+      "prompt": "Find $v_1$, the unit eigenvector of $C$ for $\\lambda_1 = 8$.",
+      "answer": {
+        "fields": [
+          { "name": "x1", "key": "2/sqrt(5)" },
+          { "name": "x2", "key": "1/sqrt(5)" }
+        ],
+        "accept": ["negated"],
+        "acceptNote": "Either sign is right: $-v_1$ is the same line.",
+        "verify": "unit(nullvec(tr(X)*X/(5 - 1) - entry(eigs(tr(X)*X/(5 - 1)), 1)*eye(2)))",
+        "slips": [
+          { "detect": "known", "when": { "x1": "2", "x2": "1" }, "say": "The right direction. Now make it a unit vector: divide by its length." },
+          { "detect": "scaled" }
+        ]
+      },
+      "hints": [
+        "Solve $(C - 8I)\\,v = 0$.",
+        "$C - 8I = \\begin{bmatrix}-1&2\\\\2&-4\\end{bmatrix}$. Its first row says $-x + 2y = 0$.",
+        "So $x = 2y$: the direction is $(2, 1)$, and its length is $\\sqrt5$."
+      ],
+      "check": { "say": "$C$ times $(2, 1)$ should be 8 times $(2, 1)$. Then check $x^2 + y^2 = 1$ for your unit vector." },
+      "solution": "Your better guess from the first lesson. Next: why nothing beats it.",
+      "next": "See why it is the best"
+    },
+    {
+      "type": "step",
+      "id": "why-v1-is-best",
+      "title": "Why nothing beats v₁",
+      "define": [
+        { "term": "v₂", "meaning": "The unit eigenvector for $\\lambda_2 = 3$. For a symmetric matrix, eigenvectors with different eigenvalues are perpendicular, so $v_1, v_2$ is a pair of perpendicular unit axes." }
+      ],
+      "why": "This turns \"no guess got past 8\" into a proof, for every direction at once.",
+      "prompt": "Any unit $u$ is $a v_1 + b v_2$ with $a^2 + b^2 = 1$, and then $u^\\mathsf{T}Cu = 8a^2 + 3b^2$. What is the largest $u^\\mathsf{T}Cu$ can be?",
+      "answer": {
+        "fields": [{ "name": "q", "label": "largest =", "key": "8" }],
+        "verify": "entry(eigs(tr(X)*X/(5 - 1)), 1)",
+        "slips": [
+          { "detect": "known", "when": { "q": "11" }, "say": "$8a^2 + 3b^2$ can't reach $8 + 3$: $a^2$ and $b^2$ share 1 between them." }
+        ]
+      },
+      "hints": [
+        "Replace $b^2$ by $1 - a^2$.",
+        "$8a^2 + 3(1 - a^2) = 3 + 5a^2$, and $a^2$ is at most 1.",
+        "It is largest at $a^2 = 1$, $b = 0$: that is $u = \\pm v_1$."
+      ],
+      "check": { "say": "Try $a = b = 1/\\sqrt2$: it should give something between 3 and 8." },
+      "solution": "So the variance along $u$ is largest at $u = v_1$, and there it is $\\lambda_1$. That is **principal component analysis (PCA)**: the first principal direction is the top eigenvector of $C$, and the variance along it is the top eigenvalue.",
+      "next": "Find v₂"
+    },
+    {
+      "type": "step",
+      "id": "second-eigenvector",
+      "title": "v₂",
+      "why": "The second principal direction holds the spread that the first one misses.",
+      "prompt": "Find $v_2$, the unit eigenvector of $C$ for $\\lambda_2 = 3$. Take the one with a positive second entry.",
+      "answer": {
+        "fields": [
+          { "name": "w1", "key": "-1/sqrt(5)" },
+          { "name": "w2", "key": "2/sqrt(5)" }
+        ],
+        "accept": ["negated"],
+        "acceptNote": "That is $-v_2$, the same line. Later lessons use $(-1, 2)/\\sqrt5$.",
+        "verify": "unit(nullvec(tr(X)*X/(5 - 1) - entry(eigs(tr(X)*X/(5 - 1)), 2)*eye(2)))",
+        "slips": [
+          { "detect": "known", "when": { "w1": "-1", "w2": "2" }, "say": "The right direction. Now make it a unit vector." },
+          { "detect": "scaled" }
+        ]
+      },
+      "hints": [
+        "It is perpendicular to $v_1$, which points along $(2, 1)$.",
+        "A vector perpendicular to $(2, 1)$ is $(-1, 2)$.",
+        "Its length is $\\sqrt5$."
+      ],
+      "check": { "say": "$v_1 \\cdot v_2$ should be 0, and $C(-1, 2)$ should be $3 \\cdot (-1, 2)$." },
+      "next": "Measure the distance to the best line"
+    },
+    {
+      "type": "step",
+      "id": "distance-to-the-best-line",
+      "title": "The closest line",
+      "why": "Least squares measured the distance from points to a line straight up. PCA's line is the best one measured straight to the line.",
+      "prompt": "For the line through the mean along $v_1$, what is the mean squared distance from the points to it: the sum of squared perpendicular distances, divided by $n - 1$?",
+      "widget": {
+        "name": "pca-scatter",
+        "params": { "points": [[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]], "centre": true, "start": 0, "revealBest": true, "showSecond": true },
+        "caption": "Show the best direction, then turn the line onto it: the variance along it peaks just as the distance to it bottoms out."
+      },
+      "answer": {
+        "fields": [{ "name": "d", "label": "mean sq. distance =", "key": "3" }],
+        "verify": "sq(X - X*rsv(X, 1)*tr(rsv(X, 1)))/(5 - 1)",
+        "slips": [
+          { "detect": "known", "when": { "d": "12" }, "say": "That is the sum of squared distances. Now divide by $n - 1$." }
+        ]
+      },
+      "hints": [
+        "By Pythagoras, each point's squared distance to the line is $\\|x_i\\|^2 - (x_i \\cdot v_1)^2$.",
+        "So the answer is the total variance minus the variance along $v_1$.",
+        "$11 - 8$."
+      ],
+      "check": { "say": "It should equal $\\lambda_2$, the variance along $v_2$: the perpendicular drops are exactly each point's part along $v_2$." },
+      "solution": "$\\lambda_2 = 3$. Since along + across is always 11, the line with the most spread along it is the line closest to the points. It is not the least-squares line: least squares of $y$ on $x$ here has slope $\\frac{8}{28} = \\frac27$; PCA's line has slope $\\frac12$.",
+      "next": "Finish the lesson"
+    }
+  ],
+  "sideQuest": {
+    "title": "Check it in numpy",
+    "body": "Only if you want to.\n\n```\nimport numpy as np\nC = np.array([[7, 2], [2, 4]])\nvalues, vectors = np.linalg.eigh(C)  # eigh: for symmetric matrices, smallest first\nprint(values)   # [3. 8.]\nprint(vectors)  # columns are v2 and v1, each up to sign\n```"
+  }
+}

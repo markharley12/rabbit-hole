@@ -1,0 +1,159 @@
+{
+  "format": 1,
+  "id": "the-same-answer-from-the-svd",
+  "title": "The same answer from the SVD",
+  "summary": "The SVD of the centred data gives the directions, the variances σ²/(n − 1) and the scores.",
+  "data": {
+    "X": [[-4, 0], [-1, -2], [1, -2], [1, 2], [3, 2]]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "singular-values-of-x",
+      "title": "The singular values of X",
+      "define": [
+        { "term": "SVD of X", "meaning": "$X = U\\Sigma V^\\mathsf{T}$, as you know it: the $\\sigma_i^2$ are the eigenvalues of $X^\\mathsf{T}X$, and the columns $v_i$ of $V$ (the right singular vectors) are its unit eigenvectors." }
+      ],
+      "why": "$X^\\mathsf{T}X = (n - 1)C$: the same matrix up to a number. So the SVD of $X$ should carry everything PCA found.",
+      "prompt": "$X^\\mathsf{T}X = 4C$, and $C$ has eigenvalues 8 and 3. Find $\\sigma_1$ and $\\sigma_2$.",
+      "answer": {
+        "fields": [
+          { "name": "s1", "label": "$\\sigma_1$ =", "key": "4sqrt(2)" },
+          { "name": "s2", "label": "$\\sigma_2$ =", "key": "2sqrt(3)" }
+        ],
+        "verify": "vec(sv(X, 1), sv(X, 2))",
+        "slips": [
+          { "detect": "known", "when": { "s1": "2sqrt(2)", "s2": "sqrt(3)" }, "say": "That is $\\sqrt{\\lambda}$ for $C$. The $\\sigma_i^2$ are eigenvalues of $X^\\mathsf{T}X = 4C$, so $\\sigma_i = \\sqrt{4\\lambda_i}$." },
+          { "detect": "known", "when": { "s1": "32", "s2": "12" }, "say": "Those are $\\sigma_1^2$ and $\\sigma_2^2$. Take square roots." },
+          { "detect": "known", "when": { "s1": "8", "s2": "3" }, "say": "Those are the eigenvalues of $C$. The $\\sigma_i^2$ are eigenvalues of $X^\\mathsf{T}X = 4C$." },
+          { "detect": "swapped" }
+        ]
+      },
+      "hints": [
+        "Multiplying a matrix by 4 multiplies its eigenvalues by 4.",
+        "So $\\sigma_1^2 = 4 \\cdot 8$ and $\\sigma_2^2 = 4 \\cdot 3$.",
+        "$\\sigma_1 = \\sqrt{16 \\cdot 2}$ and $\\sigma_2 = \\sqrt{4 \\cdot 3}$."
+      ],
+      "check": { "say": "$\\sigma_1^2 + \\sigma_2^2$ should be the sum of the squares of all ten entries of $X$, which is 44." },
+      "solution": "$\\lambda_i = \\sigma_i^2/(n - 1)$: $32/4 = 8$ and $12/4 = 3$. The singular values of the centred data are the PCA variances, before dividing.",
+      "next": "Write Vᵀ"
+    },
+    {
+      "type": "step",
+      "id": "write-v-transpose",
+      "title": "Vᵀ",
+      "why": "$X^\\mathsf{T}X$ and $C$ have the same eigenvectors, so the right singular vectors of $X$ are the principal directions. $V^\\mathsf{T}$ is how they appear in $U\\Sigma V^\\mathsf{T}$.",
+      "prompt": "With $v_1 = (2, 1)/\\sqrt5$ and $v_2 = (-1, 2)/\\sqrt5$, write $V^\\mathsf{T}$: its rows are $v_1$ and $v_2$, written across.",
+      "answer": {
+        "fields": [
+          { "name": "a11", "key": "2/sqrt(5)" },
+          { "name": "a12", "key": "1/sqrt(5)" },
+          { "name": "a21", "key": "-1/sqrt(5)" },
+          { "name": "a22", "key": "2/sqrt(5)" }
+        ],
+        "matrix": [2, 2],
+        "verify": "tr(rsv(X, 1)*tr(vec(1, 0)) - rsv(X, 2)*tr(vec(0, 1)))",
+        "slips": [
+          { "detect": "transpose", "name": "Vᵀ" },
+          { "detect": "scaled" }
+        ]
+      },
+      "hints": [
+        "Row 1 of $V^\\mathsf{T}$ is $v_1$ laid along the row.",
+        "Row 2 is $v_2$ laid along the row. $V$ itself has them as columns.",
+        "$V^\\mathsf{T} = \\frac{1}{\\sqrt5}\\begin{bmatrix}2&1\\\\ \\cdot&\\cdot\\end{bmatrix}$, with $v_2$'s entries in the second row."
+      ],
+      "check": { "say": "The rows are perpendicular unit vectors, so $V^\\mathsf{T}V = I$. Check that row 1 · row 2 is 0." },
+      "solution": "$V$ is a rotation: the principal directions are a new pair of axes, turned about 27° from $x$ and $y$.",
+      "next": "Compute the scores"
+    },
+    {
+      "type": "step",
+      "id": "scores",
+      "title": "The scores Xv₁",
+      "define": [
+        { "term": "scores", "meaning": "Each centred point's coordinate along $v_1$: the five numbers $Xv_1$. Each point's one-number summary." }
+      ],
+      "why": "The scores are what PCA hands on: one number per point instead of two.",
+      "prompt": "Compute $Xv_1$ with $v_1 = (2, 1)/\\sqrt5$.",
+      "answer": {
+        "fields": [
+          { "name": "t1", "key": "-8/sqrt(5)" },
+          { "name": "t2", "key": "-4/sqrt(5)" },
+          { "name": "t3", "key": "0" },
+          { "name": "t4", "key": "4/sqrt(5)" },
+          { "name": "t5", "key": "8/sqrt(5)" }
+        ],
+        "accept": ["negated"],
+        "acceptNote": "That is $X(-v_1)$: the scores of the opposite sign choice. Both are right.",
+        "verify": "X*rsv(X, 1)",
+        "slips": [
+          { "detect": "known", "when": { "t1": "-8", "t2": "-4", "t4": "4", "t5": "8" }, "say": "Those use $(2, 1)$. $v_1$ is a unit vector: divide each by $\\sqrt5$." },
+          { "detect": "scaled" }
+        ]
+      },
+      "hints": [
+        "Each score is a row of $X$ dotted with $v_1$.",
+        "Row 1: $(-4, 0) \\cdot (2, 1)$, then divide by $\\sqrt5$.",
+        "Rows 1 to 5 dotted with $(2, 1)$: $-8 + 0$, $-2 - 2$, $2 - 2$, $2 + 2$, $6 + 2$. Each over $\\sqrt5$."
+      ],
+      "check": { "say": "Scores of centred data add up to 0. You also met these numbers, times $\\sqrt5$, in the first lesson." },
+      "next": "Measure their size"
+    },
+    {
+      "type": "step",
+      "id": "size-of-the-scores",
+      "title": "How big are the scores?",
+      "why": "This is the link between the two routes: variance along $v_1$ from the scores, and $\\sigma_1$ from the SVD.",
+      "prompt": "Compute $\\|Xv_1\\|^2$, the sum of the squared scores.",
+      "answer": {
+        "fields": [{ "name": "q", "label": "$\\|Xv_1\\|^2$ =", "key": "32" }],
+        "verify": "sq(X*rsv(X, 1))",
+        "slips": [
+          { "detect": "known", "when": { "q": "8" }, "say": "That is the variance, after dividing by $n - 1$. Here the sum is wanted, before dividing." },
+          { "detect": "known", "when": { "q": "160" }, "say": "That squares $X(2, 1)$. With the unit $v_1$ each square is divided by 5." }
+        ]
+      },
+      "hints": [
+        "Square each score and add.",
+        "$(8/\\sqrt5)^2 = 64/5$; there are two of those and two of $(4/\\sqrt5)^2$.",
+        "$(64 + 16 + 0 + 16 + 64)/5$."
+      ],
+      "check": { "say": "Divided by $n - 1$ it should give $\\lambda_1$." },
+      "solution": "$\\sigma_1^2$. In the SVD, $Xv_1 = \\sigma_1 u_1$ with $u_1$ a unit vector, so $\\|Xv_1\\|^2 = \\sigma_1^2$. Variance along $v_1$ is $\\sigma_1^2/(n - 1)$.",
+      "next": "Find u₁"
+    },
+    {
+      "type": "step",
+      "id": "left-singular-vector",
+      "title": "u₁",
+      "why": "$u_1$ is the scores scaled to unit length. With it, the scores are the first column of $U\\Sigma$.",
+      "prompt": "Compute $u_1 = Xv_1/\\sigma_1$, with $\\sigma_1 = 4\\sqrt2$.",
+      "answer": {
+        "fields": [
+          { "name": "y1", "key": "-2/sqrt(10)" },
+          { "name": "y2", "key": "-1/sqrt(10)" },
+          { "name": "y3", "key": "0" },
+          { "name": "y4", "key": "1/sqrt(10)" },
+          { "name": "y5", "key": "2/sqrt(10)" }
+        ],
+        "accept": ["negated"],
+        "acceptNote": "The sign goes with $v_1$'s: if you flipped $v_1$, $u_1$ flips too.",
+        "verify": "lsv(X, 1)",
+        "slips": [{ "detect": "scaled" }]
+      },
+      "hints": [
+        "Divide each score by $4\\sqrt2$.",
+        "The first score over $\\sigma_1$ is $\\frac{-8}{\\sqrt5 \\cdot 4\\sqrt2}$.",
+        "$\\frac{-8}{4\\sqrt5\\,\\sqrt2} = \\frac{-2}{\\sqrt5\\,\\sqrt2}$, and $\\sqrt5\\,\\sqrt2 = \\sqrt{10}$."
+      ],
+      "check": { "say": "$u_1$ is a unit vector: the squares of its entries add to 1." },
+      "solution": "So PCA is the SVD of the centred data: $V$ gives the principal directions, $\\sigma_i^2/(n - 1)$ the variances, and $U\\Sigma$ the scores. Software does it this way, without ever forming $C$.",
+      "next": "Finish the lesson"
+    }
+  ],
+  "sideQuest": {
+    "title": "Check it in numpy",
+    "body": "Only if you want to.\n\n```\nimport numpy as np\nX = np.array([[-4, 0], [-1, -2], [1, -2], [1, 2], [3, 2]])\nU, s, Vt = np.linalg.svd(X, full_matrices=False)\nprint(s, s**2 / (len(X) - 1))  # [5.657 3.464] [8. 3.]\nprint(Vt)                      # rows are v1, v2, each up to sign\nprint(U * s)                   # the scores, column 1 is X v1\n```"
+  }
+}
