@@ -217,6 +217,37 @@ class Contexts(unittest.TestCase):
         self.assertIn("canReveal: false", text)
         self.assertIn("Lesson file: content/maths/courses/", text)
 
+    def test_a_quiz_question_is_described_with_its_answer_held_back(self):
+        block = {"type": "choice", "id": "which-is-symmetric", "title": "Which is symmetric", "prompt": "Which is?",
+                 "options": [{"id": "a", "text": "$A^TA$", "correct": True, "say": "Always."},
+                             {"id": "b", "text": "$AB$", "correct": False, "say": "Not in general."}],
+                 "next": "On"}
+        ctx = rs.validate_context(context(block=block, record={"attempts": 1, "hints": 1, "log": [
+            {"values": {"picked": "b"}, "result": "wrong"}]}, draft={"picked": "a"}, canReveal=False))
+        text = rs.context_text(ctx, {}, "f00")
+        self.assertIn("A quiz question (verbatim JSON). For your eyes only: `correct` marks the right option (exactly one)", text)
+        self.assertIn("do not say which option is right", text)
+        self.assertIn('"correct": true', text)
+        self.assertIn("its one hint taken", text)
+        self.assertIn('What he has picked now (option ids, not yet checked): {"picked": "a"}', text)
+        self.assertIn('"values": {"picked": "b"}', text)
+        self.assertIn("canReveal: false", text)
+        self.assertNotIn("text screen with no answer", text)
+        multiple = rs.context_text(rs.validate_context(context(block=dict(block, multiple=True))), {}, "f00")
+        self.assertIn("right options (tick every right one)", multiple)
+
+    def test_an_ordering_puzzle_is_described_with_its_order_held_back(self):
+        block = {"type": "order", "id": "put-them-in-order", "prompt": "Order the steps.",
+                 "items": [{"id": "s1", "text": "Form $A^TA$"}, {"id": "s2", "text": "Solve"}], "next": "On"}
+        ctx = rs.validate_context(context(block=block, record={"attempts": 3, "hints": 0, "log": []},
+                                          draft={"order": "s2,s1"}, canReveal=True))
+        text = rs.context_text(ctx, {}, "f00")
+        self.assertIn("An ordering puzzle (verbatim JSON). For your eyes only: `items` are listed in the CORRECT order", text)
+        self.assertIn("do not give the order", text)
+        self.assertIn("its one hint not taken", text)
+        self.assertIn('His current order (item ids, top first, not yet checked): {"order": "s2,s1"}', text)
+        self.assertIn("canReveal: true", text)
+
     def test_files_for_an_unknown_course(self):
         self.assertEqual(rs.course_files("no-such-course", "x", REPO), {})
 

@@ -126,3 +126,58 @@ describe('aboutLine', () => {
     expect(aboutLine(lesson, 0)).toBe('screen 1 of 2, The smallest best fit')
   })
 })
+
+describe('quiz questions and ordering puzzles', () => {
+  const quiz: Lesson = {
+    ...lesson,
+    blocks: [
+      {
+        type: 'choice',
+        id: 'which-is-symmetric',
+        prompt: 'Which is symmetric?',
+        options: [
+          { id: 'a', text: 'AᵀA', correct: true, say: 'Always.' },
+          { id: 'b', text: 'AB', correct: false, say: 'Not in general.' },
+        ],
+        next: 'On',
+      },
+      {
+        type: 'order',
+        id: 'put-in-order',
+        prompt: 'Order the steps.',
+        items: [
+          { id: 's1', text: 'Form AᵀA' },
+          { id: 's2', text: 'Solve' },
+          { id: 's3', text: 'Check' },
+        ],
+        next: 'On',
+      },
+    ],
+  }
+  const wrong = (values: Record<string, string>) => ({ at: '2026-11-16T10:00:00Z', values, result: 'wrong' as const })
+
+  it('sends the picked options and the order, never the shuffle seed', () => {
+    const picked = record({ attempts: 1, log: [wrong({ picked: 'b', seed: 'k3x9' })], draft: { picked: 'a', seed: 'k3x9' } })
+    const choice = buildContext({ course, lesson: quiz, at: 0, record: picked })
+    expect(choice.draft).toEqual({ picked: 'a' })
+    expect(choice.record.log[0].values).toEqual({ picked: 'b' })
+    expect(choice.block.type).toBe('choice')
+
+    const ordered = record({ attempts: 1, log: [wrong({ order: 's2,s1,s3', seed: 'q1' })], draft: { order: 's1,s3,s2', seed: 'q1' } })
+    const order = buildContext({ course, lesson: quiz, at: 1, record: ordered })
+    expect(order.draft).toEqual({ order: 's1,s3,s2' })
+    expect(order.record.log[0].values).toEqual({ order: 's2,s1,s3' })
+    expect(snapshot(ordered, quiz.blocks[1]).draft).toEqual({ order: 's1,s3,s2' })
+  })
+
+  it('allows the answer by the same rule as the screen: wrong tries, not hints', () => {
+    // A quiz: after 2 wrong tries; a puzzle: after 3 (choice.ts, order.ts).
+    expect(buildContext({ course, lesson: quiz, at: 0, record: record({ attempts: 1 }) }).canReveal).toBe(false)
+    expect(buildContext({ course, lesson: quiz, at: 0, record: record({ attempts: 2 }) }).canReveal).toBe(true)
+    expect(buildContext({ course, lesson: quiz, at: 0, record: record({ attempts: 2, solved: true }) }).canReveal).toBe(false)
+    expect(buildContext({ course, lesson: quiz, at: 1, record: record({ attempts: 2, hints: 1 }) }).canReveal).toBe(false)
+    expect(buildContext({ course, lesson: quiz, at: 1, record: record({ attempts: 3 }) }).canReveal).toBe(true)
+    expect(snapshot(record({ attempts: 3 }), quiz.blocks[1]).canReveal).toBe(true)
+    expect(snapshot(record({ attempts: 2 }), quiz.blocks[1]).canReveal).toBe(false)
+  })
+})

@@ -4,7 +4,9 @@
 // the server validates all of it again (server/rabbit_server.py).
 
 import type { Attempt, StepRecord } from '../lesson/progress.ts'
-import { canShowAnswer } from '../lesson/reveal.ts'
+import { CHOICE_REVEAL_AFTER } from '../lesson/choice.ts'
+import { ORDER_REVEAL_AFTER } from '../lesson/order.ts'
+import { canShowAnswer, canShowAnswerAfterTries } from '../lesson/reveal.ts'
 import type { Block, Course, Lesson } from '../lesson/types.ts'
 
 /** Attempts sent with the context: the most recent ones. */
@@ -31,7 +33,11 @@ export interface AskContext {
   lessonCount: number
   screenIndex: number
   screenCount: number
-  /** The step or text screen, verbatim (the key included: the tutor is told not to reveal it). */
+  /**
+   * The screen, verbatim: a step (its key included), a text screen, a quiz question (its
+   * options' `correct` flags included) or an ordering puzzle (its items in the correct order).
+   * The tutor is told not to reveal any of those until canReveal.
+   */
   block: Block
   record: { attempts: number; hints: number; solved: boolean; revealed: boolean; log: SentAttempt[] }
   /** What is typed but not yet checked. */
@@ -53,11 +59,30 @@ export interface ContextInput {
 const trimValues = (values: Record<string, string> | undefined): Record<string, string> =>
   Object.fromEntries(Object.entries(values ?? {}).map(([name, text]) => [name, String(text).slice(0, MAX_VALUE)]))
 
+/**
+ * What he typed or picked, as the tutor should see it. A quiz's values are `{picked, seed}` and a
+ * puzzle's `{order, seed}` (src/lesson/types.ts): the tutor gets the picked option ids or the
+ * current order, never the shuffle seed, which means nothing to it.
+ */
+export function blockValues(block: Block | undefined, values: Record<string, string> | undefined): Record<string, string> {
+  if (block?.type === 'choice') return trimValues(values?.picked !== undefined ? { picked: values.picked } : {})
+  if (block?.type === 'order') return trimValues(values?.order !== undefined ? { order: values.order } : {})
+  return trimValues(values)
+}
+
+/** The app's own "Show the answer" rule for this kind of screen (src/lesson/reveal.ts). */
+export function canReveal(block: Block | undefined, record: StepRecord | undefined): boolean {
+  if (block?.type === 'step') return canShowAnswer(record)
+  if (block?.type === 'choice') return canShowAnswerAfterTries(record, CHOICE_REVEAL_AFTER)
+  if (block?.type === 'order') return canShowAnswerAfterTries(record, ORDER_REVEAL_AFTER)
+  return false
+}
+
 export function buildContext({ course, lesson, at, record, nodeName }: ContextInput): AskContext {
   const block = lesson.blocks[at]
   const position = course.lessons.findIndex((entry) => entry.id === lesson.id)
   const log = (record?.log ?? []).slice(-LOG_SENT).map((attempt) => {
-    const sent: SentAttempt = { at: attempt.at, values: trimValues(attempt.values), result: attempt.result }
+    const sent: SentAttempt = { at: attempt.at, values: blockValues(block, attempt.values), result: attempt.result }
     if (attempt.slip) sent.slip = attempt.slip
     return sent
   })
@@ -79,8 +104,8 @@ export function buildContext({ course, lesson, at, record, nodeName }: ContextIn
       revealed: record?.revealed ?? false,
       log,
     },
-    draft: trimValues(record?.draft),
-    canReveal: block?.type === 'step' && canShowAnswer(record),
+    draft: blockValues(block, record?.draft),
+    canReveal: canReveal(block, record),
   }
   if (nodeName) context.nodeName = nodeName
   return context
@@ -96,12 +121,17 @@ export interface StepSnapshot {
   revealed: boolean
 }
 
-export function snapshot(record: StepRecord | undefined, isStep = true): StepSnapshot {
+/**
+ * `screen` is the block (any kind), or for older callers whether it is a step (true: a step,
+ * false: a text screen).
+ */
+export function snapshot(record: StepRecord | undefined, screen: Block | boolean = true): StepSnapshot {
+  const block = typeof screen === 'boolean' ? undefined : screen
   return {
-    draft: trimValues(record?.draft),
+    draft: block ? blockValues(block, record?.draft) : trimValues(record?.draft),
     attempts: record?.attempts ?? 0,
     hints: record?.hints ?? 0,
-    canReveal: isStep && canShowAnswer(record),
+    canReveal: block ? canReveal(block, record) : screen === true && canShowAnswer(record),
     solved: record?.solved ?? false,
     revealed: record?.revealed ?? false,
   }

@@ -604,7 +604,13 @@ class Live(unittest.TestCase):
         self.assertEqual(build["state"], "stopped")
         self.assertFalse(os.path.exists(self.content("courses", "tiny-course")))
         self.assertTrue(os.path.isfile(os.path.join(self.root, "data", "drafts", did, "failed-course", "course.json")))
+        # The record says stopped a moment before the job lets go of the lock.
+        for _ in range(100):
+            if self.server.build is None:
+                break
+            time.sleep(0.02)
         self.assertIsNone(self.server.build)
+        self.assertFalse(self.server.turn_lock.locked())
 
     def test_a_build_waits_for_a_chat_reply(self):
         sid, did = self.brief_for_build()

@@ -513,6 +513,12 @@ def _record(value):
     return out
 
 
+# The screens the Ask tutor can be opened on (schema/lesson.schema.json).
+BLOCK_TYPES = ("step", "text", "choice", "order")
+# Screens with an answer the tutor must hold back until canReveal (docs/agents/ask.md).
+ANSWERED = ("step", "choice", "order")
+
+
 def validate_context(ctx):
     """The context the app sent, checked and with unknown keys dropped. Raises Invalid."""
     if not isinstance(ctx, dict):
@@ -536,8 +542,8 @@ def validate_context(ctx):
         raise Invalid("block must be an object")
     if not isinstance(block.get("id"), str) or not SLUG.match(block["id"]) or len(block["id"]) > 60:
         raise Invalid("block.id is not a valid id")
-    if block.get("type") not in ("step", "text"):
-        raise Invalid("block.type must be step or text")
+    if block.get("type") not in BLOCK_TYPES:
+        raise Invalid("block.type must be one of %s" % ", ".join(BLOCK_TYPES))
     if block.get("title") is not None and (not isinstance(block["title"], str) or len(block["title"]) > MAX_TITLE):
         raise Invalid("block.title must be short text")
     out["block"] = block
@@ -620,14 +626,31 @@ def context_text(ctx, files, fence):
                                                ctx.get("lessonTitle") or ctx["lessonId"], ctx["lessonId"],
                                                _n_of(ctx.get("screenIndex"), ctx.get("screenCount")), title),
     ]
-    if block.get("type") == "step":
-        lines.append("The step (verbatim JSON, including the key and hints: do not reveal the key): %s"
-                     % json.dumps(block, ensure_ascii=False))
+    kind = block.get("type")
+    if kind in ANSWERED:
+        if kind == "step":
+            lines.append("The step (verbatim JSON, including the key and hints: do not reveal the key): %s"
+                         % json.dumps(block, ensure_ascii=False))
+            hints, typed = "hints taken: %d of 3" % record.get("hints", 0), "What he typed just now (not yet checked)"
+        elif kind == "choice":
+            lines.append("A quiz question (verbatim JSON). For your eyes only: `correct` marks the right option%s and "
+                         "`say` the reason or the misconception; do not say which option is right, or rule options in "
+                         "or out so that it follows, until canReveal is true or it is solved or shown: %s"
+                         % ("s (tick every right one)" if block.get("multiple") else " (exactly one)",
+                            json.dumps(block, ensure_ascii=False)))
+            hints = "its one hint %s" % ("taken" if record.get("hints", 0) else "not taken")
+            typed = "What he has picked now (option ids, not yet checked)"
+        else:
+            lines.append("An ordering puzzle (verbatim JSON). For your eyes only: `items` are listed in the CORRECT "
+                         "order; do not give the order, or the place of more than one line, until canReveal is true or "
+                         "it is solved or shown: %s" % json.dumps(block, ensure_ascii=False))
+            hints = "its one hint %s" % ("taken" if record.get("hints", 0) else "not taken")
+            typed = "His current order (item ids, top first, not yet checked)"
         log_lines = [{k: e[k] for k in ("values", "result", "slip") if k in e} for e in record.get("log", [])]
-        lines.append("What he has done on this step: attempts %d %s, hints taken: %d of 3%s%s"
-                     % (record.get("attempts", 0), json.dumps(log_lines, ensure_ascii=False), record.get("hints", 0),
+        lines.append("What he has done on this screen: attempts %d %s, %s%s%s"
+                     % (record.get("attempts", 0), json.dumps(log_lines, ensure_ascii=False), hints,
                         ", solved" if record.get("solved") else "", ", answer shown" if record.get("revealed") else ""))
-        lines.append("What he typed just now (not yet checked): %s" % json.dumps(ctx.get("draft") or {}, ensure_ascii=False))
+        lines.append("%s: %s" % (typed, json.dumps(ctx.get("draft") or {}, ensure_ascii=False)))
         lines.append("canReveal: %s" % ("true" if ctx.get("canReveal") else "false"))
     else:
         lines.append("The screen (verbatim JSON, a text screen with no answer): %s" % json.dumps(block, ensure_ascii=False))

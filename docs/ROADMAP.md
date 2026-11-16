@@ -240,3 +240,10 @@ Filled in as stages land (date, commit, what was not checked).
   noted in the report. Not checked: on the phone itself; drag to reorder (not built: buttons only); the Ask tool is
   hidden on these screens because `server/rabbit_server.py` rejects block types other than step and text;
   whether the puzzles have exactly one valid order beyond the author's reading; read by Mark.
+- **Ask on quiz and puzzle screens** (16 Nov 2026). The server accepts `choice` and `order` blocks and
+  describes them with the answer for the tutor's eyes only (which options are `correct`; `items` in the
+  correct order) under the step's withholding rule; the app sends the picked ids or the current order (not
+  the seed) and `canReveal` by `reveal.ts`'s wrong-tries rule (2 for a quiz, 3 for a puzzle); `ask.md` says
+  what the tutor may do on each. The Ask tool is no longer hidden on these screens (the note in the entry
+  above is now out of date). Not checked: any of it with the real CLI, so whether the tutor keeps the
+  answer back on these screens is untested; not looked at in the browser.

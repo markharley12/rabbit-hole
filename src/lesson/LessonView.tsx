@@ -105,19 +105,17 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
   const nodeName = reading?.layout.byId.get(course.nodeId)?.node.name
   const shownBlock = lesson?.blocks[at]
   const ask = useMemo<AskOption | undefined>(() => {
-    // The tutor's server accepts only step and text screens (server/rabbit_server.py), so a quiz or
-    // puzzle has no Ask tool rather than one that fails.
-    if (!available || !lesson || !shownBlock || shownBlock.type === 'choice' || shownBlock.type === 'order') return undefined
+    if (!available || !lesson || !shownBlock) return undefined
     // Read at the moment a message is sent, so the tutor sees the latest draft and attempts.
     const stepRecord = () => readProgress(course.id).lessons[lesson.id]?.steps[shownBlock.id]
     return {
       store: chats,
       about: aboutLine(lesson, at),
-      isStep: shownBlock.type === 'step',
+      isStep: shownBlock.type !== 'text',
       target: {
         key: chatKey(course.id, lesson.id, shownBlock.id),
         context: () => buildContext({ course, lesson, at, record: stepRecord(), nodeName }),
-        snapshot: () => snapshot(stepRecord(), shownBlock.type === 'step'),
+        snapshot: () => snapshot(stepRecord(), shownBlock),
       },
     }
   }, [available, lesson, shownBlock, at, course, nodeName, chats])
