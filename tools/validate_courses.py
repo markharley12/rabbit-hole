@@ -9,8 +9,11 @@ What is checked, for every content/<field>/courses/<course-id>/:
 - course.json and each lesson against schema/course.schema.json and schema/lesson.schema.json;
 - an optional cheatsheet.json against schema/cheatsheet.schema.json: item ids unique, `lesson`
   one of the course's, Markdown checked as for lessons;
-- steps marked `review: true` (a boolean on a step, schema only). Publishing lists them in the
-  course's entry in index.json as `review: [{lesson, step}]`, for spaced review in the app;
+- steps, choice and order screens marked `review: true` (a boolean, schema only). Publishing lists
+  them in the course's entry in index.json as `review: [{lesson, step}]`, for spaced review in the app;
+- choice screens: exactly one right option (at least one when `multiple`), at least one wrong,
+  distinct texts; order screens: `fixed` and `say` name real lines, three or more can move, distinct
+  texts; a lesson has at least one step and at most half its screens are choice or order;
 - the course hangs on a node that exists in public/content/<field>/map.json (any number of
   courses may share a node), its folder is named after the course's id, and ids are unique; every listed lesson has a file and every file is listed;
 - every widget is in schema/widgets.json and its params match the schema there;
@@ -448,9 +451,17 @@ def schema_errors(validator, document, where: str, report: Report) -> bool:
 
 def markdown_strings(block: dict):
     """Every Markdown string in a block, with a name for messages."""
-    for key in ("why", "prompt", "body", "solution"):
+    for key in ("why", "prompt", "body", "solution", "hint"):
         if key in block:
             yield key, block[key]
+    # choice: every option's text and reason; order: every line, and the per-line nudges.
+    for i, option in enumerate(block.get("options", [])):
+        yield f"options/{i}/text", option["text"]
+        yield f"options/{i}/say", option["say"]
+    for i, item in enumerate(block.get("items", [])):
+        yield f"items/{i}/text", item["text"]
+    for name, text in block.get("say", {}).items():
+        yield f"say/{name}", text
     for i, item in enumerate(block.get("define", [])):
         yield f"define/{i}", item["meaning"]
     for i, hint in enumerate(block.get("hints", [])):
@@ -551,6 +562,64 @@ def check_answer(block: dict, data: dict, where: str, report: Report):
                 report.add(where, f"hint {i + 1} gives away the key {giver!r}; only the third hint may get close")
 
 
+def check_choice(block: dict, where: str, report: Report):
+    """Exactly one right option (or at least one when `multiple`), at least one wrong, texts distinct."""
+    options = block["options"]
+    ids = [o["id"] for o in options]
+    if len(set(ids)) != len(ids):
+        report.add(where, "option ids repeat")
+    texts = [" ".join(o["text"].split()) for o in options]
+    if len(set(texts)) != len(texts):
+        report.add(where, "two options have the same text")
+    right = sum(1 for o in options if o["correct"])
+    if block.get("multiple"):
+        if right < 1:
+            report.add(where, "a multiple-choice question needs at least one correct option")
+    elif right != 1:
+        report.add(where, f"a single-answer question needs exactly one correct option (has {right}); set multiple for more")
+    if right == len(options):
+        report.add(where, "at least one option must be incorrect")
+
+
+def check_order(block: dict, where: str, report: Report):
+    """Fixed and say name real lines, at least three lines can move, texts distinct.
+
+    One valid order is the author's responsibility (course-authoring.md): no rule here can tell
+    that two lines could swap, which is why the texts are only checked to differ.
+    """
+    items = block["items"]
+    ids = [i["id"] for i in items]
+    if len(set(ids)) != len(ids):
+        report.add(where, "item ids repeat")
+    texts = [" ".join(i["text"].split()) for i in items]
+    if len(set(texts)) != len(texts):
+        report.add(where, "two lines have the same text")
+    fixed = block.get("fixed", [])
+    for name in fixed:
+        if name not in ids:
+            report.add(where, f"fixed names {name!r}, which is not an item")
+    for name in block.get("say", {}):
+        if name not in ids:
+            report.add(where, f"say names {name!r}, which is not an item")
+        elif name in fixed:
+            report.add(where, f"say names {name!r}, which is fixed and can never be out of place")
+    if len(set(fixed) & set(ids)) > len(ids) - 3:
+        report.add(where, "at least three lines must be movable")
+
+
+QUIZ_TYPES = ("choice", "order")
+
+
+def check_lesson_shape(lesson: dict, where: str, report: Report):
+    """A lesson still teaches through steps: quizzes support the worked problems, never replace them."""
+    blocks = lesson["blocks"]
+    if not any(b["type"] == "step" for b in blocks):
+        report.add(where, "a lesson needs at least one step")
+    quizzes = sum(1 for b in blocks if b["type"] in QUIZ_TYPES)
+    if quizzes * 2 > len(blocks):
+        report.add(where, f"at most half the screens may be choice or order ({quizzes} of {len(blocks)})")
+
+
 def check_lesson(lesson: dict, where: str, lesson_ids: set[str], node_ids: set[str], widget_validators: dict, report: Report):
     try:
         data = {name: to_sympy(value) for name, value in lesson.get("data", {}).items()}
@@ -575,6 +644,11 @@ def check_lesson(lesson: dict, where: str, lesson_ids: set[str], node_ids: set[s
             check_widget(block["check"]["widget"], f"{at} check widget", widget_validators, report)
         if block["type"] == "step":
             check_answer(block, data, at, report)
+        elif block["type"] == "choice":
+            check_choice(block, at, report)
+        elif block["type"] == "order":
+            check_order(block, at, report)
+    check_lesson_shape(lesson, where, report)
     if "sideQuest" in lesson:
         check_markdown(lesson["sideQuest"]["body"], f"{where} sideQuest", lesson_ids, node_ids, report)
 
@@ -738,7 +812,10 @@ def publish_resources(found: dict[str, list[tuple[Path, dict]]], public: Path, f
 
 
 def review_steps(course_dir: Path, course: dict) -> list[dict[str, str]]:
-    """The steps a course's lessons mark `review: true`, in lesson order, as {lesson, step}.
+    """The blocks a course's lessons mark `review: true`, in lesson order, as {lesson, step}.
+
+    A marked choice or order block is listed under the same `step` key: the app joins on the id
+    and shows whatever block it finds there.
 
     There is no rule here that a review step must not rest on a widget: nothing in a step says
     reliably whether its prompt can be answered without one. Whether a prompt stands on its own
@@ -747,7 +824,7 @@ def review_steps(course_dir: Path, course: dict) -> list[dict[str, str]]:
     marked = []
     for entry in course["lessons"]:
         lesson = json.loads((course_dir / f"{entry['id']}.json").read_text(encoding="utf-8"))
-        marked += [{"lesson": entry["id"], "step": b["id"]} for b in lesson["blocks"] if b.get("type") == "step" and b.get("review")]
+        marked += [{"lesson": entry["id"], "step": b["id"]} for b in lesson["blocks"] if b.get("type") in ("step", "choice", "order") and b.get("review")]
     return marked
 
 

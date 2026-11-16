@@ -1,4 +1,6 @@
-// Which items exist and where they stand: the courses' marked steps and cheat-sheet formulas,
+// Which items exist and where they stand: the courses' marked steps (a marked quiz question or
+// ordering puzzle is listed as a "step" too: the index and the progress record key every block by
+// its id, and the review screen shows whichever kind of block it finds) and cheat-sheet formulas,
 // joined to the progress records (when each was earned) and the review record (how each has
 // been graded). Pure. Items of courses or steps that no longer exist are not here: they stay in
 // the stored record, ignored, not deleted.

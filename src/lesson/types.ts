@@ -104,7 +104,66 @@ export interface TextBlock {
   next: string
 }
 
-export type Block = StepBlock | TextBlock
+export interface ChoiceOption {
+  id: string
+  text: string
+  correct: boolean
+  /** Why it is right, or the misconception it catches. Required: an option without a reason teaches nothing. */
+  say: string
+}
+
+/**
+ * A quiz question. Progress uses the same StepRecord as a step; the values of an attempt and of
+ * the draft are `{ picked: "a,c", seed: "k3x9" }`: the picked option ids, comma-separated, in the
+ * block's own option order (not the shuffled one), and the shuffle seed.
+ */
+export interface ChoiceBlock {
+  type: 'choice'
+  id: string
+  title?: string
+  why?: string
+  prompt: string
+  widget?: WidgetRef
+  /** Two to five. */
+  options: ChoiceOption[]
+  /** True: tick every right option. False or absent: exactly one is right. */
+  multiple?: boolean
+  /** Default true. */
+  shuffle?: boolean
+  hint?: string
+  solution?: string
+  next: string
+  review?: boolean
+}
+
+export interface OrderItem {
+  id: string
+  text: string
+}
+
+/**
+ * An ordering puzzle; `items` are in the CORRECT order. Progress values (attempts and draft) are
+ * `{ order: "s2,s1,s3", seed: "k3x9" }`: every item id, fixed ones included, in the order shown,
+ * and the shuffle seed.
+ */
+export interface OrderBlock {
+  type: 'order'
+  id: string
+  title?: string
+  why?: string
+  prompt: string
+  items: OrderItem[]
+  /** Item ids shown already in place. */
+  fixed?: string[]
+  /** Said when the item is the first one out of place. */
+  say?: Record<string, string>
+  hint?: string
+  solution?: string
+  next: string
+  review?: boolean
+}
+
+export type Block = StepBlock | TextBlock | ChoiceBlock | OrderBlock
 
 export interface Lesson {
   format: 1

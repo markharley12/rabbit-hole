@@ -1865,3 +1865,231 @@ a {
   color: var(--fg);
   box-shadow: inset 0 0 0 2px var(--fg);
 }
+
+/* Choice and order screens */
+.quiz-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.options {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 8px;
+}
+.option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--fg);
+  font-size: 16px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+/* The real input stays in the row (keyboard, screen readers) but is not drawn: the row is the target. */
+.option-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.option-input:disabled {
+  cursor: default;
+}
+.option:focus-within {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+.option-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--muted);
+}
+.option-input[type='checkbox'] ~ .option-mark {
+  border-radius: 8px;
+}
+.option-text {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+.option-text > :first-child {
+  margin-top: 0;
+}
+.option-text > :last-child {
+  margin-bottom: 0;
+}
+.option.picked {
+  border-color: var(--fg);
+}
+.option.picked .option-mark {
+  border-color: var(--fg);
+  background: var(--fg);
+  color: var(--bg);
+}
+.option.off {
+  border-color: var(--b1);
+  background: color-mix(in srgb, var(--b1) 8%, var(--surface));
+}
+.option.off .option-mark {
+  border-color: var(--b1);
+  background: var(--b1);
+  color: var(--bg);
+}
+.option.right {
+  border-color: var(--b2);
+  background: color-mix(in srgb, var(--b2) 10%, var(--surface));
+}
+.option.right .option-mark {
+  border-color: var(--b2);
+  background: var(--b2);
+  color: var(--bg);
+}
+.feedback-live:empty {
+  display: none;
+}
+.says {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.says li {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+.say-letter {
+  flex: none;
+  font-weight: 650;
+}
+.option-notes {
+  margin: 8px 0 12px;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+}
+.option-notes li {
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  border-left: 3px solid var(--line);
+}
+.option-notes li.right {
+  border-color: var(--b2);
+}
+.note-head {
+  display: block;
+  font-weight: 650;
+}
+.order-list {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.order-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 6px 6px 6px 10px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 16px;
+  box-sizing: border-box;
+}
+.order-pos {
+  flex: none;
+  width: 22px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--muted);
+}
+.order-text {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+.order-text .md > :first-child {
+  margin-top: 0;
+}
+.order-text .md > :last-child {
+  margin-bottom: 0;
+}
+.order-given {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.order-row.fixed {
+  border-style: dashed;
+  background: var(--bg);
+}
+.order-row.off {
+  border-color: var(--b1);
+  background: color-mix(in srgb, var(--b1) 9%, var(--surface));
+}
+.order-row.right {
+  border-color: var(--b2);
+}
+.order-buttons {
+  flex: none;
+  display: flex;
+  gap: 4px;
+}
+.order-move {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.order-move:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.order-move:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+@media (max-width: 400px) {
+  .order-row {
+    gap: 6px;
+    padding-left: 6px;
+  }
+  .order-pos {
+    width: 16px;
+  }
+}
