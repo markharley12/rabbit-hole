@@ -23,6 +23,18 @@ import validate_courses as vc  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 COURSE_ID = "least-squares-to-the-pseudo-inverse"
+
+
+def copy_fixture_content(target: Path) -> None:
+    """The real content, cut to the first course and the 15Axx reading: these tests count what
+    they publish, so later courses and reading files must not change the fixture."""
+    shutil.copytree(ROOT / "content", target)
+    for course in (target / "maths" / "courses").iterdir():
+        if course.name != COURSE_ID:
+            shutil.rmtree(course)
+    for reading in (target / "maths" / "resources").glob("*.json"):
+        if reading.name != "15Axx.json":
+            reading.unlink()
 COURSE = ROOT / "content" / "maths" / "courses" / COURSE_ID
 
 
@@ -80,7 +92,7 @@ class Content(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
         self.content = self.tmp / "content"
-        shutil.copytree(ROOT / "content", self.content)
+        copy_fixture_content(self.content)
         self.public = self.tmp / "public"
         (self.public / "content" / "maths").mkdir(parents=True)
         shutil.copyfile(ROOT / "public" / "content" / "maths" / "map.json", self.public / "content" / "maths" / "map.json")
@@ -329,7 +341,7 @@ class Reading(unittest.TestCase):
         self.tmp = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.tmp)
         self.content = self.tmp / "content"
-        shutil.copytree(ROOT / "content", self.content)
+        copy_fixture_content(self.content)
         self.public = self.tmp / "public"
         (self.public / "content" / "maths").mkdir(parents=True)
         shutil.copyfile(ROOT / "public" / "content" / "maths" / "map.json", self.public / "content" / "maths" / "map.json")

@@ -9,7 +9,9 @@ be turnkey for anyone else. **"rabbit-hole" is a working name** — rename freel
 ## Status: Phase 2 slice plus roadmap stages A and B built, waiting for Mark's phone test (15 Nov 2026)
 
 The map, plus one real course: **"Least squares to the pseudo-inverse"** on `15Axx` (Basic
-linear algebra), five lessons resuming where Mark's chat stopped. No server, no AI, no photo
+linear algebra), five lessons resuming where Mark's chat stopped; and a second,
+**"Principal components from the SVD"** (`principal-components-from-the-svd`) on `62Hxx`
+(Multivariate analysis), five lessons of PCA on one five-point data set, with 7 reading links. No server, no AI, no photo
 marking, no Capacitor yet. What is where:
 
 - **Map.** `tools/build_maths_map.py` → `public/content/maths/map.json` (593 nodes, 517
@@ -29,7 +31,7 @@ marking, no Capacitor yet. What is where:
 - **Lesson UI:** `src/lesson/LessonView.tsx`, `StepScreen.tsx`; routes are
   `#<node>/learn/<course>/<lesson>` (`src/route.ts`; the old `#<node>/learn/<lesson>` still opens the
   first course on the node with that lesson). A lazy chunk with KaTeX (woff2 only).
-- **Widgets:** `src/widgets/` (line fitter, dependent columns, SVD geometry), pure maths in
+- **Widgets:** `src/widgets/` (line fitter, dependent columns, SVD geometry, PCA scatter), pure maths in
   `*-math.ts`, registry kept equal to `schema/widgets.json` by a test.
 - **Finding courses:** every node counts the courses under it (`src/courses.ts`), the sheet
   says "1 course inside" instead of "No course yet" on any ancestor, the map rings each node

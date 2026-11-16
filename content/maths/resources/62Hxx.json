@@ -1,0 +1,90 @@
+{
+  "format": 1,
+  "nodeId": "62Hxx",
+  "resources": [
+    {
+      "id": "setosa-pca-explained-visually",
+      "title": "Principal Component Analysis Explained Visually",
+      "by": "Victor Powell and Lewis Lehe (Setosa)",
+      "kind": "article",
+      "url": "https://setosa.io/ev/principal-component-analysis/",
+      "about": "An interactive page: drag points in 2D and see the new axes PCA picks, then the same idea in 3D and with 17 variables.",
+      "use": "When you want to see what principal components do to a cloud of points before doing the algebra.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": ["PCA", "intuition", "interactive"]
+    },
+    {
+      "id": "shlens-pca-tutorial",
+      "title": "A Tutorial on Principal Component Analysis",
+      "by": "Jonathon Shlens (arXiv:1404.1100)",
+      "kind": "notes",
+      "url": "https://arxiv.org/abs/1404.1100",
+      "about": "A self-contained tutorial that builds PCA from a toy example: centring, the covariance matrix, diagonalising it, and the same result from the SVD.",
+      "use": "For one careful derivation of PCA from both the eigenvector and the SVD side.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": ["PCA", "covariance", "SVD"]
+    },
+    {
+      "id": "strang-18065-lecture-7-pca",
+      "title": "Lecture 7: Eckart-Young: The Closest Rank k Matrix to A (18.065)",
+      "by": "Gilbert Strang, MIT OpenCourseWare",
+      "kind": "video",
+      "url": "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/resources/lecture-7-eckart-young-the-closest-rank-k-matrix-to-a/",
+      "about": "Strang reviews PCA on centred data with the n − 1 sample covariance, contrasts its perpendicular distances with least squares, and states Eckart–Young.",
+      "use": "For how PCA and the best low-rank approximation are the same question.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": ["PCA", "Eckart-Young", "SVD"]
+    },
+    {
+      "id": "brunton-kutz-databook-pca",
+      "title": "Data-Driven Science & Engineering, Chapter 1 (Section 1.5: PCA)",
+      "by": "Steven L. Brunton and J. Nathan Kutz",
+      "kind": "course",
+      "url": "https://www.databookuw.com/page-2/page-4/",
+      "about": "The book's chapter 1 page, with videos per section; section 1.5 covers PCA, with an overview and worked versions in MATLAB and Python.",
+      "use": "For short video walk-throughs of PCA as an application of the SVD.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": ["PCA", "SVD", "video"]
+    },
+    {
+      "id": "mml-book-chapter-10",
+      "title": "Mathematics for Machine Learning, Chapter 10: Dimensionality Reduction with PCA",
+      "by": "Deisenroth, Faisal and Ong (Cambridge University Press)",
+      "kind": "book",
+      "url": "https://mml-book.github.io/",
+      "about": "The book's site, with a free PDF; chapter 10 treats PCA as the direction of maximum variance and as the best projection.",
+      "use": "For PCA in machine-learning notation, at book length.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": ["PCA", "dimensionality reduction"]
+    },
+    {
+      "id": "wikipedia-principal-component-analysis",
+      "title": "Principal component analysis (Wikipedia)",
+      "by": "Wikipedia contributors",
+      "kind": "article",
+      "url": "https://en.wikipedia.org/wiki/Principal_component_analysis",
+      "about": "Reference article: the covariance and SVD routes, scores, explained variance, how many components to keep, and links to related methods.",
+      "use": "To look up a PCA definition, convention or property quickly.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": ["PCA", "explained variance", "SVD"]
+    },
+    {
+      "id": "scikit-learn-decomposition",
+      "title": "Decomposing signals in components (scikit-learn user guide)",
+      "by": "scikit-learn developers",
+      "kind": "notes",
+      "url": "https://scikit-learn.org/stable/modules/decomposition.html",
+      "about": "The user guide for scikit-learn's matrix decompositions, starting with PCA: it centres each feature and uses the SVD.",
+      "use": "When you want to run PCA in Python and know what the library does to your data.",
+      "free": true,
+      "checked": "2026-11-15",
+      "topics": ["PCA", "software"]
+    }
+  ]
+}

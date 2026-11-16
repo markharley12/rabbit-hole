@@ -1,0 +1,141 @@
+{
+  "format": 1,
+  "id": "keeping-one-component",
+  "title": "Keeping one component",
+  "summary": "Rebuild each point from one number, measure what is lost, and meet Eckart–Young again.",
+  "data": {
+    "P": [[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]],
+    "X": [[-4, 0], [-1, -2], [1, -2], [1, 2], [3, 2]]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "rebuild-point-one",
+      "title": "Rebuild a point from its score",
+      "define": [
+        { "term": "reconstruction", "meaning": "From one component, point $i$ is rebuilt as $\\hat x_i = (x_i \\cdot v_1)\\,v_1$: its score times $v_1$. It is the foot of $x_i$ on the line along $v_1$." }
+      ],
+      "why": "Keeping one component means storing one number per point. This is what that number gives back.",
+      "prompt": "Centred point 1 is $x_1 = (-4, 0)$, with score $-8/\\sqrt5$. Compute $\\hat x_1$.",
+      "answer": {
+        "fields": [
+          { "name": "r1", "key": "-16/5" },
+          { "name": "r2", "key": "-8/5" }
+        ],
+        "verify": "dot(tr(X)*vec(1, 0, 0, 0, 0), rsv(X, 1))*rsv(X, 1)",
+        "slips": [
+          { "detect": "known", "when": { "r1": "-16", "r2": "-8" }, "say": "Both the score and $v_1$ carry a $1/\\sqrt5$: together they make $1/5$." },
+          { "detect": "scaled" }
+        ]
+      },
+      "hints": [
+        "Multiply the score by $v_1 = (2, 1)/\\sqrt5$.",
+        "$\\frac{-8}{\\sqrt5} \\cdot \\frac{(2, 1)}{\\sqrt5}$: the two $\\sqrt5$ make 5.",
+        "$-8\\,(2, 1)/5$."
+      ],
+      "check": {
+        "say": "$x_1 - \\hat x_1$ should be perpendicular to $v_1$: dot it with $(2, 1)$ and get 0. In the picture, it is the foot of the leftmost point.",
+        "widget": { "name": "pca-scatter", "params": { "points": [[0, 2], [3, 0], [5, 0], [5, 4], [7, 4]], "centre": true, "start": 27 } }
+      },
+      "next": "Put the mean back"
+    },
+    {
+      "type": "step",
+      "id": "back-to-raw-coordinates",
+      "title": "Back where it started",
+      "why": "The original point was $(0, 2)$. The summary has to be read in the same coordinates.",
+      "prompt": "Add the mean back: what is $\\hat x_1$ in the original coordinates?",
+      "answer": {
+        "fields": [
+          { "name": "r1", "key": "4/5" },
+          { "name": "r2", "key": "2/5" }
+        ],
+        "verify": "dot(tr(X)*vec(1, 0, 0, 0, 0), rsv(X, 1))*rsv(X, 1) + tr(P)*vec(1, 1, 1, 1, 1)/5",
+        "slips": [
+          { "detect": "known", "when": { "r1": "-16/5", "r2": "-8/5" }, "say": "That is still centred. Add the mean $(4, 2)$." }
+        ]
+      },
+      "hints": [
+        "The mean is $(4, 2)$.",
+        "Add it to $\\hat x_1$ entry by entry.",
+        "$4 - \\frac{16}{5}$ and $2 - \\frac85$."
+      ],
+      "check": { "say": "It should lie on the line through $(4, 2)$ with slope $\\frac12$." },
+      "solution": "$(0, 2)$ becomes $(0.8, 0.4)$. Stored: one score per point, plus the mean and $v_1$ shared by all five.",
+      "next": "Measure the error"
+    },
+    {
+      "type": "step",
+      "id": "error-of-point-one",
+      "title": "What point 1 loses",
+      "why": "The error of one point shows where the lost spread goes: across the line.",
+      "prompt": "Compute $\\|x_1 - \\hat x_1\\|^2$, with $x_1 = (-4, 0)$.",
+      "answer": {
+        "fields": [{ "name": "e", "label": "$\\|x_1 - \\hat x_1\\|^2$ =", "key": "16/5" }],
+        "verify": "sq(tr(X)*vec(1, 0, 0, 0, 0) - dot(tr(X)*vec(1, 0, 0, 0, 0), rsv(X, 1))*rsv(X, 1))"
+      },
+      "hints": [
+        "Subtract $\\hat x_1$ from $x_1 = (-4, 0)$, then square the entries and add.",
+        "$x_1 - \\hat x_1 = (-\\frac45, \\frac85)$.",
+        "$\\frac{16}{25} + \\frac{64}{25}$."
+      ],
+      "check": { "say": "It should equal the square of point 1's score along $v_2$, which is $x_1 \\cdot (-1, 2)/\\sqrt5 = 4/\\sqrt5$." },
+      "next": "Add up all five"
+    },
+    {
+      "type": "step",
+      "id": "total-error",
+      "title": "The total error",
+      "define": [
+        { "term": "X₁", "meaning": "The matrix whose rows are the $\\hat x_i$: $X_1 = Xv_1v_1^\\mathsf{T} = \\sigma_1 u_1 v_1^\\mathsf{T}$, the SVD of $X$ cut to one term. It has rank 1." }
+      ],
+      "why": "The total error is the whole cost of keeping one component.",
+      "prompt": "Add the squared errors of all five points: $\\sum_i \\|x_i - \\hat x_i\\|^2$, the sum of the squares of all entries of $X - X_1$.",
+      "answer": {
+        "fields": [{ "name": "e", "label": "total =", "key": "12" }],
+        "verify": "sq(X - X*rsv(X, 1)*tr(rsv(X, 1)))",
+        "slips": [
+          { "detect": "known", "when": { "e": "3" }, "say": "That is after dividing by $n - 1$. The sum is wanted, before dividing." }
+        ]
+      },
+      "hints": [
+        "Each point's error is its part along $v_2$, so its square is $(x_i \\cdot v_2)^2$.",
+        "The scores along $v_2$ are $(4, -3, -5, 3, 1)/\\sqrt5$.",
+        "$(16 + 9 + 25 + 9 + 1)/5$."
+      ],
+      "check": { "say": "Total sum of squares minus the kept part: $44 - \\|Xv_1\\|^2$." },
+      "solution": "$12 = \\sigma_2^2$. This is Eckart–Young again: $X_1$ is the closest rank-1 matrix to $X$. You proved $\\|X - X_1\\|_2 = \\sigma_2$ and that no rank-1 matrix does better in the 2-norm; the same truncation is also the best in the sum of squares, where the error is $\\sigma_2^2$. Divided by $n - 1$, the lost variance is $\\lambda_2 = 3$.",
+      "next": "Score the summary"
+    },
+    {
+      "type": "step",
+      "id": "explained-variance",
+      "title": "How much is kept",
+      "define": [
+        { "term": "explained variance ratio", "meaning": "The share of the total variance that a component carries: $\\lambda_1/(\\lambda_1 + \\lambda_2)$ for the first." }
+      ],
+      "why": "This one number is how PCA is judged in practice: how much spread one component keeps.",
+      "prompt": "What is the explained variance ratio of the first component? Give a fraction.",
+      "answer": {
+        "fields": [{ "name": "r", "label": "ratio =", "key": "8/11" }],
+        "verify": "entry(eigs(tr(X)*X/(5 - 1)), 1)/(sq(X)/(5 - 1))",
+        "slips": [
+          { "detect": "known", "when": { "r": "8/3" }, "say": "That compares $\\lambda_1$ with $\\lambda_2$. The ratio compares it with the total, $\\lambda_1 + \\lambda_2$." },
+          { "detect": "known", "when": { "r": "3/11" }, "say": "That is the share lost, the second component's. The kept share is the first's." }
+        ]
+      },
+      "hints": [
+        "The total variance is $\\lambda_1 + \\lambda_2$, which you found in the covariance lesson.",
+        "The first component keeps $\\lambda_1$.",
+        "8 out of 11."
+      ],
+      "check": { "say": "With singular values it is $\\sigma_1^2/(\\sigma_1^2 + \\sigma_2^2)$; that should give the same fraction." },
+      "solution": "About 73%: one number per point keeps $\\frac{8}{11}$ of the spread. That is principal component analysis (PCA) from start to finish: centre, take the SVD, keep the top directions, report how much they explain.",
+      "next": "Finish the course"
+    }
+  ],
+  "sideQuest": {
+    "title": "Check it in numpy",
+    "body": "Only if you want to.\n\n```\nimport numpy as np\nX = np.array([[-4, 0], [-1, -2], [1, -2], [1, 2], [3, 2]])\nU, s, Vt = np.linalg.svd(X, full_matrices=False)\nX1 = s[0] * np.outer(U[:, 0], Vt[0])\nprint(X1)                        # rows are the rebuilt points\nprint(((X - X1)**2).sum())       # 12, which is s[1]**2\nprint(s[0]**2 / (s**2).sum())    # 0.727 = 8/11\n```"
+  }
+}

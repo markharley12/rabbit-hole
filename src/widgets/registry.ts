@@ -7,6 +7,8 @@ import { DependentColumns } from './DependentColumns.tsx'
 import type { DependentColumnsParams } from './DependentColumns.tsx'
 import { LineFitter } from './LineFitter.tsx'
 import type { LineFitterParams } from './LineFitter.tsx'
+import { PcaScatter } from './PcaScatter.tsx'
+import type { PcaScatterParams } from './PcaScatter.tsx'
 import { SvdGeometry } from './SvdGeometry.tsx'
 import type { SvdGeometryParams } from './SvdGeometry.tsx'
 
@@ -19,4 +21,5 @@ export const registry: Record<string, AnyWidget> = {
   'line-fitter': LineFitter satisfies (props: { params: LineFitterParams }) => ReactNode,
   'dependent-columns': DependentColumns satisfies (props: { params: DependentColumnsParams }) => ReactNode,
   'svd-geometry': SvdGeometry satisfies (props: { params: SvdGeometryParams }) => ReactNode,
+  'pca-scatter': PcaScatter satisfies (props: { params: PcaScatterParams }) => ReactNode,
 }
