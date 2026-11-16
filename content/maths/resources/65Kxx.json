@@ -1,0 +1,90 @@
+{
+  "format": 1,
+  "nodeId": "65Kxx",
+  "resources": [
+    {
+      "id": "3blue1brown-gradient-descent",
+      "title": "Gradient descent, how neural networks learn",
+      "by": "Grant Sanderson (3Blue1Brown)",
+      "kind": "video",
+      "url": "https://www.3blue1brown.com/lessons/gradient-descent",
+      "about": "A video lesson with a text version: a network's cost function as a landscape, and learning as repeated steps down its negative gradient.",
+      "use": "When you want the picture of why training a model is walking downhill, before any algebra.",
+      "free": true,
+      "checked": "2026-11-16",
+      "topics": ["gradient descent", "intuition", "neural networks"]
+    },
+    {
+      "id": "wikipedia-gradient-descent",
+      "title": "Gradient descent",
+      "by": "Wikipedia",
+      "kind": "article",
+      "url": "https://en.wikipedia.org/wiki/Gradient_descent",
+      "about": "A reference article: the update rule and its step size (learning rate), line searches, the linear least-squares case, and how the condition number slows it.",
+      "use": "For a quick reminder of the update rule, or the least-squares gradient, with links to the variants.",
+      "free": true,
+      "checked": "2026-11-16",
+      "topics": ["gradient descent", "learning rate", "least squares"]
+    },
+    {
+      "id": "goh-why-momentum-really-works",
+      "title": "Why Momentum Really Works",
+      "by": "Gabriel Goh (Distill)",
+      "kind": "article",
+      "url": "https://distill.pub/2017/momentum/",
+      "about": "An interactive article that splits gradient descent on a quadratic into eigen-directions, shows the step-size limit and the condition number at work, then adds momentum.",
+      "use": "When the eigenvalue view of step sizes and zig-zags needs to be seen moving, or for what momentum adds.",
+      "free": true,
+      "checked": "2026-11-16",
+      "topics": ["eigenvalues", "condition number", "momentum", "interactive"]
+    },
+    {
+      "id": "strang-18065-lecture-22",
+      "title": "Lecture 22: Gradient Descent: Downhill to a Minimum (18.065)",
+      "by": "Gilbert Strang, MIT OpenCourseWare",
+      "kind": "video",
+      "url": "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/resources/lecture-22-gradient-descent-downhill-to-a-minimum/",
+      "about": "Strang steps downhill on the bowl ½(x² + by²) and shows why a narrow bowl makes the path zig-zag slowly.",
+      "use": "For a lecture on gradient descent on a quadratic bowl from the linear-algebra side.",
+      "free": true,
+      "checked": "2026-11-16",
+      "topics": ["gradient descent", "zig-zag", "quadratic"]
+    },
+    {
+      "id": "strang-18065-lecture-23",
+      "title": "Lecture 23: Accelerating Gradient Descent (Use Momentum) (18.065)",
+      "by": "Gilbert Strang, MIT OpenCourseWare",
+      "kind": "video",
+      "url": "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/resources/lecture-23-accelerating-gradient-descent-use-momentum/",
+      "about": "The zig-zag example again, then momentum and Nesterov's method, which remember the previous step and converge faster on narrow bowls.",
+      "use": "When plain gradient descent is clear and the next question is how to beat the crawl on a narrow bowl.",
+      "free": true,
+      "checked": "2026-11-16",
+      "topics": ["momentum", "Nesterov", "condition number"]
+    },
+    {
+      "id": "sra-18065-lecture-25-sgd",
+      "title": "Lecture 25: Stochastic Gradient Descent (18.065)",
+      "by": "Suvrit Sra, MIT OpenCourseWare",
+      "kind": "video",
+      "url": "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/resources/lecture-25-stochastic-gradient-descent/",
+      "about": "A guest lecture on stochastic gradient descent: a gradient from a random minibatch per step, fast early progress, and why it trains large models.",
+      "use": "For how gradient descent is actually run on big data sets in machine learning.",
+      "free": true,
+      "checked": "2026-11-16",
+      "topics": ["stochastic gradient descent", "machine learning"]
+    },
+    {
+      "id": "boyd-vandenberghe-convex-optimization",
+      "title": "Convex Optimization",
+      "by": "Stephen Boyd and Lieven Vandenberghe (Cambridge University Press, 2004)",
+      "kind": "book",
+      "url": "https://www.seas.ucla.edu/~vandenbe/cvxbook.html",
+      "about": "The standard textbook on convex optimization; the book's page links a free PDF of the whole text, with slides and exercises.",
+      "use": "For a careful treatment of descent methods and their convergence (chapter 9, unconstrained minimization), once the hand examples are solid.",
+      "free": true,
+      "checked": "2026-11-16",
+      "topics": ["convex optimization", "descent methods", "textbook"]
+    }
+  ]
+}

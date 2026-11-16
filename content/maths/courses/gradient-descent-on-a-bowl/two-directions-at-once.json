@@ -1,0 +1,213 @@
+{
+  "format": 1,
+  "id": "two-directions-at-once",
+  "title": "Two directions at once",
+  "summary": "A bowl with a steep and a shallow direction: the largest eigenvalue caps η, the smallest sets the crawl, and their ratio is the condition number.",
+  "data": {
+    "D": [[4, 0], [0, 1]],
+    "H": [[5, 3], [3, 5]],
+    "x0": [1, 0]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "the-limit-for-two-directions",
+      "review": true,
+      "title": "One η for two directions",
+      "define": [
+        { "term": "½xᵀHx", "meaning": "A bowl in the plane, for a symmetric matrix $H$ with positive eigenvalues. Its gradient is $\\nabla f = Hx$. For $H = \\begin{bmatrix}4&0\\\\0&1\\end{bmatrix}$ it is $f = 2x^2 + \\frac12 y^2$ with $\\nabla f = (4x, y)$." }
+      ],
+      "why": "One $\\eta$ has to suit every direction at once. The last lesson's rule, applied to each, says which direction sets the limit.",
+      "prompt": "$f(x, y) = 2x^2 + \\frac12 y^2$. Each gradient-descent step multiplies $x$ by $1 - 4\\eta$ and $y$ by $1 - \\eta$. What is the largest $\\eta$ below which both shrink?",
+      "answer": {
+        "fields": [{ "name": "e", "label": "$\\eta$ below", "key": "1/2" }],
+        "verify": "2/entry(eigs(D), 1)",
+        "slips": [
+          { "detect": "known", "when": { "e": "2" }, "say": "That keeps $y$ safe, $|1 - \\eta| < 1$. But at $\\eta = 2$ the $x$ factor is $1 - 8 = -7$: $x$ blows up. The steep direction sets the limit." },
+          { "detect": "known", "when": { "e": "1/4" }, "say": "At $\\eta = \\frac14$ the $x$ factor is 0: the best step for $x$. It still converges up to twice that." }
+        ]
+      },
+      "hints": [
+        "Each factor needs size below 1. Find the limit for $x$ and the limit for $y$ separately.",
+        "For $x$: $\\eta < 2/4$. For $y$: $\\eta < 2/1$.",
+        "Both must hold, so take the smaller."
+      ],
+      "check": { "say": "At your limit, one factor should be exactly $-1$ and the other between 0 and 1." },
+      "solution": "$\\eta < 2/\\lambda_{\\max}$, with $\\lambda_{\\max} = 4$ the largest eigenvalue of $H$. The steepest direction caps the step for all of them.",
+      "next": "Push η near the limit"
+    },
+    {
+      "type": "step",
+      "id": "factors-near-the-limit",
+      "title": "The factors at η = 2/5",
+      "why": "Near the limit the steep direction bounces while the shallow one creeps. Here is how both look at once.",
+      "prompt": "On $f = 2x^2 + \\frac12 y^2$, with $\\eta = \\frac25$, find the factor for $x$, $1 - 4\\eta$, and for $y$, $1 - \\eta$.",
+      "widget": {
+        "name": "descent-path",
+        "params": { "H": [[4, 0], [0, 1]], "start": [1, 2], "view": 2.5, "eta": 0.4, "maxSteps": 15 },
+        "caption": "The path zig-zags across the narrow way and creeps along the long way."
+      },
+      "answer": {
+        "fields": [
+          { "name": "p", "label": "$x$ factor:", "key": "-3/5" },
+          { "name": "q", "label": "$y$ factor:", "key": "3/5" }
+        ],
+        "verify": "vec(1 - 2*entry(D, 1, 1)/5, 1 - 2*entry(D, 2, 2)/5)",
+        "slips": [
+          { "detect": "swapped" },
+          { "detect": "known", "when": { "p": "3/5" }, "say": "$4 \\cdot \\frac25 = \\frac85$, which is more than 1, so $1 - \\frac85$ is negative." }
+        ]
+      },
+      "hints": [
+        "Multiply first: $4\\eta$ and $\\eta$.",
+        "$4\\eta = \\frac85$.",
+        "$1 - \\frac85$ and $1 - \\frac25$."
+      ],
+      "check": { "say": "Both should have size below 1, since $\\frac25 < \\frac12$." },
+      "solution": "Both have size $\\frac35$: $x$ flips sign every step (the zig-zag), $y$ shrinks on one side. Any other $\\eta$ makes one of the two sizes bigger than $\\frac35$, so $\\frac25 = 2/(\\lambda_{\\max} + \\lambda_{\\min})$ is the best single step for this bowl.",
+      "next": "Describe the path"
+    },
+    {
+      "type": "choice",
+      "id": "what-the-path-looks-like",
+      "title": "What the path looks like",
+      "why": "Training plots show this shape all the time. Reading it from the factors is the skill.",
+      "prompt": "Gradient descent on $f = 2x^2 + \\frac12 y^2$ from $(1, 2)$ with $\\eta = \\frac25$: each step multiplies $x$ by $-\\frac35$ and $y$ by $\\frac35$. What does the path look like?",
+      "widget": {
+        "name": "descent-path",
+        "params": { "H": [[4, 0], [0, 1]], "start": [1, 2], "view": 2.5, "eta": 0.4, "stepByStep": true },
+        "caption": "Answer first, then take steps."
+      },
+      "options": [
+        { "id": "zig-zag", "text": "A zig-zag: $x$ changes side every step while $y$ shrinks on one side.", "correct": true, "say": "Right. The negative factor flips $x$ across the valley each step; the positive one walks $y$ straight down it." },
+        { "id": "straight", "text": "A straight line from $(1, 2)$ to the bottom.", "correct": false, "say": "Not this one. A straight path needs both coordinates multiplied by the same number. Here the signs differ, so the direction changes every step. (From a start on an axis it would be straight.)" },
+        { "id": "spiral", "text": "A spiral that circles the bottom as it closes in.", "correct": false, "say": "Not this one. Each coordinate only ever flips or keeps its sign; nothing turns it round. Circling would need the two coordinates to mix, which a diagonal $H$ never does." },
+        { "id": "y-escapes", "text": "$x$ settles fast while $y$ drifts away from the bottom.", "correct": false, "say": "Not this one. $y$'s factor is $\\frac35$, below 1, so $y$ shrinks. Both sizes are $\\frac35$; they converge at the same rate." }
+      ],
+      "hint": "Follow the signs: what does multiplying by a negative number do to which side $x$ is on?",
+      "solution": "The zig-zag is the steep direction bouncing. Shrink $\\eta$ and the bounce stops, but then $y$ crawls. A bowl that is much steeper one way than the other forces that trade-off.",
+      "next": "Turn the bowl"
+    },
+    {
+      "type": "step",
+      "id": "eigenvalues-of-a-turned-bowl",
+      "review": true,
+      "title": "A turned bowl",
+      "define": [
+        { "term": "turned bowl", "meaning": "When $H$ is not diagonal, its steep and shallow directions are its eigenvectors, at an angle to the axes. Along each, the bowl is a parabola with curvature the eigenvalue." }
+      ],
+      "why": "Real problems never come lined up with the axes. The eigenvalues carry the step-size story over unchanged.",
+      "prompt": "$H = \\begin{bmatrix}5&3\\\\3&5\\end{bmatrix}$. Find its eigenvalues, largest first.",
+      "answer": {
+        "fields": [
+          { "name": "l1", "label": "$\\lambda_1$ =", "key": "8" },
+          { "name": "l2", "label": "$\\lambda_2$ =", "key": "2" }
+        ],
+        "verify": "eigs(H)",
+        "slips": [
+          { "detect": "swapped" },
+          { "detect": "known", "when": { "l1": "5", "l2": "5" }, "say": "Those are the diagonal entries. For a matrix that is not diagonal, solve $\\det(H - \\lambda I) = 0$." }
+        ]
+      },
+      "hints": [
+        "The eigenvalues add up to the trace and multiply to the determinant.",
+        "Trace $10$, determinant $25 - 9$: so $\\lambda^2 - 10\\lambda + 16 = 0$.",
+        "Two numbers adding to 10 and multiplying to 16."
+      ],
+      "check": { "say": "$H(1, 1)$ should be $\\lambda_1(1, 1)$ and $H(1, -1)$ should be $\\lambda_2(1, -1)$." },
+      "solution": "Steep direction $(1, 1)$ with curvature 8, shallow direction $(1, -1)$ with curvature 2. So $\\eta$ must stay below $2/8 = \\frac14$.",
+      "next": "Step on the turned bowl"
+    },
+    {
+      "type": "step",
+      "id": "a-step-on-the-turned-bowl",
+      "title": "One step on the turned bowl",
+      "why": "The same update as before; only the gradient is a matrix product now.",
+      "prompt": "$f = \\frac12 x^\\mathsf{T}Hx$ with $H = \\begin{bmatrix}5&3\\\\3&5\\end{bmatrix}$, so $\\nabla f = Hx$. From $x_0 = (1, 0)$ with $\\eta = \\frac18$, find $x_1$.",
+      "widget": {
+        "name": "descent-path",
+        "params": { "H": [[5, 3], [3, 5]], "start": [1, 0], "view": 1.5, "eta": 0.125, "stepByStep": true },
+        "caption": "Work it out, then take a step."
+      },
+      "answer": {
+        "fields": [
+          { "name": "a", "key": "3/8" },
+          { "name": "b", "key": "-3/8" }
+        ],
+        "verify": "x0 - H*x0/8",
+        "slips": [
+          { "detect": "known", "when": { "a": "13/8", "b": "3/8" }, "say": "That adds the step. Subtract: downhill is $-\\nabla f$." },
+          { "detect": "known", "when": { "a": "-4", "b": "-3" }, "say": "That subtracts the whole gradient $(5, 3)$. Multiply it by $\\eta = \\frac18$ first." },
+          { "detect": "known", "when": { "b": "3/8" }, "say": "The second entry: $0 - \\frac38$ is negative." }
+        ]
+      },
+      "hints": [
+        "First $\\nabla f(x_0) = Hx_0$, the first column of $H$.",
+        "$Hx_0 = (5, 3)$, and $\\frac18$ of that is $(\\frac58, \\frac38)$.",
+        "$(1 - \\frac58,\\; 0 - \\frac38)$."
+      ],
+      "check": { "say": "$f(x_0) = \\frac52$. $f(x_1) = \\frac12 x_1^\\mathsf{T}Hx_1$ should be smaller." },
+      "solution": "$x_1 = \\frac38(1, -1)$: on the shallow eigenvector. With $\\eta = \\frac18 = 1/\\lambda_{\\max}$, the steep part of $x_0$ was removed in one step (factor $1 - 8\\eta = 0$). What is left is the slow part.",
+      "next": "Watch the slow part"
+    },
+    {
+      "type": "step",
+      "id": "the-slow-direction",
+      "title": "The slow direction",
+      "why": "Once only the shallow direction is left, the shallow eigenvalue alone sets the speed.",
+      "prompt": "Take one more step: from $x_1 = (\\frac38, -\\frac38)$ with $\\eta = \\frac18$ and $H = \\begin{bmatrix}5&3\\\\3&5\\end{bmatrix}$, find $x_2$.",
+      "answer": {
+        "fields": [
+          { "name": "a", "key": "9/32" },
+          { "name": "b", "key": "-9/32" }
+        ],
+        "verify": "(eye(2) - H/8)*(eye(2) - H/8)*x0",
+        "slips": [
+          { "detect": "known", "when": { "a": "0", "b": "0" }, "say": "$Hx_1$ is not 0: $H(\\frac38, -\\frac38) = (\\frac68, -\\frac68)$. Only the steep part vanished." },
+          { "detect": "sign" }
+        ]
+      },
+      "hints": [
+        "$Hx_1$ first.",
+        "$x_1$ lies along $(1, -1)$, an eigenvector with $\\lambda_2 = 2$, so $Hx_1 = 2x_1$.",
+        "$x_2 = x_1 - \\frac18 \\cdot 2x_1 = \\frac34 x_1$."
+      ],
+      "check": { "say": "$x_2$ should be $x_1$ times $1 - \\eta\\lambda_2$." },
+      "solution": "Every step from here multiplies by $\\frac34$: it takes about 8 steps to shrink tenfold. A larger $\\eta$ would hurry this direction, but $\\eta$ is capped at $\\frac14$ by the steep one.",
+      "next": "Name the ratio"
+    },
+    {
+      "type": "step",
+      "id": "condition-number",
+      "title": "The condition number",
+      "define": [
+        { "term": "condition number", "meaning": "$\\kappa = \\lambda_{\\max}/\\lambda_{\\min}$, the ratio of the largest to the smallest eigenvalue of $H$. Large $\\kappa$: a long narrow valley." }
+      ],
+      "why": "One number predicts how slow gradient descent is on a bowl, whichever way the bowl is turned.",
+      "prompt": "For $H = \\begin{bmatrix}5&3\\\\3&5\\end{bmatrix}$, find the condition number $\\kappa$ and the best single step size $\\eta^* = 2/(\\lambda_{\\max} + \\lambda_{\\min})$.",
+      "answer": {
+        "fields": [
+          { "name": "k", "label": "$\\kappa$ =", "key": "4" },
+          { "name": "e", "label": "$\\eta^*$ =", "key": "1/5" }
+        ],
+        "verify": "vec(entry(eigs(H), 1)/entry(eigs(H), 2), 2/(entry(eigs(H), 1) + entry(eigs(H), 2)))",
+        "slips": [
+          { "detect": "known", "when": { "k": "1/4" }, "say": "Largest over smallest, so $\\kappa \\ge 1$." },
+          { "detect": "known", "when": { "e": "1/4" }, "say": "$\\frac14 = 2/\\lambda_{\\max}$ is the limit, where the steep direction bounces for ever. The best step is smaller." }
+        ]
+      },
+      "hints": [
+        "The eigenvalues are 8 and 2.",
+        "$\\kappa = 8/2$ and $\\eta^* = 2/(8 + 2)$.",
+        "Simplify both fractions."
+      ],
+      "check": { "say": "At $\\eta^*$ both factors $1 - 8\\eta^*$ and $1 - 2\\eta^*$ should have the same size, $(\\kappa - 1)/(\\kappa + 1)$." },
+      "solution": "$\\kappa = 4$, the same as the diagonal bowl $2x^2 + \\frac12 y^2$, and the best rate is again $(\\kappa - 1)/(\\kappa + 1) = \\frac35$ per step. Turning a bowl changes nothing but the directions.",
+      "next": "Finish the lesson"
+    }
+  ],
+  "sideQuest": {
+    "title": "Count steps against κ, in numpy",
+    "body": "Only if you want to.\n\n```\nimport numpy as np\nfor kappa in (1, 4, 16, 100):\n    H = np.diag([kappa, 1.0])\n    eta = 2 / (kappa + 1)  # the best single step\n    x, k = np.array([1.0, 1.0]), 0\n    while np.linalg.norm(x) > 1e-3:\n        x, k = x - eta * (H @ x), k + 1\n    print(kappa, k)  # steps grow roughly in proportion to kappa\n```"
+  }
+}

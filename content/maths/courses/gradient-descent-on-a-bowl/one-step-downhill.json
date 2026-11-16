@@ -1,0 +1,188 @@
+{
+  "format": 1,
+  "id": "one-step-downhill",
+  "title": "One step downhill",
+  "summary": "The update x_{k+1} = x_k − η∇f(x_k) by hand: two steps on x² + 2y², watching f fall.",
+  "data": {
+    "H": [[2, 0], [0, 4]],
+    "x0": [2, 1],
+    "eta": "1/8"
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "the-first-step",
+      "review": true,
+      "title": "The first step",
+      "define": [
+        { "term": "step size η", "meaning": "How far to move along $-\\nabla f$: the step is $\\eta$ times the gradient. In machine learning it is called the **learning rate**." },
+        { "term": "iterate", "meaning": "The points $x_0, x_1, x_2, \\ldots$ the method visits. $x_0$ is the start; $x_k$ is the point after $k$ steps." },
+        { "term": "gradient descent", "meaning": "From $x_k$, step to $x_{k+1} = x_k - \\eta\\,\\nabla f(x_k)$. Repeat." }
+      ],
+      "why": "This one line is how models are trained. Everything after it is about choosing $\\eta$ and knowing when it works.",
+      "prompt": "$f(x, y) = x^2 + 2y^2$, so $\\nabla f = (2x, 4y)$. Start at $x_0 = (2, 1)$, with $\\eta = \\frac18$. Find $x_1$.",
+      "widget": {
+        "name": "descent-path",
+        "params": { "H": [[2, 0], [0, 4]], "start": [2, 1], "view": 3, "eta": 0.125, "stepByStep": true, "showGradient": true },
+        "caption": "Work it out first, then take a step to check."
+      },
+      "answer": {
+        "fields": [
+          { "name": "a", "key": "3/2" },
+          { "name": "b", "key": "1/2" }
+        ],
+        "verify": "x0 - eta*H*x0",
+        "slips": [
+          { "detect": "known", "when": { "a": "5/2", "b": "3/2" }, "say": "That adds the step: $x_0 + \\eta\\nabla f$, which goes uphill. Gradient descent subtracts." },
+          { "detect": "known", "when": { "a": "-2", "b": "-3" }, "say": "That subtracts the whole gradient $(4, 4)$. Multiply it by $\\eta = \\frac18$ first." },
+          { "detect": "known", "when": { "a": "7/4", "b": "3/4" }, "say": "That uses $\\nabla f = (x, 2y)$. The power comes down: $(2x, 4y)$, which is $(4, 4)$ at $x_0$." }
+        ]
+      },
+      "hints": [
+        "First $\\nabla f(x_0)$, then multiply it by $\\eta$, then subtract from $x_0$.",
+        "$\\nabla f(2, 1) = (4, 4)$, and $\\frac18$ of that is half a unit each way.",
+        "$x_1 = (2 - \\frac12,\\; 1 - \\frac12)$."
+      ],
+      "check": { "say": "$f(x_1)$ should be less than $f(x_0) = 6$." },
+      "next": "Measure the new height"
+    },
+    {
+      "type": "step",
+      "id": "height-after-one-step",
+      "title": "Did f fall?",
+      "why": "The whole point of a step is that $f$ goes down. Check it every time; it is the cheapest test there is.",
+      "prompt": "Compute $f(x_1)$ for $x_1 = (\\frac32, \\frac12)$ and $f(x, y) = x^2 + 2y^2$.",
+      "answer": {
+        "fields": [{ "name": "f", "label": "$f(x_1)$ =", "key": "11/4" }],
+        "verify": "dot(x0 - eta*H*x0, H*(x0 - eta*H*x0))/2",
+        "slips": [
+          { "detect": "known", "when": { "f": "5/2" }, "say": "$2y^2$ at $y = \\frac12$ is $2 \\cdot \\frac14 = \\frac12$, not $\\frac14$." },
+          { "detect": "known", "when": { "f": "7/2" }, "say": "$(\\frac12)^2 = \\frac14$, so $2y^2 = \\frac12$; and $(\\frac32)^2 = \\frac94$." }
+        ]
+      },
+      "hints": [
+        "Square each coordinate; double the $y$ one.",
+        "$(\\frac32)^2 = \\frac94$ and $(\\frac12)^2 = \\frac14$.",
+        "$\\frac94 + 2 \\cdot \\frac14$."
+      ],
+      "check": { "say": "It should be between 0 (the bottom) and 6 (where you started)." },
+      "solution": "$f$ fell from 6 to $\\frac{11}{4} = 2.75$, more than half the way down in one step.",
+      "next": "Find the next gradient"
+    },
+    {
+      "type": "step",
+      "id": "the-new-gradient",
+      "title": "The gradient at x₁",
+      "why": "Each step uses the gradient where you are now. It has changed: the slope near the bottom is gentler.",
+      "prompt": "Find $\\nabla f(x_1)$ for $x_1 = (\\frac32, \\frac12)$, with $\\nabla f = (2x, 4y)$.",
+      "answer": {
+        "fields": [
+          { "name": "g1", "key": "3" },
+          { "name": "g2", "key": "2" }
+        ],
+        "verify": "H*(x0 - eta*H*x0)",
+        "slips": [
+          { "detect": "known", "when": { "g1": "4", "g2": "4" }, "say": "That is the gradient at $x_0$. Each step uses the gradient at the point it starts from, now $x_1$." },
+          { "detect": "known", "when": { "g1": "3/2", "g2": "1" }, "say": "That is $(x, 2y)$. Use $(2x, 4y)$." },
+          { "detect": "swapped" }
+        ]
+      },
+      "hints": [
+        "Put $x = \\frac32$ and $y = \\frac12$ into $(2x, 4y)$.",
+        "$2 \\cdot \\frac32$ and $4 \\cdot \\frac12$.",
+        "Both come out as whole numbers."
+      ],
+      "check": { "say": "Both entries should be smaller than at $x_0$, where the gradient was $(4, 4)$: nearer the bottom, the floor is flatter." },
+      "next": "Take the second step"
+    },
+    {
+      "type": "step",
+      "id": "the-second-step",
+      "title": "The second step",
+      "why": "Two steps make a pattern; the pattern is next lesson's subject.",
+      "prompt": "With $\\eta = \\frac18$, step from $x_1 = (\\frac32, \\frac12)$ using $\\nabla f(x_1) = (3, 2)$. Find $x_2$.",
+      "answer": {
+        "fields": [
+          { "name": "a", "key": "9/8" },
+          { "name": "b", "key": "1/4" }
+        ],
+        "verify": "(eye(2) - eta*H)*(eye(2) - eta*H)*x0",
+        "slips": [
+          { "detect": "known", "when": { "a": "15/8", "b": "3/4" }, "say": "That adds the step. Subtract: downhill is $-\\nabla f$." },
+          { "detect": "known", "when": { "a": "-3/2", "b": "-3/2" }, "say": "That subtracts the whole gradient. Multiply it by $\\eta = \\frac18$ first." },
+          { "detect": "known", "when": { "b": "0" }, "say": "The $x$ part is right. For $y$, the gradient's second entry at $x_1$ is 2, not the 4 from $x_0$: use the new point for both coordinates." },
+          { "detect": "known", "when": { "a": "1" }, "say": "The $y$ part is right. For $x$, the gradient's first entry at $x_1$ is 3, not the 4 from $x_0$: use the new point for both coordinates." }
+        ]
+      },
+      "hints": [
+        "$x_2 = x_1 - \\eta\\,\\nabla f(x_1)$.",
+        "$\\frac18 \\cdot (3, 2) = (\\frac38, \\frac14)$.",
+        "$(\\frac32 - \\frac38,\\; \\frac12 - \\frac14)$."
+      ],
+      "check": {
+        "say": "Take two steps in the picture and read $x_2$.",
+        "widget": { "name": "descent-path", "params": { "H": [[2, 0], [0, 4]], "start": [2, 1], "view": 3, "eta": 0.125, "stepByStep": true } }
+      },
+      "solution": "$x_2 = (\\frac98, \\frac14)$, and $f(x_2) = \\frac{81}{64} + 2 \\cdot \\frac{1}{16} = \\frac{89}{64} \\approx 1.39$. Down again, by less this time.",
+      "next": "Put a step in order"
+    },
+    {
+      "type": "order",
+      "id": "order-one-step",
+      "review": true,
+      "title": "One step, in order",
+      "why": "Written as an algorithm, each line needs what the line above it made.",
+      "prompt": "One step of gradient descent from the point $x_k$, with step size $\\eta$. Put the lines in order. The first is given.",
+      "items": [
+        { "id": "start", "text": "You are at the point $x_k$." },
+        { "id": "partials", "text": "Work out each partial derivative of $f$ at $x_k$." },
+        { "id": "gradient", "text": "Put them together: that vector is $\\nabla f(x_k)$." },
+        { "id": "scale", "text": "Multiply that vector by $\\eta$." },
+        { "id": "subtract", "text": "Subtract the result from $x_k$: this is $x_{k+1}$." },
+        { "id": "check", "text": "Check that $f(x_{k+1})$ is smaller than $f(x_k)$." }
+      ],
+      "fixed": ["start"],
+      "say": {
+        "partials": "This needs a point to evaluate at. Is that line above it?",
+        "gradient": "This puts the partial derivatives together. Are they worked out above it?",
+        "scale": "This scales a vector. Which line makes that vector?",
+        "subtract": "This subtracts a scaled vector. Is the scaling done above it?",
+        "check": "This compares the new point with the old. Is the new point made above it?"
+      },
+      "hint": "Ask of each line: what must already exist for it to make sense?",
+      "solution": "Gradient, scale by $\\eta$, subtract, check. The check is the one line software often skips, and the one that catches a bad $\\eta$.",
+      "next": "Look for the pattern"
+    },
+    {
+      "type": "step",
+      "id": "the-factor-per-step",
+      "title": "What each step multiplies by",
+      "why": "Gradient descent on a bowl hides a simple rule. It is the key to choosing $\\eta$ in the next lesson.",
+      "prompt": "With $\\eta = \\frac18$ on $f = x^2 + 2y^2$: $x$ went $2 \\to \\frac32 \\to \\frac98$ and $y$ went $1 \\to \\frac12 \\to \\frac14$. By what number is $x$ multiplied each step, and by what number is $y$?",
+      "answer": {
+        "fields": [
+          { "name": "p", "label": "$x$ is multiplied by", "key": "3/4" },
+          { "name": "q", "label": "$y$ is multiplied by", "key": "1/2" }
+        ],
+        "verify": "vec(1 - eta*entry(H, 1, 1), 1 - eta*entry(H, 2, 2))",
+        "slips": [
+          { "detect": "swapped" },
+          { "detect": "known", "when": { "p": "1/2" }, "say": "$y$ halves, but $x$ does not: $\\frac32 / 2 = \\frac34$." },
+          { "detect": "known", "when": { "p": "1/4" }, "say": "That is how much of $x$ each step removes. What is kept is $1 - \\frac14$." }
+        ]
+      },
+      "hints": [
+        "Divide each new value by the one before it.",
+        "$\\frac32 \\div 2$, then check $\\frac98 \\div \\frac32$ gives the same.",
+        "Or from the rule: $x_{k+1} = x_k - \\eta \\cdot 2x_k = (1 - 2\\eta)\\,x_k$."
+      ],
+      "check": { "say": "It should be $1 - 2\\eta$ for $x$ and $1 - 4\\eta$ for $y$: the update $x - \\eta \\cdot 2x$ and $y - \\eta \\cdot 4y$." },
+      "solution": "Each coordinate is multiplied by $1 - \\eta\\lambda$, where $\\lambda$ is its curvature (2 for $x$, 4 for $y$). The steeper direction shrinks faster. The next lesson asks what $\\eta$ makes that factor misbehave.",
+      "next": "Finish the lesson"
+    }
+  ],
+  "sideQuest": {
+    "title": "The same steps in numpy",
+    "body": "Only if you want to; nothing in the course needs it.\n\n```\nimport numpy as np\nH = np.array([[2.0, 0.0], [0.0, 4.0]])  # f = x^2 + 2y^2 = 1/2 x^T H x\nx = np.array([2.0, 1.0])\neta = 1 / 8\nfor k in range(5):\n    print(k, x, x @ H @ x / 2)  # iterate and f\n    x = x - eta * (H @ x)        # gradient of f is H x\n```"
+  }
+}

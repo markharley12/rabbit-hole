@@ -1,0 +1,220 @@
+{
+  "format": 1,
+  "id": "least-squares-by-walking-downhill",
+  "title": "Least squares by walking downhill",
+  "summary": "f(x) = ½‖Ax − b‖² is a bowl: its gradient is Aᵀ(Ax − b), zero gradient is the normal equations, and AᵀA sets the step size.",
+  "data": {
+    "A": [[1, 0], [1, 1], [0, 1]],
+    "b": [2, 1, 2],
+    "x0": [1, 0],
+    "eta": "1/4"
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "the-error-at-the-start",
+      "title": "The error at the start",
+      "define": [
+        { "term": "f(x) = ½‖Ax − b‖²", "meaning": "Half the squared error of the fit $Ax$ to the data $b$: the least-squares objective. The $\\frac12$ changes nothing about where the minimum is; it only makes the gradient tidier." }
+      ],
+      "why": "You have minimised $\\|Ax - b\\|^2$ by solving. Now the same bowl, walked down instead. First, how high up the walk starts.",
+      "prompt": "$A = \\begin{bmatrix}1&0\\\\1&1\\\\0&1\\end{bmatrix}$, $b = (2, 1, 2)$, and the start is $x_0 = (1, 0)$. Compute $f(x_0) = \\frac12\\|Ax_0 - b\\|^2$.",
+      "answer": {
+        "fields": [{ "name": "f", "label": "$f(x_0)$ =", "key": "5/2" }],
+        "verify": "sq(A*x0 - b)/2",
+        "slips": [
+          { "detect": "known", "when": { "f": "5" }, "say": "That is $\\|Ax_0 - b\\|^2$. This course's $f$ has a $\\frac12$ in front." },
+          { "detect": "known", "when": { "f": "9/2" }, "say": "That is $\\frac12\\|b\\|^2$, the error at $x = (0, 0)$. Start from $Ax_0$ with $x_0 = (1, 0)$." }
+        ]
+      },
+      "hints": [
+        "$Ax_0$ is the first column of $A$, because $x_0 = (1, 0)$.",
+        "$Ax_0 - b = (1, 1, 0) - (2, 1, 2)$.",
+        "$Ax_0 - b = (-1, 0, -2)$. Square, add, halve."
+      ],
+      "check": { "say": "It must be at least $f$ at the best fit. You will meet that value at the end of the lesson." },
+      "next": "Find the gradient"
+    },
+    {
+      "type": "step",
+      "id": "the-least-squares-gradient",
+      "review": true,
+      "title": "The gradient of ½‖Ax − b‖²",
+      "define": [
+        { "term": "∇f = Aᵀ(Ax − b)", "meaning": "The gradient of $\\frac12\\|Ax - b\\|^2$. With the residual $r = b - Ax$ from least squares, it is $-A^\\mathsf{T}r$: the residual hit with $A^\\mathsf{T}$, with a minus sign." }
+      ],
+      "why": "This is the gradient every least-squares model is trained with. The sign is the trap: $A^\\mathsf{T}(b - Ax)$ points uphill.",
+      "prompt": "$A = \\begin{bmatrix}1&0\\\\1&1\\\\0&1\\end{bmatrix}$, $b = (2, 1, 2)$, $x_0 = (1, 0)$. Compute $\\nabla f(x_0) = A^\\mathsf{T}(Ax_0 - b)$.",
+      "answer": {
+        "fields": [
+          { "name": "g1", "key": "-1" },
+          { "name": "g2", "key": "-2" }
+        ],
+        "verify": "tr(A)*(A*x0 - b)",
+        "slips": [
+          { "detect": "known", "when": { "g1": "1", "g2": "2" }, "say": "That is $A^\\mathsf{T}(b - Ax_0) = A^\\mathsf{T}r$, minus the gradient. The sign matters here: with it, a step would go uphill." },
+          { "detect": "known", "when": { "g1": "-2", "g2": "-4" }, "say": "That is the gradient of $\\|Ax - b\\|^2$ without the $\\frac12$, which is twice as big. This course's $f$ has the $\\frac12$." },
+          { "detect": "known", "when": { "g2": "0" }, "say": "Those are the first two entries of $Ax_0 - b$. Now multiply by $A^\\mathsf{T}$: entry $i$ is column $i$ of $A$ dotted with $Ax_0 - b$." }
+        ]
+      },
+      "hints": [
+        "First $Ax_0 - b$, then each entry of the answer is a column of $A$ dotted with it.",
+        "$Ax_0 - b = (-1, 0, -2)$. The columns of $A$ are $(1, 1, 0)$ and $(0, 1, 1)$.",
+        "$(1, 1, 0) \\cdot (-1, 0, -2)$ and $(0, 1, 1) \\cdot (-1, 0, -2)$."
+      ],
+      "check": { "say": "Both entries negative means increasing either unknown lowers the error. At $x_0 = (1, 0)$ the fit is too low everywhere, so that should be so." },
+      "solution": "$\\nabla f(x_0) = (-1, -2)$. Downhill, $-\\nabla f = (1, 2) = A^\\mathsf{T}r$: the residual, sent back through $A^\\mathsf{T}$, says how to change $x$.",
+      "next": "Take a step"
+    },
+    {
+      "type": "step",
+      "id": "one-least-squares-step",
+      "title": "One step towards the best fit",
+      "why": "The update is the same as on every bowl so far. Only the gradient came from data.",
+      "prompt": "With $\\eta = \\frac14$, step from $x_0 = (1, 0)$ using $\\nabla f(x_0) = (-1, -2)$. Find $x_1$.",
+      "widget": {
+        "name": "descent-path",
+        "params": { "H": [[2, 1], [1, 2]], "g": [3, 3], "c": 4.5, "start": [1, 0], "view": 1.5, "eta": 0.25, "stepByStep": true },
+        "caption": "The bowl of $\\frac12\\|Ax - b\\|^2$ over $x = (c, m)$. Work it out, then take a step."
+      },
+      "answer": {
+        "fields": [
+          { "name": "a", "key": "5/4" },
+          { "name": "c", "key": "1/2" }
+        ],
+        "verify": "x0 - eta*tr(A)*(A*x0 - b)",
+        "slips": [
+          { "detect": "known", "when": { "a": "3/4", "c": "-1/2" }, "say": "That adds $\\eta\\nabla f$. Subtract it: two minus signs make a plus here." },
+          { "detect": "known", "when": { "a": "2", "c": "2" }, "say": "That subtracts the whole gradient. Multiply it by $\\eta = \\frac14$ first." }
+        ]
+      },
+      "hints": [
+        "$x_1 = x_0 - \\eta\\,\\nabla f(x_0)$.",
+        "$\\eta\\,\\nabla f(x_0) = \\frac14(-1, -2)$, and subtracting a negative adds.",
+        "$(1 + \\frac14,\\; 0 + \\frac24)$."
+      ],
+      "check": { "say": "$f(x_1)$ should be below $f(x_0) = \\frac52$. That is the next screen." },
+      "next": "Check the error fell"
+    },
+    {
+      "type": "step",
+      "id": "the-error-fell",
+      "title": "The error fell",
+      "why": "A step that does not lower the error is a bad step. Check this one.",
+      "prompt": "With $A = \\begin{bmatrix}1&0\\\\1&1\\\\0&1\\end{bmatrix}$ and $b = (2, 1, 2)$, compute $f(x_1) = \\frac12\\|Ax_1 - b\\|^2$ for $x_1 = (\\frac54, \\frac12)$.",
+      "answer": {
+        "fields": [{ "name": "f", "label": "$f(x_1)$ =", "key": "27/16" }],
+        "verify": "sq(A*(x0 - eta*tr(A)*(A*x0 - b)) - b)/2",
+        "slips": [
+          { "detect": "known", "when": { "f": "27/8" }, "say": "That is $\\|Ax_1 - b\\|^2$. Halve it." }
+        ]
+      },
+      "hints": [
+        "$Ax_1 = (\\frac54,\\; \\frac54 + \\frac12,\\; \\frac12)$.",
+        "$Ax_1 - b = (-\\frac34, \\frac34, -\\frac32)$.",
+        "$\\frac12\\left(\\frac{9}{16} + \\frac{9}{16} + \\frac{36}{16}\\right)$."
+      ],
+      "check": { "say": "It should be below $\\frac52$, and above the best fit's error." },
+      "solution": "$\\frac{27}{16} \\approx 1.69$, down from 2.5. The next step gives $\\frac{405}{256} \\approx 1.58$, and so on towards the bottom.",
+      "next": "Where the walk ends"
+    },
+    {
+      "type": "order",
+      "id": "zero-gradient-is-the-normal-equations",
+      "review": true,
+      "title": "Where the walk stops",
+      "why": "Gradient descent stops moving where the gradient is zero. That turns out to be an old friend.",
+      "prompt": "Why the point where gradient descent on $f(x) = \\frac12\\|Ax - b\\|^2$ stops is the least-squares solution. Put the lines in order. The first is given.",
+      "items": [
+        { "id": "stops", "text": "The steps stop changing $x$ exactly when $\\eta\\,\\nabla f(x) = 0$." },
+        { "id": "zero", "text": "With $\\eta > 0$, that means $\\nabla f(x) = 0$." },
+        { "id": "formula", "text": "Write the gradient out: $A^\\mathsf{T}(Ax - b) = 0$." },
+        { "id": "expand", "text": "Multiply out the bracket: $A^\\mathsf{T}Ax - A^\\mathsf{T}b = 0$." },
+        { "id": "normal", "text": "Move $A^\\mathsf{T}b$ across: $A^\\mathsf{T}Ax = A^\\mathsf{T}b$, the normal equations." }
+      ],
+      "fixed": ["stops"],
+      "say": {
+        "zero": "This divides out $\\eta$. Is the line with $\\eta$ in it above?",
+        "formula": "This writes out a gradient that is zero. Is the line saying it is zero above?",
+        "expand": "This multiplies out a bracket. Which line has the bracket?",
+        "normal": "This moves a term across. Is the line with both terms on one side above?"
+      },
+      "hint": "Start from the step rule and follow it until it looks like something from least squares.",
+      "solution": "Zero gradient is the normal equations, and $A^\\mathsf{T}(Ax - b) = 0$ is your old \"the residual is perpendicular to every column\". Walking downhill and solving find the same point.",
+      "next": "Find where it ends"
+    },
+    {
+      "type": "step",
+      "id": "the-destination",
+      "review": true,
+      "title": "The destination",
+      "why": "Solve for the point the walk is heading to, so you can see the iterates closing in on it.",
+      "prompt": "Solve the normal equations $A^\\mathsf{T}Ax = A^\\mathsf{T}b$ for $A = \\begin{bmatrix}1&0\\\\1&1\\\\0&1\\end{bmatrix}$ and $b = (2, 1, 2)$.",
+      "answer": {
+        "fields": [
+          { "name": "a", "key": "1" },
+          { "name": "c", "key": "1" }
+        ],
+        "verify": "pinv(tr(A)*A)*tr(A)*b",
+        "slips": [
+          { "detect": "known", "when": { "a": "3/2", "c": "3/2" }, "say": "That divides $A^\\mathsf{T}b = (3, 3)$ by the diagonal, 2. $A^\\mathsf{T}A$ has off-diagonal 1s too: $2x + y = 3$ and $x + 2y = 3$." }
+        ]
+      },
+      "hints": [
+        "Build $A^\\mathsf{T}A$ (column · column) and $A^\\mathsf{T}b$ (column · $b$).",
+        "$A^\\mathsf{T}A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$ and $A^\\mathsf{T}b = (3, 3)$.",
+        "$2x + y = 3$ and $x + 2y = 3$: subtract them to see $x = y$."
+      ],
+      "check": { "say": "The residual $r = b - Ax$ should be perpendicular to both columns of $A$: $r \\cdot (1, 1, 0) = 0$ and $r \\cdot (0, 1, 1) = 0$." },
+      "solution": "$x^* = (1, 1)$, with $r = (1, -1, 1)$ and $f(x^*) = \\frac32$. The iterates $(1, 0)$, $(\\frac54, \\frac12)$, $(\\frac54, \\frac{11}{16})$, … head there.",
+      "next": "How big may the steps be?"
+    },
+    {
+      "type": "step",
+      "id": "the-step-limit-from-ata",
+      "review": true,
+      "title": "The step limit from AᵀA",
+      "define": [
+        { "term": "Hessian", "meaning": "The matrix of second partial derivatives of $f$: the curvature in every direction. For $f = \\frac12\\|Ax - b\\|^2$ it is $A^\\mathsf{T}A$, so this bowl is the $\\frac12 x^\\mathsf{T}Hx$ of the last lesson with $H = A^\\mathsf{T}A$." }
+      ],
+      "why": "The step-size rule from the bowls applies to least squares through $A^\\mathsf{T}A$, whose eigenvalues are the squared singular values of $A$.",
+      "prompt": "Gradient descent on $\\frac12\\|Ax - b\\|^2$ converges when $0 < \\eta < 2/\\lambda_{\\max}$, with $\\lambda_{\\max}$ the largest eigenvalue of $A^\\mathsf{T}A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}$. What is the limit $2/\\lambda_{\\max}$?",
+      "answer": {
+        "fields": [{ "name": "e", "label": "$\\eta$ below", "key": "2/3" }],
+        "verify": "2/entry(eigs(tr(A)*A), 1)",
+        "slips": [
+          { "detect": "known", "when": { "e": "2" }, "say": "That uses the smallest eigenvalue, 1. The largest one sets the limit." },
+          { "detect": "known", "when": { "e": "2/sqrt(3)" }, "say": "That divides by the largest singular value of $A$, $\\sqrt3$. The curvature is its square, the eigenvalue of $A^\\mathsf{T}A$: 3." },
+          { "detect": "known", "when": { "e": "1" }, "say": "That divides by the diagonal entry 2. Use the largest eigenvalue of $A^\\mathsf{T}A$." }
+        ]
+      },
+      "hints": [
+        "Find the eigenvalues of $A^\\mathsf{T}A$: trace and determinant.",
+        "Trace 4, determinant 3: $\\lambda^2 - 4\\lambda + 3 = 0$.",
+        "The eigenvalues are 3 and 1."
+      ],
+      "check": {
+        "say": "In the picture, slide $\\eta$ just below and just above your limit and watch the path.",
+        "widget": { "name": "descent-path", "params": { "H": [[2, 1], [1, 2]], "g": [3, 3], "c": 4.5, "start": [1, 0], "view": 1.5, "eta": 0.25, "maxSteps": 20, "revealLimit": true } }
+      },
+      "solution": "$\\eta < \\frac23$. Here $\\kappa = 3/1 = 3$, so the walk is quick; a nearly dependent pair of columns would make $\\lambda_{\\min}$ tiny and $\\kappa$ huge, and the walk would crawl.",
+      "next": "Why walk at all?"
+    },
+    {
+      "type": "text",
+      "id": "why-walk",
+      "title": "Why walk when you can solve?",
+      "body": "With a million unknowns, $A^\\mathsf{T}A$ has a million million entries and solving with it is out of reach. A gradient step needs only products with $A$ and $A^\\mathsf{T}$, and machine learning goes further: each step uses the gradient from a small random batch of rows (stochastic gradient descent).",
+      "widget": {
+        "name": "descent-path",
+        "params": { "H": [[2, 1], [1, 2]], "g": [3, 3], "c": 4.5, "start": [1, 0], "view": 1.5, "eta": 0.25, "maxSteps": 20 },
+        "caption": "Your least-squares walk, 20 steps, ending at $(1, 1)$, the fit you would get by solving."
+      },
+      "next": "Finish the course"
+    }
+  ],
+  "sideQuest": {
+    "title": "Walk to the least-squares fit, in numpy",
+    "body": "Only if you want to.\n\n```\nimport numpy as np\nA = np.array([[1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])\nb = np.array([2.0, 1.0, 2.0])\nx, eta = np.array([1.0, 0.0]), 1 / 4\nfor k in range(30):\n    x = x - eta * A.T @ (A @ x - b)\nprint(x)                              # close to [1, 1]\nprint(np.linalg.lstsq(A, b, rcond=None)[0])  # [1, 1]\n```"
+  }
+}

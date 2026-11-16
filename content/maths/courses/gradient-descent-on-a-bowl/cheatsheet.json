@@ -1,0 +1,128 @@
+{
+  "format": 1,
+  "sections": [
+    {
+      "title": "The landscape",
+      "items": [
+        {
+          "id": "partial-derivative",
+          "name": "Partial derivative",
+          "formula": "$\\partial f/\\partial x$: differentiate in $x$ with $y$ held fixed",
+          "when": "To get the slope in one direction. On $x^2 + 2y^2$ the two are $2x$ and $4y$.",
+          "lesson": "the-gradient-points-uphill"
+        },
+        {
+          "id": "gradient",
+          "name": "Gradient",
+          "formula": "$\\nabla f = (\\partial f/\\partial x,\\; \\partial f/\\partial y)$",
+          "when": "It points the way $f$ rises fastest, so $-\\nabla f$ is the way down.",
+          "lesson": "the-gradient-points-uphill"
+        },
+        {
+          "id": "flat-bottom",
+          "name": "Bottom of a bowl",
+          "formula": "$\\nabla f = 0$",
+          "when": "To find a minimum by algebra: set every partial derivative to 0 and solve.",
+          "lesson": "the-gradient-points-uphill"
+        }
+      ]
+    },
+    {
+      "title": "One step",
+      "items": [
+        {
+          "id": "update",
+          "name": "Gradient descent step",
+          "formula": "$x_{k+1} = x_k - \\eta\\,\\nabla f(x_k)$",
+          "when": "Every step, with the gradient at the point you are at now. Subtract; never add.",
+          "lesson": "one-step-downhill"
+        },
+        {
+          "id": "check-f-falls",
+          "name": "Check the step",
+          "formula": "$f(x_{k+1}) < f(x_k)$",
+          "when": "After every step. If $f$ went up, $\\eta$ is too big or the sign is wrong.",
+          "lesson": "one-step-downhill"
+        }
+      ]
+    },
+    {
+      "title": "Step size",
+      "items": [
+        {
+          "id": "factor",
+          "name": "Factor per step",
+          "formula": "$x_{k+1} = (1 - \\eta\\lambda)\\,x_k$ on $f = \\frac12\\lambda x^2$",
+          "when": "To predict a run of steps in one direction: negative factor bounces, size above 1 blows up.",
+          "lesson": "how-big-a-step"
+        },
+        {
+          "id": "limit",
+          "name": "When it converges",
+          "formula": "$0 < \\eta < 2/\\lambda_{\\max}$",
+          "when": "To choose $\\eta$: the largest eigenvalue (the steepest direction) sets the limit for every direction.",
+          "lesson": "how-big-a-step"
+        },
+        {
+          "id": "f-factor",
+          "name": "How f shrinks",
+          "formula": "$f(x_{k+1}) = (1 - \\eta\\lambda)^2 f(x_k)$ on $f = \\frac12\\lambda x^2$",
+          "when": "To see that $f$ falls every step even while $x$ bounces, as long as $|1 - \\eta\\lambda| < 1$.",
+          "lesson": "how-big-a-step"
+        }
+      ]
+    },
+    {
+      "title": "Bowls in the plane",
+      "items": [
+        {
+          "id": "quadratic-gradient",
+          "name": "Gradient of a bowl",
+          "formula": "$\\nabla\\left(\\tfrac12 x^\\mathsf{T}Hx\\right) = Hx$",
+          "when": "For any bowl given by a symmetric $H$. Its eigenvectors are the steep and shallow directions.",
+          "lesson": "two-directions-at-once"
+        },
+        {
+          "id": "condition-number",
+          "name": "Condition number",
+          "formula": "$\\kappa = \\lambda_{\\max}/\\lambda_{\\min}$",
+          "when": "To predict how slow descent will be. Large $\\kappa$ means a narrow valley and a zig-zag.",
+          "lesson": "two-directions-at-once"
+        },
+        {
+          "id": "best-step",
+          "name": "Best single step",
+          "formula": "$\\eta^* = 2/(\\lambda_{\\max} + \\lambda_{\\min})$, rate $(\\kappa - 1)/(\\kappa + 1)$",
+          "when": "When one fixed $\\eta$ must serve both directions: both factors then have the same size.",
+          "lesson": "two-directions-at-once"
+        }
+      ]
+    },
+    {
+      "title": "Least squares",
+      "items": [
+        {
+          "id": "ls-gradient",
+          "name": "Least-squares gradient",
+          "formula": "$\\nabla\\tfrac12\\|Ax - b\\|^2 = A^\\mathsf{T}(Ax - b)$",
+          "when": "To train a least-squares fit. $A^\\mathsf{T}(b - Ax)$ is minus this: it points uphill.",
+          "lesson": "least-squares-by-walking-downhill"
+        },
+        {
+          "id": "ls-normal",
+          "name": "Where the walk stops",
+          "formula": "$A^\\mathsf{T}Ax = A^\\mathsf{T}b$",
+          "when": "Zero gradient is the normal equations: walking down and solving reach the same point.",
+          "lesson": "least-squares-by-walking-downhill"
+        },
+        {
+          "id": "ls-hessian",
+          "name": "Least-squares Hessian",
+          "formula": "$H = A^\\mathsf{T}A$, eigenvalues $\\sigma_i^2$",
+          "when": "To choose $\\eta$ for least squares: $\\eta < 2/\\sigma_1^2$.",
+          "lesson": "least-squares-by-walking-downhill"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "format": 1,
+  "id": "gradient-descent-on-a-bowl",
+  "nodeId": "65Kxx",
+  "title": "Gradient descent on a bowl",
+  "summary": "Gradient descent by hand, starting from least squares: the gradient, one step downhill, how the step size (learning rate) decides converge or diverge, the eigenvalues and condition number of a bowl, and least squares solved by walking downhill.",
+  "written": "Written by Claude Code (Opus 5.5) on 16 Nov 2026, after the least-squares and PCA courses and docs/seed-context.md. Every example designed in sympy first so each hand computation is an integer or a simple fraction. Every answer key is re-derived with sympy by tools/validate_courses.py.",
+  "sources": [
+    {
+      "name": "Mark's notes and chats (seed context)",
+      "note": "docs/seed-context.md: least squares and the normal equations already his, optimisation listed as a gap, he compares guesses before optimising, and his slips (signs, a factor not applied to every term)."
+    },
+    {
+      "name": "Gradient descent (Wikipedia)",
+      "url": "https://en.wikipedia.org/wiki/Gradient_descent",
+      "note": "The update x_{n+1} = x_n − η∇f(x_n) with η called the step size or learning rate; the negative gradient as the direction of fastest decrease; the gradient of ‖Ax − b‖² as 2Aᵀ(Ax − b) (so Aᵀ(Ax − b) for this course's ½‖Ax − b‖²); iteration counts growing with the condition number of AᵀA and the zig-zag path when it is large."
+    },
+    {
+      "name": "Gabriel Goh, Why Momentum Really Works (Distill, 2017)",
+      "url": "https://distill.pub/2017/momentum/",
+      "note": "The eigenvalue view of gradient descent on ½wᵀAw − bᵀw: each eigen-component multiplied by (1 − αλᵢ) per step, convergence exactly when 0 < αλᵢ < 2 for every i, the best fixed step 2/(λ_min + λ_max) with rate (κ − 1)/(κ + 1), and κ = λ_max/λ_min. This course writes η for Goh's α."
+    },
+    {
+      "name": "Boyd and Vandenberghe, Convex Optimization (Cambridge, 2004), section 9.3",
+      "url": "https://www.seas.ucla.edu/~vandenbe/cvxbook.html",
+      "note": "Algorithm 9.3 (step along −∇f, then update) and the example f = ½(x₁² + γx₂²), whose Hessian has eigenvalues 1 and γ and whose sublevel sets have condition number max(γ, 1/γ). Read in the free PDF linked from the book's page."
+    },
+    {
+      "name": "Gilbert Strang, MIT 18.065 (Spring 2018), Lecture 22: Gradient Descent: Downhill to a Minimum",
+      "url": "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/resources/lecture-22-gradient-descent-downhill-to-a-minimum/",
+      "note": "From the lecture page's summary: the step x − s∇F, and the example F = ½(x² + by²), whose path zig-zags towards (0, 0) when b is small."
+    },
+    {
+      "name": "MIT 18.065 (Spring 2018), Lecture 25: Stochastic Gradient Descent (Suvrit Sra)",
+      "url": "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/resources/lecture-25-stochastic-gradient-descent/",
+      "note": "From the lecture page's summary: stochastic gradient descent uses a random minibatch per step instead of all the data, and is the main method for training large machine-learning models. Used only for the last screen's two sentences."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "the-gradient-points-uphill",
+      "title": "A landscape and its gradient",
+      "summary": "Heights on x² + 2y², both partial derivatives, and the gradient pointing uphill."
+    },
+    {
+      "id": "one-step-downhill",
+      "title": "One step downhill",
+      "summary": "x_{k+1} = x_k − η∇f(x_k) by hand, twice, with f falling each time."
+    },
+    {
+      "id": "how-big-a-step",
+      "title": "How big a step",
+      "summary": "On ½λx² each step multiplies x by 1 − ηλ, so it converges exactly when 0 < η < 2/λ."
+    },
+    {
+      "id": "two-directions-at-once",
+      "title": "Two directions at once",
+      "summary": "The largest eigenvalue caps η, the smallest sets the crawl, and κ = λmax/λmin measures the zig-zag."
+    },
+    {
+      "id": "least-squares-by-walking-downhill",
+      "title": "Least squares by walking downhill",
+      "summary": "∇½‖Ax − b‖² = Aᵀ(Ax − b): zero gradient is the normal equations, and AᵀA sets the step size."
+    }
+  ]
+}

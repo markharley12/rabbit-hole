@@ -1,0 +1,178 @@
+{
+  "format": 1,
+  "id": "the-gradient-points-uphill",
+  "title": "A landscape and its gradient",
+  "summary": "Read f(x, y) as a height, take both partial derivatives, and see that the gradient points uphill.",
+  "data": {
+    "H": [[2, 0], [0, 4]],
+    "x0": [2, 1],
+    "g": [2, -4]
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "heights-at-three-points",
+      "title": "Three heights",
+      "define": [
+        { "term": "a function of two variables", "meaning": "$f(x, y)$ gives one number for each point $(x, y)$ of the plane. Read it as a height: the plane becomes a landscape." }
+      ],
+      "why": "Least squares asked for the lowest point of $\\|Ax - b\\|^2$. This course walks downhill to such a point instead of solving for it. First, a landscape to walk on.",
+      "prompt": "$f(x, y) = x^2 + 2y^2$, a bowl with its bottom at $(0, 0)$. Find its height at $(2, 1)$, at $(1, 1)$ and at $(2, 0)$.",
+      "answer": {
+        "fields": [
+          { "name": "a", "label": "$f(2, 1)$ =", "key": "6" },
+          { "name": "b", "label": "$f(1, 1)$ =", "key": "3" },
+          { "name": "c", "label": "$f(2, 0)$ =", "key": "4" }
+        ],
+        "verify": "vec(dot(vec(2, 1), H*vec(2, 1)), dot(vec(1, 1), H*vec(1, 1)), dot(vec(2, 0), H*vec(2, 0)))/2",
+        "slips": [
+          { "detect": "known", "when": { "a": "5" }, "say": "That is $2^2 + 1$: the 2 multiplies $y^2$ as well, so it is $4 + 2 \\cdot 1$." },
+          { "detect": "known", "when": { "a": "8" }, "say": "That squares $2y$. In $2y^2$ only $y$ is squared: $2 \\cdot 1^2 = 2$." }
+        ]
+      },
+      "hints": [
+        "Put the numbers in: $x^2$, then twice $y^2$, then add.",
+        "At $(2, 1)$: $x^2 = 4$ and $y^2 = 1$.",
+        "$4 + 2 \\cdot 1$, $1 + 2 \\cdot 1$ and $4 + 2 \\cdot 0$."
+      ],
+      "check": {
+        "say": "$(1, 1)$ is nearer the bottom than $(2, 1)$, so its height should be lower. The picture is the bowl from above, each ring one height like a contour map: drag the knob to each point and read $f$ there.",
+        "widget": { "name": "descent-path", "params": { "H": [[2, 0], [0, 4]], "start": [2, 1], "view": 3, "eta": 0, "stepByStep": true } }
+      },
+      "solution": "Lowest of the three is $(1, 1)$. Moving one unit in $x$ from $(2, 1)$ dropped the height by 3; the next steps find the best way to move.",
+      "next": "Slope in each direction"
+    },
+    {
+      "type": "step",
+      "id": "partial-derivatives",
+      "title": "Slope along x and along y",
+      "define": [
+        { "term": "partial derivative", "meaning": "$\\partial f/\\partial x$: differentiate $f$ in $x$ and treat $y$ as a fixed number. It is the slope of the landscape walking in the $x$ direction. $\\partial f/\\partial y$ likewise." }
+      ],
+      "why": "The slope in each direction says which way is down. Two numbers cover the plane.",
+      "prompt": "For $f(x, y) = x^2 + 2y^2$, write $\\partial f/\\partial x$ and $\\partial f/\\partial y$.",
+      "answer": {
+        "fields": [
+          { "name": "fx", "label": "$\\partial f/\\partial x$ =", "key": "2x" },
+          { "name": "fy", "label": "$\\partial f/\\partial y$ =", "key": "4y" }
+        ],
+        "vars": ["x", "y"],
+        "verify": "H*vec(x, y)",
+        "slips": [
+          { "detect": "known", "when": { "fx": "x" }, "say": "$x^2$ differentiates to $2x$: the power comes down in front." },
+          { "detect": "known", "when": { "fy": "2y" }, "say": "The 2 in front of $y^2$ stays: $2 \\cdot 2y$." },
+          { "detect": "known", "when": { "fx": "2x + 4y" }, "say": "Treat $y$ as a fixed number when you differentiate in $x$: $2y^2$ is then a constant, and its derivative is 0." }
+        ]
+      },
+      "hints": [
+        "For $\\partial f/\\partial x$, the term $2y^2$ is a constant: it drops out.",
+        "What is left to differentiate in $x$ is $x^2$. In $y$, it is $2y^2$.",
+        "$\\frac{d}{dx}x^2$ and $2 \\cdot \\frac{d}{dy}y^2$."
+      ],
+      "check": { "say": "At the bottom $(0, 0)$ both should be 0: the floor is flat there." },
+      "next": "Put them together"
+    },
+    {
+      "type": "step",
+      "id": "gradient-at-a-point",
+      "review": true,
+      "title": "The gradient at (2, 1)",
+      "define": [
+        { "term": "gradient", "meaning": "$\\nabla f = (\\partial f/\\partial x,\\; \\partial f/\\partial y)$: both partial derivatives as one vector. At each point it is a different vector." }
+      ],
+      "why": "The gradient is the one object gradient descent needs: everything else is arithmetic with it.",
+      "prompt": "For $f(x, y) = x^2 + 2y^2$, find $\\nabla f$ at the point $(2, 1)$.",
+      "answer": {
+        "fields": [
+          { "name": "g1", "key": "4" },
+          { "name": "g2", "key": "4" }
+        ],
+        "verify": "H*x0",
+        "slips": [
+          { "detect": "known", "when": { "g1": "2", "g2": "2" }, "say": "That differentiates $x^2$ as $x$ and $2y^2$ as $2y$. The power comes down: $2x$ and $4y$." },
+          { "detect": "known", "when": { "g2": "2" }, "say": "The $x$ part is right. For $y$: $2y^2$ differentiates to $4y$, which is 4 at $y = 1$." }
+        ]
+      },
+      "hints": [
+        "Put $x = 2$ and $y = 1$ into the two partial derivatives.",
+        "They are $2x$ and $4y$.",
+        "$2 \\cdot 2$ and $4 \\cdot 1$."
+      ],
+      "check": { "say": "Both entries should be positive: from $(2, 1)$, increasing $x$ or $y$ moves away from the bottom, so uphill." },
+      "solution": "$\\nabla f(2, 1) = (4, 4)$. Equal slopes in $x$ and $y$ here, though $(2, 1)$ is twice as far out in $x$: the bowl is steeper in $y$.",
+      "next": "Which way is down?"
+    },
+    {
+      "type": "choice",
+      "id": "which-way-is-down",
+      "review": true,
+      "title": "Which way is fastest down?",
+      "why": "Gradient descent moves along $-\\nabla f$. This asks why that, and not the straight line to the bottom.",
+      "prompt": "On $f(x, y) = x^2 + 2y^2$, at the point $(2, 1)$, $\\nabla f = (4, 4)$. In which direction does $f$ fall fastest?",
+      "widget": {
+        "name": "descent-path",
+        "params": { "H": [[2, 0], [0, 4]], "start": [2, 1], "view": 3, "eta": 0.125, "maxSteps": 1, "stepByStep": true },
+        "caption": "Answer first. Then take a step: it moves along $-\\nabla f$."
+      },
+      "options": [
+        { "id": "minus-gradient", "text": "Along $(-1, -1)$: the direction of $-\\nabla f$.", "correct": true, "say": "Right. $\\nabla f$ points the way $f$ rises fastest, so $-\\nabla f = (-4, -4)$ points the way it falls fastest. It crosses the ring through $(2, 1)$ at a right angle." },
+        { "id": "at-the-bottom", "text": "Along $(-2, -1)$: straight at the bottom $(0, 0)$.", "correct": false, "say": "Not this one. The bottom is not where the slope is steepest. The bowl is steeper in $y$, so the fastest way down leans more towards $y$ than the line to $(0, 0)$ does. Steepest descent and \"towards the minimum\" agree only when the rings are circles." },
+        { "id": "plus-gradient", "text": "Along $(1, 1)$: the direction of $\\nabla f$.", "correct": false, "say": "Not this one. $\\nabla f$ points uphill: both slopes are positive, so increasing $x$ and $y$ raises $f$. Down is the opposite way." },
+        { "id": "along-the-ring", "text": "Along $(-1, 1)$: along the ring through $(2, 1)$.", "correct": false, "say": "Not this one. Along the ring $f$ stays 6: it is the direction of no change, at right angles to $\\nabla f$, since $(4, 4) \\cdot (-1, 1) = 0$." }
+      ],
+      "hint": "The gradient is made of the slopes in each direction. Which way do those slopes say is up?",
+      "solution": "Down fastest is $-\\nabla f$. It does not aim at the bottom, which is why gradient descent can take a curved or zig-zag path, as later lessons show.",
+      "next": "Test the uphill claim"
+    },
+    {
+      "type": "step",
+      "id": "a-step-along-the-gradient",
+      "title": "A step along +∇f",
+      "why": "A claim worth testing with numbers: move along $\\nabla f$ and see whether $f$ really rises.",
+      "prompt": "From $(2, 1)$ on $f(x, y) = x^2 + 2y^2$, move by one eighth of $\\nabla f = (4, 4)$, to $(2, 1) + \\frac18(4, 4)$. What is $f$ there?",
+      "answer": {
+        "fields": [{ "name": "f", "label": "$f$ =", "key": "43/4" }],
+        "verify": "dot(x0 + H*x0/8, H*(x0 + H*x0/8))/2",
+        "slips": [
+          { "detect": "known", "when": { "f": "11/4" }, "say": "That is $f$ at $(2, 1) - \\frac18(4, 4)$, a step the other way. This step adds: the point is $(\\frac52, \\frac32)$." },
+          { "detect": "known", "when": { "f": "17/2" }, "say": "$2y^2$ at $y = \\frac32$ is $2 \\cdot \\frac94 = \\frac92$, not $\\frac94$." }
+        ]
+      },
+      "hints": [
+        "First the new point: one eighth of $(4, 4)$ is half a unit in each direction.",
+        "The point is $(\\frac52, \\frac32)$. Square each coordinate.",
+        "$\\frac{25}{4} + 2 \\cdot \\frac94$."
+      ],
+      "check": { "say": "It should be more than $f(2, 1) = 6$, if $\\nabla f$ really points uphill." },
+      "solution": "$\\frac{43}{4} = 10.75$, up from 6. Along $\\nabla f$ the landscape climbs; the next lesson steps the other way.",
+      "next": "Find where the floor is flat"
+    },
+    {
+      "type": "step",
+      "id": "where-the-gradient-is-zero",
+      "review": true,
+      "title": "Where the gradient is zero",
+      "why": "At the bottom of a bowl no direction is downhill, so the gradient is zero. That is how a minimum is found by algebra; gradient descent finds it by walking.",
+      "prompt": "$f(x, y) = (x - 1)^2 + 2(y + 1)^2$. At which point is $\\nabla f = (0, 0)$?",
+      "answer": {
+        "fields": [
+          { "name": "x", "label": "$x$ =", "key": "1" },
+          { "name": "y", "label": "$y$ =", "key": "-1" }
+        ],
+        "verify": "pinv(H)*g",
+        "slips": [
+          { "detect": "sign" },
+          { "detect": "known", "when": { "y": "1" }, "say": "$4(y + 1) = 0$ needs $y + 1 = 0$, so $y = -1$." }
+        ]
+      },
+      "hints": [
+        "Take $\\partial f/\\partial x$ and $\\partial f/\\partial y$, then set each to 0.",
+        "They are $2(x - 1)$ and $4(y + 1)$.",
+        "$2(x - 1) = 0$ and $4(y + 1) = 0$."
+      ],
+      "check": { "say": "Put your point into $f$: it should give 0, and no point can give less, since $f$ is a sum of squares." },
+      "solution": "$(1, -1)$: the same bowl as before, moved so its bottom sits there. Expanded, $f = x^2 - 2x + 2y^2 + 4y + 3$, and the bottom is where the linear terms balance the slope.",
+      "next": "Finish the lesson"
+    }
+  ]
+}
