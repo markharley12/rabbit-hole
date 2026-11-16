@@ -83,6 +83,22 @@ def context(**changes):
 # pure functions
 # --------------------------------------------------------------------------
 
+class SourceUrls(unittest.TestCase):
+    """The first real brief (16 Nov 2026) listed a LibreTexts page whose URL has
+    a bracketed part; the parser cut it at "(" and the rest became the note."""
+
+    LIBRETEXTS = ("https://math.libretexts.org/Bookshelves/Linear_Algebra/Interactive_Linear_Algebra_"
+                  "(Margalit_and_Rabinoff)/05%3A_Eigenvalues_and_Eigenvectors/5.02%3A_The_Characteristic_Polynomial")
+
+    def test_a_bracketed_part_stays_in_the_url(self):
+        found = rs.URL_IN.search("- %s — the order of ideas (and the checks)." % self.LIBRETEXTS)
+        self.assertEqual(found.group(0), self.LIBRETEXTS)
+
+    def test_a_markdown_link_still_ends_at_its_bracket(self):
+        self.assertEqual(rs.URL_IN.search("[page](https://example.org/a) (opened)").group(0), "https://example.org/a")
+        self.assertEqual(rs.URL_IN.search("[w](%s)" % self.LIBRETEXTS).group(0), self.LIBRETEXTS)
+
+
 class RefusedCommands(unittest.TestCase):
     def test_refused_in_every_form(self):
         for command in ["sudo ls", "ls && sudo rm x", "cd /tmp; sudo -i", "git push", "git push origin main",

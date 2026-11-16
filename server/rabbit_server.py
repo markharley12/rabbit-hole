@@ -854,7 +854,7 @@ class Library:
 # the session the exact shape.
 
 LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.*\S)\s*$")
-URL_IN = re.compile(r"https?://[^\s<>()\[\]]+")
+URL_IN = re.compile(r"https?://(?:[^\s<>()\[\]]|\([^\s<>()\[\]]*\))+")  # a bracketed part stays in: a LibreTexts URL was cut at "(" on 16 Nov
 SECTIONS = (("missing", ("missing widget",)), ("who", ("who",)), ("lessons", ("lesson",)),
             ("examples", ("example",)), ("widgets", ("widget",)), ("sources", ("source",)))
 
