@@ -1455,6 +1455,88 @@ a {
   }
 }
 
+/* So far */
+
+.sofar {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 4px 16px 24px;
+}
+.sofar-group h3 {
+  margin: 20px 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sofar-earlier {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.sofar-earlier > summary {
+  padding: 12px 0;
+  min-height: 24px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sofar-count {
+  margin-left: 6px;
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.sofar-entries,
+.sofar-answer {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sofar-entry {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.sofar-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.sofar-prompt {
+  font-size: 14px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.sofar-prompt p {
+  margin: 4px 0;
+}
+.sofar-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 17px;
+}
+.sofar-value {
+  /* Long maths scrolls inside its own line; the hidden MathML must not add a vertical scrollbar. */
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.sofar-shown {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
 /* Cheat sheet and reading */
 
 .cheat {

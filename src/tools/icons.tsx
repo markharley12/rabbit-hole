@@ -95,3 +95,10 @@ export const BookIcon = () => (
     <path d="M9 8h6" />
   </Icon>
 )
+
+export const SoFarIcon = () => (
+  <Icon>
+    <path d="M3 5h12M3 12h8M3 19h10" />
+    <path d="M15 16l2.5 2.5L22 13" />
+  </Icon>
+)

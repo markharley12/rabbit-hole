@@ -2,12 +2,14 @@ import { useMemo, useState } from 'react'
 import { ReadingList } from '../components/ReadingList.tsx'
 import type { ChatStore, ChatTarget } from '../ai/chat-store.ts'
 import { Calculator } from '../lesson/Calculator.tsx'
-import type { Course } from '../lesson/types.ts'
+import type { Course, Lesson } from '../lesson/types.ts'
 import type { ReadingNode } from '../resources.ts'
 import { Chat, Opened } from './Chat.tsx'
 import { CheatSheet } from './CheatSheet.tsx'
-import { AskIcon, BookIcon, CalculatorIcon, PadIcon, SheetIcon } from './icons.tsx'
+import { AskIcon, BookIcon, CalculatorIcon, PadIcon, SheetIcon, SoFarIcon } from './icons.tsx'
 import { ScratchPad } from './ScratchPad.tsx'
+import { SoFar } from './SoFar.tsx'
+import { hasEarlierSteps } from './so-far.ts'
 import type { Tool } from './ToolDock.tsx'
 import type { CalcLine } from './calculator.ts'
 
@@ -24,6 +26,9 @@ export interface AskOption {
 interface Options {
   course: Course
   lessonId: string
+  /** The lesson's file and the screen he is on, for "So far"; without them there is no such tool. */
+  lesson?: Lesson
+  at?: number
   /** Where the course's files are served, ending in a slash. */
   base: string
   /** The course's node and its ancestors that have reading, nearest first; none means no Reading tool. */
@@ -42,7 +47,7 @@ interface Options {
  * one (the published index says so), Reading only where the course's node or
  * an ancestor has links, Ask only when the tutor's server answered.
  */
-export function useLessonTools({ course, lessonId, base, reading, ask, onOpen }: Options): Tool[] {
+export function useLessonTools({ course, lessonId, lesson, at = 0, base, reading, ask, onOpen }: Options): Tool[] {
   // One tape per lesson: a new lesson starts with an empty one.
   const [tape, setTape] = useState<{ lessonId: string; lines: CalcLine[] }>({ lessonId, lines: [] })
   const lines = tape.lessonId === lessonId ? tape.lines : NO_LINES
@@ -66,6 +71,14 @@ export function useLessonTools({ course, lessonId, base, reading, ask, onOpen }:
         render: () => <Calculator history={lines} onHistory={(next) => setTape({ lessonId, lines: next })} />,
       },
     ]
+    if (lesson && hasEarlierSteps(course.lessons.findIndex((l) => l.id === lessonId), lesson.blocks, at)) {
+      tools.push({
+        id: 'so-far',
+        label: 'So far',
+        icon: <SoFarIcon />,
+        render: () => <SoFar course={course} lesson={lesson} at={at} base={base} />,
+      })
+    }
     if (hasSheet) {
       tools.push({
         id: 'cheatsheet',
@@ -104,5 +117,5 @@ export function useLessonTools({ course, lessonId, base, reading, ask, onOpen }:
         </>
       ),
     }))
-  }, [courseId, lessonId, base, hasSheet, lines, readingNodes, readingBase, ask, onOpen])
+  }, [course, courseId, lessonId, lesson, at, base, hasSheet, lines, readingNodes, readingBase, ask, onOpen])
 }

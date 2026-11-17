@@ -54,6 +54,10 @@ marking, no Capacitor yet. What is where:
   `scratch-pad.ts`): one finger draws, two pan and pinch; pen, eraser (whole strokes), undo, redo,
   clear (tap twice), fit; saved per lesson in `rabbit-hole:scratch:<course>:<lesson>`, capped.
   **Calculator** keeps a tape of the last 20 lines (`calculator.ts`); tap a result to reuse it.
+  **So far** (`SoFar.tsx`, pure `so-far.ts`): the solved or revealed `step`s before the current screen, this
+  lesson first then earlier lessons nearest first (collapsed), each with its prompt and the answer key typeset
+  (`keyToTex`); earlier lesson files are fetched on first open; reads progress, writes nothing; offered once a step
+  lies before the screen. Asked for by Mark on 16 Nov: he kept going back to read constants from earlier stages.
   **Number keyboard**: a box gets `inputMode="decimal"` only when the answer has no `vars` and
   that field's key is a plain number (`src/lesson/input-mode.ts`); an "abc"/"123" switch under the
   boxes changes every box's keyboard without clearing anything.

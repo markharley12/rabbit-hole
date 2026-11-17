@@ -126,7 +126,7 @@ export default function LessonView({ course, lessonId, base, onClose, onOpenLess
       },
     }
   }, [available, lesson, shownBlock, at, course, nodeName, chats])
-  const tools = useLessonTools({ course, lessonId, base, reading: reading && { nodes: readingHere, base: reading.base }, ask, onOpen: recheck })
+  const tools = useLessonTools({ course, lessonId, lesson: lesson ?? undefined, at, base, reading: reading && { nodes: readingHere, base: reading.base }, ask, onOpen: recheck })
 
   const header = (subtitle: string) => (
     <header className="lesson-bar">
