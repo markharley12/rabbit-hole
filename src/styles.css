@@ -1527,7 +1527,10 @@ a {
 }
 .sofar-value {
   /* Long maths scrolls inside its own line; the hidden MathML must not add a vertical scrollbar. */
+  display: inline-block;
   max-width: 100%;
+  /* Room above and below: a column of fractions was cut off at the bottom (17 Nov). */
+  padding: 6px 0;
   overflow-x: auto;
   overflow-y: hidden;
 }

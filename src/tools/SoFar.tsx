@@ -54,7 +54,7 @@ export function SoFar({ course, lesson, at, base }: Props) {
 
   return (
     <div className="sofar">
-      {groups.map((group) =>
+      {groups.map((group, index) =>
         group.current ? (
           <section className="sofar-group" key={group.lessonId} aria-label="This lesson">
             {headed && <h3>This lesson</h3>}
@@ -65,7 +65,7 @@ export function SoFar({ course, lesson, at, base }: Props) {
             </ul>
           </section>
         ) : (
-          <details className="sofar-group sofar-earlier" key={group.lessonId}>
+          <details className="sofar-group sofar-earlier" key={group.lessonId} open={index === 0 || undefined}>
             <summary>
               {title(group.lessonId)} <span className="sofar-count">{group.entries.length}</span>
             </summary>

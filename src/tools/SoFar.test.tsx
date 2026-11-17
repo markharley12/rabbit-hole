@@ -120,6 +120,16 @@ describe('So far', () => {
     expect(panel().textContent).not.toContain('Later question')
   })
 
+  it('opens the nearest earlier lesson when this lesson has nothing yet', async () => {
+    seed(finished([]))
+    await mount('two')
+    open()
+    await flush()
+    const group = panel().querySelector('details.sofar-earlier') as HTMLDetailsElement
+    expect(group.open).toBe(true)
+    expect(group.textContent).toContain('Old question')
+  })
+
   it('includes a revealed step and says so', async () => {
     seed(finished([], ['c']))
     await mount('two')
