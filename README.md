@@ -11,6 +11,9 @@ drag. Claude Code writes the courses, either as files you commit or from inside 
 <td align="center" valign="top"><img src="docs/screenshots/lesson-widget.png" width="200" alt="A lesson screen"><br><sub>A lesson screen</sub></td>
 </tr></table>
 
+**Try it without installing anything:** the no-AI version is published at
+https://markharley12.github.io/rabbit-hole/ (once the repository is public and Pages is enabled).
+
 It is a personal project built around its author's setup (Claude Code on a PC, the phone reaching it over
 Tailscale), so it is not turnkey for everyone, but everything below runs on any Linux or macOS machine.
 The plan is in [docs/PLAN.md](docs/PLAN.md), the roadmap in [docs/ROADMAP.md](docs/ROADMAP.md).
@@ -173,6 +176,20 @@ npm run server
 ```
 
 Without the server the app is unchanged and the Ask and New course buttons are simply not there.
+
+## Without the AI server
+
+The AI server is optional. The app asks `./api/state` on load; if nothing answers, the **Ask** tool and **New course**
+disappear and everything else works unchanged: the map, lessons, typed-answer checking, widgets, scratch pad,
+calculator, So far, cheat sheets, reading links, review and Where I am. Any static host will do for this mode:
+`npm run build`, then serve the `dist` folder. The build uses relative paths, so it also works under a sub-path.
+
+Note that `npm run dev` proxies `/api` to port 8791, so if the server happens to be running the dev page will show
+the AI features too.
+
+**GitHub Pages.** [.github/workflows/pages.yml](.github/workflows/pages.yml) runs the checks, builds, and publishes the
+no-AI app on every push to `main`, at `https://<your-github-name>.github.io/<repo-name>/`. Once, in the repository's
+Settings, Pages, set Source to **GitHub Actions**. Progress and notes are stored in each visitor's own browser.
 
 ## Check everything
 
