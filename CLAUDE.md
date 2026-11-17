@@ -124,9 +124,13 @@ The planning docs, still the reference for later phases. **Read in this order:**
 
 ## About the learner (the parts that matter here)
 
-- Learning the maths behind CS and AI, being tested to find real gaps.
-- Works **on paper, photographs the pages**, and wants those marked.
+- Learning the maths behind CS and AI, being tested to find real gaps (linear algebra, SVD/PCA,
+  probability, optimisation).
+- Works **on paper, photographs the pages**, and wants those marked. When stuck, wants a
+  visualisation without having to ask for it.
 - Responds to precise language. Don't pad.
+
+(More personal context for sessions on the author's own machine lives in `CLAUDE.local.md`, which is gitignored.)
 
 ## Rules
 

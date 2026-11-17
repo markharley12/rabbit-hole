@@ -1,45 +1,186 @@
 # rabbit-hole
 
-An open-source, AI-native cousin of Brilliant.org, built around a **map**: see all of
-mathematics on one screen, zoom into a subject, see what it depends on and how deep it goes,
-and have Claude Code generate the course for any node you want to learn. Mobile first.
+A mobile-first learning app built around a **map**. All of mathematics sits on one screen as zoomable
+circles; you tap into a subject, see what is inside it, and work through short courses written to a strict
+format: one small step at a time, typed answers checked on the phone, hints before answers, pictures you can
+drag. Claude Code writes the courses, either as files you commit or from inside the app by talking to it.
 
-Status: **the map and one course.** All of mathematics (the MSC2020 classification: 517
-sections, 4,810 topics) as zoomable circles, sized by topic count, one colour per branch. Tap
-a circle to zoom in and read what is in it. One node, Basic linear algebra, has a course:
-*Least squares to the pseudo-inverse*, step by step, with typed answers checked on the phone
-and interactive pictures. The plan is in [docs/PLAN.md](docs/PLAN.md).
+<table><tr>
+<td align="center" valign="top"><img src="docs/screenshots/map-home.png" width="200" alt="The whole of maths"><br><sub>The whole of maths</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/map-zoomed.png" width="200" alt="Zoomed in on a section"><br><sub>Zoomed in on a section</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/lesson-widget.png" width="200" alt="A lesson screen"><br><sub>A lesson screen</sub></td>
+</tr></table>
 
-This is a personal project built around its author's own setup; it is not meant to be turnkey.
+It is a personal project built around its author's setup (Claude Code on a PC, the phone reaching it over
+Tailscale), so it is not turnkey for everyone, but everything below runs on any Linux or macOS machine.
+The plan is in [docs/PLAN.md](docs/PLAN.md), the roadmap in [docs/ROADMAP.md](docs/ROADMAP.md).
 
-## Run it
+## Features
 
-Node 22 and Python 3. The map build uses the standard library only; the course validator
-needs `sympy` and `jsonschema`.
+### The map
+
+All of mathematics (the MSC2020 classification: 593 nodes, 517 sections, 4,810 topics) as nested circles,
+sized by topic count, one colour per branch. A circle that has a course inside is ringed. One tap zooms in and
+opens a sheet with where the node sits, its topics, the courses on it, what a course builds on and leads to,
+and outside reading links. Light and dark follow the system, or the button at the top right.
+
+<table><tr>
+<td align="center" valign="top"><img src="docs/screenshots/map-home.png" width="200" alt="Home: five branches"><br><sub>Home: five branches</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/node-sheet.png" width="200" alt="A node's sheet"><br><sub>A node's sheet</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/dark-map.png" width="200" alt="Dark mode"><br><sub>Dark mode</sub></td>
+</tr></table>
+
+### Finding courses
+
+The search button opens the Courses menu: every course with your progress, and a search over courses, sections
+and topics. "Where I am" shows the next action, counts per course and the slips you have made twice. Counts are
+never scores: an unassessed topic has no score, and a blank is not a zero.
+
+<table><tr>
+<td align="center" valign="top"><img src="docs/screenshots/courses-menu.png" width="200" alt="Courses"><br><sub>Courses</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/search.png" width="200" alt="Search"><br><sub>Search</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/where-i-am.png" width="200" alt="Where I am"><br><sub>Where I am</sub></td>
+</tr></table>
+
+### Lessons
+
+A lesson is a run of screens. The main kind is a **step**: a definition, why it matters, a prompt, a typed answer,
+three hints, a "check it yourself", and one clear next action. Answers are parsed as maths (fractions, powers, roots,
+matrices), and a set of deterministic slip detectors names common mistakes (a sign, swapped entries, a known wrong
+value) instead of just saying "wrong". **Quiz** screens explain why every option is right or wrong, and **order**
+puzzles ask you to put a derivation in sequence.
+
+<table><tr>
+<td align="center" valign="top"><img src="docs/screenshots/step-slip.png" width="200" alt="A named slip"><br><sub>A named slip</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/quiz.png" width="200" alt="A quiz question"><br><sub>A quiz question</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/puzzle.png" width="200" alt="An order puzzle"><br><sub>An order puzzle</sub></td>
+</tr></table>
+
+### Interactive pictures
+
+Vetted widgets, never generated code: a line fitter, dependent columns, SVD geometry, a PCA scatter you can drag,
+and a descent path on a bowl.
+
+<table><tr>
+<td align="center" valign="top"><img src="docs/screenshots/lesson-widget.png" width="200" alt="PCA scatter"><br><sub>PCA scatter</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/widget-svd.png" width="200" alt="SVD geometry"><br><sub>SVD geometry</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/widget-descent.png" width="200" alt="Gradient descent"><br><sub>Gradient descent</sub></td>
+</tr></table>
+
+### Lesson tools
+
+Round buttons at the right of every lesson open an overlay without losing your place; Escape, a tap outside or the
+phone's back button closes it.
+
+<table><tr>
+<td align="center" valign="top"><img src="docs/screenshots/tool-scratch-pad.png" width="200" alt="Scratch pad: draw, erase, undo"><br><sub>Scratch pad: draw, erase, undo</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/tool-calculator.png" width="200" alt="Calculator with a tape"><br><sub>Calculator with a tape</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/tool-so-far.png" width="200" alt="So far: earlier answers"><br><sub>So far: earlier answers</sub></td>
+</tr></table>
+
+<table><tr>
+<td align="center" valign="top"><img src="docs/screenshots/tool-cheat-sheet.png" width="200" alt="Cheat sheet and your notes"><br><sub>Cheat sheet and your notes</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/tool-reading.png" width="200" alt="Reading links"><br><sub>Reading links</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/tool-ask.png" width="200" alt="Ask: a tutor that knows the step"><br><sub>Ask: a tutor that knows the step</sub></td>
+</tr></table>
+
+- **Scratch pad**: one finger draws, two pan and pinch; saved per lesson on the device.
+- **Calculator**: keeps the last 20 lines; tap a result to reuse it.
+- **So far**: the answers to steps you already solved, so you stop paging back for constants.
+- **Cheat sheet**: the course's formulas, with "this lesson" marked, and **My notes** that stay on your device.
+- **Reading**: outside links attached to the course's node and its ancestors.
+- **Ask** (needs the AI server): a chat that already knows the course, the step and what you have typed.
+
+### Spaced review
+
+Steps marked for review come back on a 1, 3, 7, 16, 35, 90 day ladder (good / hard / again) in interleaved
+sessions of at most ten, and cheat-sheet formulas become recall cards. The top bar shows how many are due.
+
+<table><tr>
+<td align="center" valign="top"><img src="docs/screenshots/review.png" width="200" alt="A review card"><br><sub>A review card</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/where-i-am.png" width="200" alt="Review due in Where I am"><br><sub>Review due in Where I am</sub></td>
+</tr></table>
+
+### Make a course by talking
+
+With the AI server running, **New course** in the Courses menu (or **Make a course here** on an empty node) opens
+a chat that asks one question at a time and writes a brief. **Build this** hands the brief to a Claude Code job that
+writes the course, checks it with the validator, repairs it up to three times and publishes it into the app.
+
+<table><tr>
+<td align="center" valign="top"><img src="docs/screenshots/new-course.png" width="200" alt="Planning a course"><br><sub>Planning a course</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/tool-ask.png" width="200" alt="Ask inside a lesson"><br><sub>Ask inside a lesson</sub></td>
+</tr></table>
+
+### Everything else
+
+Works offline once installed (PWA, with an **Update** bar when a new build waits); progress, drafts, notes and
+review state live only on your device (`localStorage`); a course can be shared as one `.rhpack` file; every answer
+key is re-derived with sympy before a course can reach the app.
+
+## Install
+
+You need **Node 22+**, **Python 3** and **git**. For the AI features you also need the
+[Claude Code](https://claude.com/claude-code) CLI signed in (`claude auth status` shows `"loggedIn": true`). There
+are no API keys anywhere; all AI goes through your own `claude` CLI.
+
+```bash
+git clone https://github.com/markharley12/rabbit-hole.git
+```
+
+```bash
+cd rabbit-hole
+```
 
 ```bash
 npm install
 ```
 
+The course validator needs two Python packages (the map build and the server use the standard library only):
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+## Run it
+
+Development server with hot reload (it validates and publishes the courses first):
+
 ```bash
 npm run dev
 ```
 
-All checks (typecheck, lint, app tests, data-tool tests):
+Open the address it prints. To try it as a phone would, use your browser's device mode.
+
+A production build, served by the AI server, which also serves the built app on `http://127.0.0.1:8791`:
+
+```bash
+npm run build
+```
+
+```bash
+npm run server
+```
+
+Without the server the app is unchanged and the Ask and New course buttons are simply not there.
+
+## Check everything
+
+Typecheck, lint, app tests, tool tests, server tests, and course validation (schema, widgets, and every answer key
+re-derived with sympy):
 
 ```bash
 npm run check
 ```
 
-Check the courses in `content/` (schema, widgets, and every answer key re-derived with
-sympy) and publish them into `public/` if they pass. `npm run dev` and `npm run build` do this
-first anyway:
+## Add or change courses
 
-```bash
-npm run courses
-```
+Courses live in `content/<field>/courses/<course-id>/`; the contract is [docs/course-authoring.md](docs/course-authoring.md).
+`npm run validate` checks them; `npm run courses` also publishes them into `public/` (gitignored). Invalid content never
+reaches the app. Or just ask for one from inside the app, as above.
 
-Rebuild the map data from TreeQuiz's dataset (expects `~/git/TreeQuiz`):
+The map data is committed. To rebuild it you need the author's [TreeQuiz](https://github.com/markharley12/TreeQuiz)
+dataset checked out at `~/git/TreeQuiz`:
 
 ```bash
 npm run build:map
@@ -76,7 +217,7 @@ npm run build
 ```
 
 ```bash
-tailscale serve --bg --https=8443 ~/git/rabbit-hole/dist
+tailscale serve --bg --https=8443 "$PWD/dist"
 ```
 
 Open `https://<machine>.<tailnet>.ts.net:8443/` on the phone and use the browser's "Install
@@ -162,9 +303,13 @@ env -u PYTHONPATH python3 server/smoke_new_course.py --port 8791
 env -u PYTHONPATH python3 server/smoke_new_course.py --port 8791 --build
 ```
 
-## Attribution
+## Attribution and licence
 
 The first map is built from the [MSC2020](https://msc2020.org) Mathematics Subject
 Classification by zbMATH Open and Mathematical Reviews, under
 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), via the curated tree in
 the author's [TreeQuiz](https://github.com/markharley12/TreeQuiz).
+
+The code is MIT licensed ([LICENSE](LICENSE)). The map data (`public/content/maths/map.json`) is derived
+from MSC2020 and stays under CC BY-NC-SA 4.0, so the repository as a whole is for non-commercial use.
+The course content in `content/` was written with Claude Code.
