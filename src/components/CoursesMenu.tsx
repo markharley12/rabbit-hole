@@ -44,6 +44,14 @@ function progressText(course: Course) {
  */
 export function CoursesMenu({ layout, courses, onClose, onOpenLesson, onShowNode, dueCount = 0, onOpenReview, onOpenProgress, onNewCourse }: Props) {
   const [query, setQuery] = useState('')
+  // Which course cards have their lesson list open (this visit only).
+  const [open, setOpen] = useState<Set<string>>(new Set())
+  const toggle = (id: string) =>
+    setOpen((prev) => {
+      const next = new Set(prev)
+      if (!next.delete(id)) next.add(id)
+      return next
+    })
   const courseHits = useMemo(() => searchCourses(query, courses, layout), [query, courses, layout])
   const nodeHits = useMemo(() => searchNodes(query, layout), [query, layout])
   const searching = query.trim().length > 0
@@ -106,10 +114,31 @@ export function CoursesMenu({ layout, courses, onClose, onOpenLesson, onShowNode
                   </span>
                   <span className="course-card-meta">{progressText(course)}</span>
                 </button>
-                {node && (
-                  <button className="text-button" onClick={() => onShowNode(node.id)}>
-                    Show on the map
+                <div className="course-card-actions">
+                  <button className="text-button" aria-expanded={open.has(course.id)} aria-controls={`lessons-${course.id}`} onClick={() => toggle(course.id)}>
+                    {open.has(course.id) ? 'Hide lessons' : 'Lessons'}
                   </button>
+                  {node && (
+                    <button className="text-button" onClick={() => onShowNode(node.id)}>
+                      Show on the map
+                    </button>
+                  )}
+                </div>
+                {open.has(course.id) && (
+                  <ol className="lessons" id={`lessons-${course.id}`} aria-label={`Lessons in ${course.title}`}>
+                    {course.lessons.map((lesson, i) => {
+                      const state = lessonState(readProgress(course.id), lesson.id).state
+                      return (
+                        <li key={lesson.id}>
+                          <button className="lesson-row" onClick={() => onOpenLesson(course, lesson.id)}>
+                            <span className="lesson-number">{i + 1}</span>
+                            <span className="lesson-name">{lesson.title}</span>
+                            <span className="lesson-state">{state === 'done' ? 'Done' : state === 'started' ? 'Started' : ''}</span>
+                          </button>
+                        </li>
+                      )
+                    })}
+                  </ol>
                 )}
               </li>
             )

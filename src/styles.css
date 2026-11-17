@@ -2332,3 +2332,11 @@ a {
   margin-left: -1px;
   background: var(--b2);
 }
+.course-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+}
+.course-card .lessons {
+  margin: 4px 0 8px;
+}

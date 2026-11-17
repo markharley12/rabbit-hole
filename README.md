@@ -35,7 +35,7 @@ and outside reading links. Light and dark follow the system, or the button at th
 
 ### Finding courses
 
-The search button opens the Courses menu: every course with your progress, and a search over courses, sections
+The search button opens the Courses menu: every course with your progress, a **Lessons** drop-down on each card listing its lessons (tap one to open it), and a search over courses, sections
 and topics. "Where I am" shows the next action, counts per course and the slips you have made twice. Counts are
 never scores: an unassessed topic has no score, and a blank is not a zero.
 
