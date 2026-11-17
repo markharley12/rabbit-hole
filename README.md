@@ -136,10 +136,20 @@ cd rabbit-hole
 npm install
 ```
 
-The course validator needs two Python packages (the map build and the server use the standard library only):
+The course validator needs two Python packages (the map build and the server use the standard library only).
+Modern Linux distributions refuse a global `pip install`, so use a virtual environment and keep it activated
+whenever you run `npm run` commands:
 
 ```bash
-python3 -m pip install -r requirements.txt
+python3 -m venv .venv
+```
+
+```bash
+source .venv/bin/activate
+```
+
+```bash
+pip install -r requirements.txt
 ```
 
 ## Run it
