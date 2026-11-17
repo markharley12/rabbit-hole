@@ -1,0 +1,228 @@
+{
+  "format": 1,
+  "id": "conditional-probability-as-a-fraction",
+  "title": "Conditional probability as a fraction",
+  "summary": "P(A | B) as a share of the people (or emails) where B happened, on a 1,000-email spam table.",
+  "data": {
+    "total": 1000,
+    "spam": 200,
+    "freeSpam": 120,
+    "freeHam": 40
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "p-free",
+      "title": "How many emails contain free?",
+      "define": [
+        {
+          "term": "event",
+          "meaning": "Something that happens or not, such as “the email is spam” or “it contains free”."
+        },
+        {
+          "term": "$P(A)$",
+          "meaning": "The share of the whole table where $A$ is true."
+        }
+      ],
+      "why": "A conditional probability only looks at part of the table. First find the part.",
+      "prompt": "1,000 emails: 200 are spam, 800 are not (ham). The word “free” appears in 120 of the spam and in 40 of the ham. What is the probability that a random email from the 1,000 contains “free”? Give a fraction.",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{free})$ =",
+            "key": "4/25"
+          }
+        ],
+        "verify": "(freeSpam+freeHam)/total",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "3/25"
+            },
+            "say": "That is only the spam with “free” ($120/1000$). Add the 40 ham."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "3/5"
+            },
+            "say": "That is $120/200$, the share of spam. Divide by 1,000, the number of all emails."
+          }
+        ]
+      },
+      "hints": [
+        "Count all emails with the word, spam and ham together.",
+        "$120 + 40 = 160$ out of 1,000.",
+        "$\\frac{160}{1000}$, cancel by 40."
+      ],
+      "next": "Count spam with free"
+    },
+    {
+      "type": "step",
+      "id": "p-spam-and-free",
+      "title": "Spam and free together",
+      "why": "\"And\" means both events at once. It is the first piece of the fraction in the definition.",
+      "prompt": "Same table: 1,000 emails, 120 are spam containing “free”. What is $P(\\text{spam and free})$ as a fraction of all 1,000?",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{spam and free})$ =",
+            "key": "3/25"
+          }
+        ],
+        "verify": "freeSpam/total",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "3/5"
+            },
+            "say": "That is 120 out of the 200 spam. \"Of all 1,000\" means divide by 1,000."
+          }
+        ]
+      },
+      "hints": [
+        "Only the emails that are both count.",
+        "120 out of 1,000.",
+        "Cancel $\\frac{120}{1000}$ by 40."
+      ],
+      "next": "Define P(A | B)"
+    },
+    {
+      "type": "step",
+      "id": "spam-given-free",
+      "title": "Spam given free",
+      "review": true,
+      "define": [
+        {
+          "term": "conditional probability",
+          "meaning": "$P(A \\mid B)$, read “probability of $A$ given $B$”: among the cases where $B$ happened, the share where $A$ also happened. $P(A \\mid B) = \\frac{P(A \\text{ and } B)}{P(B)}$."
+        }
+      ],
+      "why": "This is what a spam filter actually needs: the email has the word, so how likely is spam?",
+      "prompt": "1,000 emails: 120 are spam with “free”, 40 are ham with “free”. $P(\\text{spam and free}) = \\frac{3}{25}$ and $P(\\text{free}) = \\frac{4}{25}$. Find $P(\\text{spam} \\mid \\text{free})$ using $P(A \\mid B) = \\frac{P(A \\text{ and } B)}{P(B)}$.",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{spam} \\mid \\text{free})$ =",
+            "key": "3/4"
+          }
+        ],
+        "verify": "(freeSpam/total)/((freeSpam+freeHam)/total)",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "3/25"
+            },
+            "say": "That is the top of the fraction only. Divide by $P(\\text{free})$."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "3/5"
+            },
+            "say": "That is the share of spam that has “free” ($120/200$), the other way round."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "1/5"
+            },
+            "say": "That is $P(\\text{spam})$ with no condition. Given “free”, only the 160 emails with the word count."
+          }
+        ]
+      },
+      "hints": [
+        "Look only at the emails with “free”. What share of them are spam?",
+        "$\\frac{3/25}{4/25}$, or count: 120 of the 160.",
+        "$\\frac{120}{160}$."
+      ],
+      "check": {
+        "say": "Count: the denominator is the 160 emails with “free”."
+      },
+      "solution": "Learning that the email has “free” moves spam from $\\frac15$ to $\\frac34$.",
+      "next": "Turn it around"
+    },
+    {
+      "type": "step",
+      "id": "free-given-spam",
+      "title": "Free given spam",
+      "why": "The two directions sound alike and are different numbers. Mixing them up is the commonest slip in this subject.",
+      "prompt": "Same table: 200 spam, 120 of them contain “free”. Find $P(\\text{free} \\mid \\text{spam})$, the share of spam that contains “free”.",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{free} \\mid \\text{spam})$ =",
+            "key": "3/5"
+          }
+        ],
+        "verify": "freeSpam/spam",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "3/4"
+            },
+            "say": "That is $P(\\text{spam} \\mid \\text{free})$, the share of “free” emails that are spam. Here the condition is spam, so divide by 200."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "4/25"
+            },
+            "say": "That is $P(\\text{free})$ with no condition."
+          }
+        ]
+      },
+      "hints": [
+        "Now only the spam emails count.",
+        "How many spam emails have “free”?",
+        "$\\frac{120}{200}$."
+      ],
+      "next": "Compare the two"
+    },
+    {
+      "type": "choice",
+      "id": "which-question",
+      "review": true,
+      "title": "Which question is that?",
+      "why": "Reading the condition correctly is the skill. The number follows.",
+      "prompt": "Out of 1,000 emails, 200 are spam. 160 contain “free”, and 120 of those 160 are spam. What does $\\frac{120}{160}$ answer?",
+      "options": [
+        {
+          "id": "spam-given-free",
+          "text": "Of the emails with “free”, what share are spam?",
+          "correct": true,
+          "say": "Right. The condition is “free”, so only the 160 count, and 120 of them are spam."
+        },
+        {
+          "id": "free-given-spam",
+          "text": "Of the spam emails, what share contain “free”?",
+          "correct": false,
+          "say": "Not this one. That is $\\frac{120}{200}$: the condition is spam, so the base is the 200 spam."
+        },
+        {
+          "id": "both-of-all",
+          "text": "Of all emails, what share are spam with “free”?",
+          "correct": false,
+          "say": "Not this one. That is $\\frac{120}{1000}$: the base is all emails."
+        },
+        {
+          "id": "free-of-all",
+          "text": "Of all emails, what share contain “free”?",
+          "correct": false,
+          "say": "Not this one. That is $\\frac{160}{1000}$: the base is all emails."
+        }
+      ],
+      "hint": "The number under the line is the group you look at. Which group is 160?",
+      "solution": "The bottom number is always the condition's group: 160 emails with “free”.",
+      "next": "Finish the lesson"
+    }
+  ]
+}

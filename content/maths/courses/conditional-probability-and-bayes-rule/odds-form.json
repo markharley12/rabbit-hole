@@ -1,0 +1,243 @@
+{
+  "format": 1,
+  "id": "odds-form",
+  "title": "Odds form: multiply by a ratio",
+  "summary": "Prior odds times the likelihood ratio equals posterior odds, on the medical test and on the spam word “free”.",
+  "data": {
+    "prev": "1/100",
+    "sens": "9/10",
+    "fpr": "1/20",
+    "sp": "1/5",
+    "pfs": "3/5",
+    "pfh": "1/20"
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "prior-odds",
+      "title": "Prior odds",
+      "define": [
+        {
+          "term": "odds",
+          "meaning": "$\\frac{P(A)}{1 - P(A)}$: how many times as likely as not. Odds of 1 to 99 are written $\\frac{1}{99}$."
+        },
+        {
+          "term": "prior",
+          "meaning": "What you believe before the evidence. Here, before the test."
+        }
+      ],
+      "why": "Odds make the update a single multiplication, with no division by $P(\\text{positive})$.",
+      "prompt": "$P(\\text{sick}) = \\frac{1}{100}$. Write the odds of sick to healthy as a fraction, sick : healthy.",
+      "answer": {
+        "fields": [
+          {
+            "name": "o",
+            "label": "odds =",
+            "key": "1/99"
+          }
+        ],
+        "verify": "prev/(1-prev)",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "o": "1/100"
+            },
+            "say": "That is the probability. Odds divide by the healthy share, $\\frac{99}{100}$."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "o": "99"
+            },
+            "say": "That is healthy to sick. Put sick first."
+          }
+        ]
+      },
+      "hints": [
+        "Odds compare the sick share with the healthy share.",
+        "Healthy share: $\\frac{99}{100}$.",
+        "$\\frac{1/100}{99/100}$."
+      ],
+      "next": "Find the ratio"
+    },
+    {
+      "type": "step",
+      "id": "likelihood-ratio",
+      "title": "The likelihood ratio",
+      "review": true,
+      "define": [
+        {
+          "term": "likelihood ratio",
+          "meaning": "How many times more likely the evidence is if $A$ is true than if it is false."
+        }
+      ],
+      "why": "This one number is all the test adds. It does not depend on how rare the condition is.",
+      "prompt": "A test is positive for 90% of sick people and for 5% of healthy people. Find the **likelihood ratio** $\\frac{P(\\text{positive} \\mid \\text{sick})}{P(\\text{positive} \\mid \\text{healthy})}$.",
+      "answer": {
+        "fields": [
+          {
+            "name": "r",
+            "label": "ratio =",
+            "key": "18"
+          }
+        ],
+        "verify": "sens/fpr",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "r": "1/18"
+            },
+            "say": "That is flipped. Sick goes on top."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "r": "17/10"
+            },
+            "say": "That subtracts. A ratio divides."
+          }
+        ]
+      },
+      "hints": [
+        "Divide the two rates.",
+        "$\\frac{9/10}{1/20}$: dividing by $\\frac{1}{20}$ is times 20.",
+        "$\\frac{9}{10} \\times 20$."
+      ],
+      "check": {
+        "say": "It is above 1, so a positive pushes towards sick."
+      },
+      "next": "Update the odds"
+    },
+    {
+      "type": "step",
+      "id": "posterior-odds",
+      "title": "Posterior odds",
+      "define": [
+        {
+          "term": "posterior",
+          "meaning": "What you believe after the evidence."
+        }
+      ],
+      "why": "The whole update in one line: new odds = old odds times the ratio.",
+      "prompt": "Prior odds of sick are $\\frac{1}{99}$ and the likelihood ratio of a positive is 18. Find the **posterior odds**: $\\text{posterior odds} = \\text{prior odds} \\times \\text{likelihood ratio}$.",
+      "answer": {
+        "fields": [
+          {
+            "name": "o",
+            "label": "odds =",
+            "key": "2/11"
+          }
+        ],
+        "verify": "prev/(1-prev)*sens/fpr",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "o": "18"
+            },
+            "say": "That is the ratio alone. Multiply it by the prior odds $\\frac{1}{99}$."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "o": "1/1782"
+            },
+            "say": "That divides by 18. Multiply."
+          }
+        ]
+      },
+      "hints": [
+        "Multiply.",
+        "$\\frac{1}{99} \\times 18$.",
+        "$\\frac{18}{99}$, cancel by 9."
+      ],
+      "next": "Turn odds into a probability"
+    },
+    {
+      "type": "step",
+      "id": "odds-to-probability",
+      "title": "From odds to a probability",
+      "why": "Odds of $\\frac{2}{11}$ are not a probability yet. Check against lesson 1.",
+      "prompt": "The posterior odds of sick are $\\frac{2}{11}$. Convert to a probability with $P = \\frac{\\text{odds}}{1 + \\text{odds}}$. Give a fraction.",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{sick})$ =",
+            "key": "2/13"
+          }
+        ],
+        "verify": "(prev/(1-prev)*sens/fpr)/(1+prev/(1-prev)*sens/fpr)",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "2/11"
+            },
+            "say": "That is the odds. Sick is 2 parts out of 13."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "11/13"
+            },
+            "say": "That is healthy. Sick is the 2."
+          }
+        ]
+      },
+      "hints": [
+        "Odds 2 to 11 means 2 sick for every 11 healthy.",
+        "How many people are in 2 + 11 parts?",
+        "$\\frac{2}{2 + 11}$."
+      ],
+      "solution": "$\\frac{2}{13}$ again, the third way to the same answer.",
+      "next": "Use it on spam"
+    },
+    {
+      "type": "step",
+      "id": "spam-odds",
+      "title": "Update on the word free",
+      "review": true,
+      "why": "The same rule works for any evidence. Here it is a spam filter.",
+      "prompt": "$P(\\text{spam}) = \\frac{1}{5}$. The word “free” is in $\\frac{3}{5}$ of spam and in $\\frac{1}{20}$ of ham. Find the odds of spam after seeing “free”.",
+      "answer": {
+        "fields": [
+          {
+            "name": "o",
+            "label": "odds =",
+            "key": "3"
+          }
+        ],
+        "verify": "(sp/(1-sp))*pfs/pfh",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "o": "12"
+            },
+            "say": "That is the ratio alone. Prior odds are $\\frac{1}{4}$, not 1."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "o": "3/4"
+            },
+            "say": "That is the probability from lesson 2. The question asks for odds, which here is $\\frac{3/4}{1/4}$."
+          }
+        ]
+      },
+      "hints": [
+        "Prior odds first: spam to ham.",
+        "Prior odds $\\frac{1}{4}$. Ratio $\\frac{3/5}{1/20} = 12$.",
+        "$\\frac{1}{4} \\times 12$."
+      ],
+      "check": {
+        "say": "Odds of 3 are $P = \\frac{3}{4}$, the answer from lesson 2."
+      },
+      "solution": "Odds 3 to 1 is a probability of $\\frac{3}{4}$, matching lesson 2.",
+      "next": "Finish the lesson"
+    }
+  ]
+}

@@ -1,0 +1,210 @@
+{
+  "format": 1,
+  "id": "count-people-not-percentages",
+  "title": "Count people, not percentages",
+  "summary": "A 90% accurate test on a 1% condition: build the table of 10,000 people and find how many positives are really sick.",
+  "data": {
+    "total": 10000,
+    "prev": "1/100",
+    "sens": "9/10",
+    "fpr": "1/20"
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "how-many-sick",
+      "title": "How many are sick?",
+      "define": [
+        {
+          "term": "prevalence",
+          "meaning": "The share of people who have the condition. Here $\\frac{1}{100}$."
+        },
+        {
+          "term": "positive",
+          "meaning": "The test says “you have it”. A positive can be right or wrong."
+        }
+      ],
+      "why": "Probabilities are easy to misread. Counting people is not. Start the table with the smallest group.",
+      "prompt": "A condition affects 1% of people. Out of 10,000 people, how many have it?",
+      "answer": {
+        "fields": [
+          {
+            "name": "n",
+            "label": "people =",
+            "key": "100"
+          }
+        ],
+        "verify": "total*prev",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "n": "1"
+            },
+            "say": "That is 1% of 100. The group is 10,000 people."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "n": "9900"
+            },
+            "say": "That is the healthy group. The question asks for the sick one."
+          }
+        ]
+      },
+      "hints": [
+        "1% means 1 in every 100.",
+        "How many hundreds are in 10,000?",
+        "$10{,}000 \\div 100$."
+      ],
+      "check": {
+        "say": "The sick and the healthy must add to 10,000."
+      },
+      "next": "Count the true positives"
+    },
+    {
+      "type": "step",
+      "id": "true-positives",
+      "title": "Sick and tested positive",
+      "define": [
+        {
+          "term": "sensitivity",
+          "meaning": "The share of sick people the test flags: $P(\\text{positive} \\mid \\text{sick})$."
+        }
+      ],
+      "why": "The test catches most, not all, of the sick. This is the first of the two groups that test positive.",
+      "prompt": "The test is positive for 90% of people who have the condition (its **sensitivity**). Of the 100 sick people, how many test positive?",
+      "answer": {
+        "fields": [
+          {
+            "name": "n",
+            "label": "people =",
+            "key": "90"
+          }
+        ],
+        "verify": "total*prev*sens",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "n": "10"
+            },
+            "say": "That is the sick people the test misses. You want those it catches."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "n": "9000"
+            },
+            "say": "That is 90% of all 10,000. Only the 100 sick people can be true positives."
+          }
+        ]
+      },
+      "hints": [
+        "Take 90% of the sick group, not of everyone.",
+        "90% of 100.",
+        "$\\frac{9}{10} \\times 100$."
+      ],
+      "next": "Count the false alarms"
+    },
+    {
+      "type": "step",
+      "id": "false-alarms",
+      "title": "Healthy and tested positive",
+      "define": [
+        {
+          "term": "false positive rate",
+          "meaning": "The share of healthy people the test flags by mistake: $P(\\text{positive} \\mid \\text{healthy})$."
+        }
+      ],
+      "why": "A small error rate on a big group is a big number of people. This is why rare conditions surprise.",
+      "prompt": "The test is also positive for 5% of healthy people (the **false positive rate**). There are 9,900 healthy people. How many test positive?",
+      "answer": {
+        "fields": [
+          {
+            "name": "n",
+            "label": "people =",
+            "key": "495"
+          }
+        ],
+        "verify": "total*(1-prev)*fpr",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "n": "500"
+            },
+            "say": "That is 5% of 10,000. Only the 9,900 healthy people can be false positives."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "n": "5"
+            },
+            "say": "That is 5% of the 100 sick. False alarms come from the healthy group."
+          }
+        ]
+      },
+      "hints": [
+        "Take 5% of the healthy group.",
+        "5% is $\\frac{1}{20}$. Divide 9,900 by 20.",
+        "$9900 \\div 20$."
+      ],
+      "check": {
+        "say": "Compare with the 90 true positives. Which group is bigger?"
+      },
+      "next": "Ask the real question"
+    },
+    {
+      "type": "step",
+      "id": "chance-sick",
+      "title": "Positive: how likely is sick?",
+      "review": true,
+      "why": "This is the number a patient wants. It is a share of the positives, not of the sick.",
+      "prompt": "Of 10,000 people, 100 are sick. Of those, 90 test positive. Of the 9,900 healthy people, 495 test positive. Someone tests positive. What fraction of all positives are sick? Give a fraction.",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{sick} \\mid \\text{positive})$ =",
+            "key": "2/13"
+          }
+        ],
+        "verify": "total*prev*sens/(total*prev*sens+total*(1-prev)*fpr)",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "9/10"
+            },
+            "say": "That is the share of the sick who test positive, the other way round. Here you divide by all positives."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "2/11"
+            },
+            "say": "That compares the 90 with the 495 only. The positives are $90 + 495$."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "9/1000"
+            },
+            "say": "That divides by all 10,000 people. Divide by the 585 who tested positive."
+          }
+        ]
+      },
+      "hints": [
+        "First count everyone who tests positive.",
+        "$90 + 495 = 585$ positives. How many of them are sick?",
+        "$\\frac{90}{585}$, then cancel by 45."
+      ],
+      "check": {
+        "say": "It should be well below 1/2: false alarms outnumber true positives."
+      },
+      "solution": "$\\frac{90}{585} = \\frac{2}{13}$, about 15%. A positive result from a 90% test means about a 15% chance, because the condition is rare. Next lesson names this idea.",
+      "next": "Finish the lesson"
+    }
+  ]
+}

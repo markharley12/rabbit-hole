@@ -1,0 +1,56 @@
+{
+  "format": 1,
+  "id": "conditional-probability-and-bayes-rule",
+  "nodeId": "60Axx",
+  "title": "Conditional probability and Bayes' rule",
+  "summary": "Conditional probability and Bayes' rule by hand on small numbers: a medical test and a spam filter, natural frequencies, the law of total probability, odds form (prior odds times likelihood ratio), and updating on two pieces of evidence.",
+  "written": "Written by Claude Code (Sonnet 5.5) on 17 Nov 2026, for the audience in docs/seed-context.md (small steps, hints, terms defined first). Every example was chosen so each hand computation is an integer or a simple fraction; every answer key is re-derived with sympy by tools/validate_courses.py.",
+  "sources": [
+    {
+      "name": "Bayes' theorem (Wikipedia)",
+      "url": "https://en.wikipedia.org/wiki/Bayes%27_theorem",
+      "note": "Opened 17 Nov 2026. The statement P(A|B) = P(B|A)P(A)/P(B), the odds form O(A|B) = O(A) x P(B|A)/P(B|not A) (posterior odds = prior odds x Bayes factor), and the drug-test example where a positive from a 99% test on a rare group is often a false positive."
+    },
+    {
+      "name": "Pishro-Nik, Introduction to Probability, Statistics, and Random Processes, section 1.4 (probabilitycourse.com)",
+      "url": "https://www.probabilitycourse.com/chapter1/1_4_0_conditional_probability.php",
+      "note": "Opened 17 Nov 2026. The definition P(A|B) = P(A and B)/P(B) as shrinking the sample space to B. Bayes' rule and total probability on the same book's following pages were not opened; those parts rest on the Wikipedia article and on sympy."
+    },
+    {
+      "name": "Seeing Theory, Bayesian Inference (Brown University)",
+      "url": "https://seeing-theory.brown.edu/bayesian-inference/index.html",
+      "note": "Opened 17 Nov 2026. A medical-test example computing P(disease | positive) from prevalence and test accuracy; used for the framing of lesson 1."
+    },
+    {
+      "name": "Mark's notes and chats (seed context)",
+      "note": "docs/seed-context.md: probability is on his list of gaps; typed answers; hints not answers."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "count-people-not-percentages",
+      "title": "Count people, not percentages",
+      "summary": "A 90% test on a 1% condition, as a table of 10,000 people."
+    },
+    {
+      "id": "conditional-probability-as-a-fraction",
+      "title": "Conditional probability as a fraction",
+      "summary": "P(A | B) as a share of the cases where B happened, on a spam table."
+    },
+    {
+      "id": "bayes-rule",
+      "title": "Bayes' rule",
+      "summary": "P(sick | positive) from P(positive | sick), the prior and total probability."
+    },
+    {
+      "id": "odds-form",
+      "title": "Odds form: multiply by a ratio",
+      "summary": "Prior odds times the likelihood ratio is the posterior odds."
+    },
+    {
+      "id": "updating-twice",
+      "title": "Updating twice",
+      "summary": "Two pieces of evidence, and when multiplying ratios is valid."
+    }
+  ]
+}

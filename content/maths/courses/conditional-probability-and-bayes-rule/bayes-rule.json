@@ -1,0 +1,234 @@
+{
+  "format": 1,
+  "id": "bayes-rule",
+  "title": "Bayes' rule",
+  "summary": "Turn P(positive | sick) into P(sick | positive): the law of total probability for P(positive), then Bayes' rule, on the 1% condition.",
+  "data": {
+    "prev": "1/100",
+    "sens": "9/10",
+    "fpr": "1/20",
+    "sens2": "99/100",
+    "fpr2": "1/100"
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "both-sick-positive",
+      "title": "Sick and positive, as a probability",
+      "define": [
+        {
+          "term": "$P(B \\mid A)\\,P(A)$",
+          "meaning": "The share where $A$ happened, times the share of those where $B$ also did. It equals $P(A \\text{ and } B)$."
+        }
+      ],
+      "why": "Lesson 1 counted people. Bayes' rule does the same sums with probabilities, so you can use it when you have no table.",
+      "prompt": "1% of people are sick, and 90% of the sick test positive. What is $P(\\text{sick and positive})$? Use $P(A \\text{ and } B) = P(B \\mid A)\\,P(A)$.",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{sick and positive})$ =",
+            "key": "9/1000"
+          }
+        ],
+        "verify": "sens*prev",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "9/10"
+            },
+            "say": "That is only $P(\\text{positive} \\mid \\text{sick})$. Multiply by $P(\\text{sick}) = \\frac{1}{100}$."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "1/100"
+            },
+            "say": "That is $P(\\text{sick})$. Multiply by 90%."
+          }
+        ]
+      },
+      "hints": [
+        "Take 90% of the 1%.",
+        "$\\frac{9}{10} \\times \\frac{1}{100}$.",
+        "Multiply the tops and the bottoms."
+      ],
+      "next": "Now the healthy side"
+    },
+    {
+      "type": "step",
+      "id": "both-healthy-positive",
+      "title": "Healthy and positive",
+      "why": "The positives come from two groups. You need both.",
+      "prompt": "99% of people are healthy, and 5% of healthy people test positive. What is $P(\\text{healthy and positive})$?",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{healthy and positive})$ =",
+            "key": "99/2000"
+          }
+        ],
+        "verify": "fpr*(1-prev)",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "1/20"
+            },
+            "say": "That is only $P(\\text{positive} \\mid \\text{healthy})$. Multiply by $P(\\text{healthy}) = \\frac{99}{100}$."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "1/2000"
+            },
+            "say": "That uses $\\frac{1}{100}$, the sick share. The healthy share is $\\frac{99}{100}$."
+          }
+        ]
+      },
+      "hints": [
+        "The healthy share is $1 - \\frac{1}{100}$.",
+        "$\\frac{1}{20} \\times \\frac{99}{100}$.",
+        "Multiply the tops and the bottoms."
+      ],
+      "next": "Add the groups"
+    },
+    {
+      "type": "step",
+      "id": "p-positive",
+      "title": "All positives",
+      "define": [
+        {
+          "term": "law of total probability",
+          "meaning": "$P(B) = P(B \\mid A)P(A) + P(B \\mid \\text{not } A)P(\\text{not } A)$: split by the cases, add."
+        }
+      ],
+      "why": "The bottom of Bayes' rule is the chance of testing positive at all. Sick and healthy people are the only two groups, so the two parts add.",
+      "prompt": "$P(\\text{sick and positive}) = \\frac{9}{1000}$ and $P(\\text{healthy and positive}) = \\frac{99}{2000}$. Find $P(\\text{positive})$.",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{positive})$ =",
+            "key": "117/2000"
+          }
+        ],
+        "verify": "sens*prev+fpr*(1-prev)",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "59/1000"
+            },
+            "say": "That adds $\\frac{9}{1000}$ and $\\frac{1}{20}$. The second part must be $\\frac{1}{20} \\times \\frac{99}{100}$."
+          }
+        ]
+      },
+      "hints": [
+        "Put both over 2000.",
+        "$\\frac{9}{1000} = \\frac{18}{2000}$.",
+        "$\\frac{18}{2000} + \\frac{99}{2000}$."
+      ],
+      "check": {
+        "say": "It should be $\\frac{585}{10000}$ from lesson 1, the same number simplified."
+      },
+      "next": "State Bayes' rule"
+    },
+    {
+      "type": "step",
+      "id": "bayes-itself",
+      "title": "Bayes' rule",
+      "review": true,
+      "why": "Now divide: the share of positives that are sick.",
+      "prompt": "$P(\\text{sick}) = \\frac{1}{100}$, $P(\\text{positive} \\mid \\text{sick}) = \\frac{9}{10}$, and $P(\\text{positive}) = \\frac{117}{2000}$. Use **Bayes' rule** $P(A \\mid B) = \\frac{P(B \\mid A)\\,P(A)}{P(B)}$ to find $P(\\text{sick} \\mid \\text{positive})$.",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{sick} \\mid \\text{positive})$ =",
+            "key": "2/13"
+          }
+        ],
+        "verify": "sens*prev/(sens*prev+fpr*(1-prev))",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "9/10"
+            },
+            "say": "That is $P(\\text{positive} \\mid \\text{sick})$, the other direction. Bayes' rule flips it using the prior and $P(\\text{positive})$."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "9/1000"
+            },
+            "say": "That is the top only. Divide by $P(\\text{positive})$."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "117/2000"
+            },
+            "say": "That is $P(\\text{positive})$. It belongs on the bottom."
+          }
+        ]
+      },
+      "hints": [
+        "The top is $P(\\text{sick and positive})$, which you found.",
+        "$\\frac{9/1000}{117/2000}$.",
+        "$\\frac{18}{117}$, cancel by 9."
+      ],
+      "check": {
+        "say": "It must match lesson 1: $\\frac{90}{585}$."
+      },
+      "solution": "Same $\\frac{2}{13}$ as the table, now from probabilities alone. The prior $P(\\text{sick})$ is what most people forget.",
+      "next": "Try a better test"
+    },
+    {
+      "type": "step",
+      "id": "better-test",
+      "title": "A much better test",
+      "why": "Even a very good test can be weaker than it looks when the condition is rare.",
+      "prompt": "1% of people are sick. A new test is positive for 99% of the sick and for 1% of the healthy. Find $P(\\text{sick} \\mid \\text{positive})$. Give a fraction.",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{sick} \\mid \\text{positive})$ =",
+            "key": "1/2"
+          }
+        ],
+        "verify": "sens2*prev/(sens2*prev+fpr2*(1-prev))",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "99/100"
+            },
+            "say": "That is the sensitivity. Bayes' rule divides by all positives, which include the same number of healthy ones."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "1/100"
+            },
+            "say": "That is the prior. The test is positive, so the answer has moved a long way up."
+          }
+        ]
+      },
+      "hints": [
+        "Top: $\\frac{99}{100} \\times \\frac{1}{100}$. Bottom: that plus the healthy positives.",
+        "Healthy positives: $\\frac{1}{100} \\times \\frac{99}{100}$.",
+        "Both parts are $\\frac{99}{10000}$."
+      ],
+      "check": {
+        "say": "Count: of 10,000 people, 99 sick positives and 99 healthy positives."
+      },
+      "solution": "A 99% test on a 1% condition: a positive is a coin toss. The sick are rare, so their share is small even after a positive.",
+      "next": "Finish the lesson"
+    }
+  ]
+}

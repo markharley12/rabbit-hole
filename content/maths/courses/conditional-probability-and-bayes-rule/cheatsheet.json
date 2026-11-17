@@ -1,0 +1,113 @@
+{
+  "format": 1,
+  "sections": [
+    {
+      "title": "Conditional probability",
+      "items": [
+        {
+          "id": "conditional",
+          "name": "Conditional probability",
+          "formula": "$P(A \\mid B) = \\dfrac{P(A \\text{ and } B)}{P(B)}$",
+          "when": "When you know $B$ happened: only the cases with $B$ count, so divide by them.",
+          "cue": "The definition of $P(A \\mid B)$ as a fraction of two probabilities",
+          "lesson": "conditional-probability-as-a-fraction"
+        },
+        {
+          "id": "not-symmetric",
+          "name": "The two directions differ",
+          "formula": "$P(\\text{spam} \\mid \\text{free}) = \\tfrac34 \\ne \\tfrac35 = P(\\text{free} \\mid \\text{spam})$",
+          "when": "Whenever you read a conditional: the number under the line is the condition's group.",
+          "cue": "Whether $P(A \\mid B)$ and $P(B \\mid A)$ are equal, with the spam example",
+          "lesson": "conditional-probability-as-a-fraction"
+        },
+        {
+          "id": "joint",
+          "name": "Both at once",
+          "formula": "$P(A \\text{ and } B) = P(B \\mid A)\\,P(A)$",
+          "when": "To get the share where both happen from a rate inside one group.",
+          "cue": "$P(A \\text{ and } B)$ written with a conditional probability",
+          "lesson": "bayes-rule"
+        }
+      ]
+    },
+    {
+      "title": "Bayes' rule",
+      "items": [
+        {
+          "id": "total",
+          "name": "Law of total probability",
+          "formula": "$P(B) = P(B \\mid A)P(A) + P(B \\mid \\text{not } A)P(\\text{not } A)$",
+          "when": "To find the bottom of Bayes' rule: all the ways to see $B$, added.",
+          "cue": "$P(B)$ split by the two cases $A$ and not $A$",
+          "lesson": "bayes-rule"
+        },
+        {
+          "id": "bayes",
+          "name": "Bayes' rule",
+          "formula": "$P(A \\mid B) = \\dfrac{P(B \\mid A)\\,P(A)}{P(B)}$",
+          "when": "To turn a test's accuracy into the chance the condition is there.",
+          "cue": "Bayes' rule: $P(A \\mid B)$ from $P(B \\mid A)$, the prior and $P(B)$",
+          "lesson": "bayes-rule"
+        },
+        {
+          "id": "natural-frequencies",
+          "name": "Natural frequencies",
+          "formula": "$\\dfrac{\\text{sick positives}}{\\text{sick positives} + \\text{healthy positives}}$",
+          "when": "When a table of 10,000 people is easier than probabilities.",
+          "cue": "How to get $P(\\text{sick} \\mid \\text{positive})$ by counting people",
+          "lesson": "count-people-not-percentages"
+        }
+      ]
+    },
+    {
+      "title": "Odds form",
+      "items": [
+        {
+          "id": "odds",
+          "name": "Odds",
+          "formula": "$\\text{odds} = \\dfrac{P(A)}{1 - P(A)}$",
+          "when": "To change probability into the scale where updates multiply.",
+          "cue": "The odds of $A$ in terms of $P(A)$",
+          "lesson": "odds-form"
+        },
+        {
+          "id": "odds-to-p",
+          "name": "Odds to probability",
+          "formula": "$P = \\dfrac{\\text{odds}}{1 + \\text{odds}}$",
+          "when": "At the end of an odds update, to get a probability again.",
+          "cue": "Converting odds back to a probability",
+          "lesson": "odds-form"
+        },
+        {
+          "id": "likelihood-ratio",
+          "name": "Likelihood ratio",
+          "formula": "$\\dfrac{P(\\text{positive} \\mid \\text{sick})}{P(\\text{positive} \\mid \\text{healthy})}$",
+          "when": "To measure how strongly a piece of evidence points one way.",
+          "cue": "The likelihood ratio of a positive test, from its two rates",
+          "lesson": "odds-form"
+        },
+        {
+          "id": "odds-update",
+          "name": "Odds form of Bayes",
+          "formula": "$\\text{posterior odds} = \\text{prior odds} \\times \\text{likelihood ratio}$",
+          "when": "To update by one multiplication, with no $P(B)$ to compute.",
+          "cue": "The odds form of Bayes' rule, in words and symbols",
+          "lesson": "odds-form"
+        }
+      ]
+    },
+    {
+      "title": "More than one piece of evidence",
+      "items": [
+        {
+          "id": "two-updates",
+          "name": "Update twice",
+          "formula": "$\\text{prior odds} \\times L_1 \\times L_2$",
+          "when": "When the two pieces are independent given each class (naive Bayes).",
+          "cue": "Posterior odds after two pieces of evidence, with the ratios $L_1$ and $L_2$",
+          "lesson": "updating-twice"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "format": 1,
+  "id": "updating-twice",
+  "title": "Updating twice",
+  "summary": "Two pieces of evidence: multiply two likelihood ratios, check it with counts, and see when that is allowed.",
+  "data": {
+    "total": 1000,
+    "sp": "1/5",
+    "pfs": "3/5",
+    "pfh": "1/20",
+    "pws": "1/2",
+    "pwh": "1/10",
+    "prev": "1/100",
+    "sens": "9/10",
+    "fpr": "1/20"
+  },
+  "blocks": [
+    {
+      "type": "step",
+      "id": "second-ratio",
+      "title": "A second word",
+      "why": "A second piece of evidence has its own ratio. You compute it exactly as the first.",
+      "prompt": "After the word “free” the odds of spam are 3. Now see the word “winner”, in $\\frac{1}{2}$ of spam and $\\frac{1}{10}$ of ham. Find its likelihood ratio.",
+      "answer": {
+        "fields": [
+          {
+            "name": "r",
+            "label": "ratio =",
+            "key": "5"
+          }
+        ],
+        "verify": "pws/pwh",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "r": "1/5"
+            },
+            "say": "That is flipped. Spam on top."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "r": "2/5"
+            },
+            "say": "That subtracts the rates. A ratio divides."
+          }
+        ]
+      },
+      "hints": [
+        "Spam rate over ham rate.",
+        "$\\frac{1/2}{1/10}$.",
+        "Dividing by $\\frac{1}{10}$ is times 10."
+      ],
+      "next": "Update twice"
+    },
+    {
+      "type": "step",
+      "id": "odds-after-both",
+      "title": "Odds after both words",
+      "review": true,
+      "why": "Updating twice is multiplying twice. Order does not matter.",
+      "prompt": "$P(\\text{spam}) = \\frac{1}{5}$. “free” has likelihood ratio 12 and “winner” has 5. Find the odds of spam after both words: prior odds times both ratios.",
+      "answer": {
+        "fields": [
+          {
+            "name": "o",
+            "label": "odds =",
+            "key": "15"
+          }
+        ],
+        "verify": "(sp/(1-sp))*(pfs/pfh)*(pws/pwh)",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "o": "8"
+            },
+            "say": "That adds the odds of 3 and the ratio 5. Updates multiply."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "o": "60"
+            },
+            "say": "That is $12 \\times 5$ with the prior odds $\\frac{1}{4}$ left out."
+          }
+        ]
+      },
+      "hints": [
+        "Prior odds first: spam to ham.",
+        "Prior odds $\\frac{1}{4}$.",
+        "$\\frac{1}{4} \\times 12 \\times 5$."
+      ],
+      "next": "Convert to a probability"
+    },
+    {
+      "type": "step",
+      "id": "prob-after-both",
+      "title": "Probability after both",
+      "why": "Odds above 1 mean more likely than not.",
+      "prompt": "After both words, the odds of spam are 15. Find $P(\\text{spam})$ using $P = \\frac{\\text{odds}}{1 + \\text{odds}}$. Give a fraction.",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{spam})$ =",
+            "key": "15/16"
+          }
+        ],
+        "verify": "(sp/(1-sp)*(pfs/pfh)*(pws/pwh))/(1+sp/(1-sp)*(pfs/pfh)*(pws/pwh))",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "15"
+            },
+            "say": "That is the odds."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "1/16"
+            },
+            "say": "That is the ham share. Spam is the 15."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "3/4"
+            },
+            "say": "That is after “free” alone. Use odds 15."
+          }
+        ]
+      },
+      "hints": [
+        "15 spam for every 1 ham.",
+        "That is 15 out of how many?",
+        "$\\frac{15}{15 + 1}$."
+      ],
+      "next": "Check with counts"
+    },
+    {
+      "type": "step",
+      "id": "count-check",
+      "title": "Check with counts",
+      "why": "Two ways to one answer is how you trust a method.",
+      "prompt": "Out of 1,000 emails, 800 are ham. Ham has “free” in $\\frac{1}{20}$ and “winner” in $\\frac{1}{10}$, and the two words appear independently within ham. How many ham emails have both words?",
+      "answer": {
+        "fields": [
+          {
+            "name": "n",
+            "label": "emails =",
+            "key": "4"
+          }
+        ],
+        "verify": "total*(1-sp)*pfh*pwh",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "n": "40"
+            },
+            "say": "That is ham with “free” only. Then take $\\frac{1}{10}$ of those."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "n": "80"
+            },
+            "say": "That is ham with “winner” only ($800 \\times \\frac{1}{10}$). Take $\\frac{1}{20}$ of those."
+          }
+        ]
+      },
+      "hints": [
+        "Take $\\frac{1}{20}$ of the 800, then $\\frac{1}{10}$ of that.",
+        "$800 \\times \\frac{1}{20} = 40$ have “free”.",
+        "$40 \\times \\frac{1}{10}$."
+      ],
+      "solution": "Spam with both: $200 \\times \\frac{3}{5} \\times \\frac{1}{2} = 60$. So $\\frac{60}{60 + 4} = \\frac{15}{16}$, matching the odds method.",
+      "next": "Ask why it works"
+    },
+    {
+      "type": "choice",
+      "id": "why-multiply",
+      "review": true,
+      "title": "When may you multiply ratios?",
+      "why": "Multiplying ratios is only valid under one condition. Spam filters rely on it, often wrongly.",
+      "prompt": "We multiplied the ratios 12 (“free”) and 5 (“winner”). Which assumption makes that correct?",
+      "options": [
+        {
+          "id": "independent-given-class",
+          "text": "Given the email is spam (and given it is ham), the two words occur independently.",
+          "correct": true,
+          "say": "Right. The rates $\\frac{3}{5}\\cdot\\frac{1}{2}$ and $\\frac{1}{20}\\cdot\\frac{1}{10}$ multiply only if, within each class, one word tells you nothing about the other."
+        },
+        {
+          "id": "independent-overall",
+          "text": "Across all emails, the two words are independent of each other.",
+          "correct": false,
+          "say": "Not this one. They are usually not: both are more common in spam, so across all emails seeing one makes the other likelier."
+        },
+        {
+          "id": "both-above-one",
+          "text": "Each word has a likelihood ratio above 1.",
+          "correct": false,
+          "say": "Not this one. That is true here and says both point to spam, but it does not make the product valid."
+        },
+        {
+          "id": "prior-small",
+          "text": "The prior probability of spam is small.",
+          "correct": false,
+          "say": "Not this one. The prior is only the starting odds. It plays no part in whether ratios multiply."
+        }
+      ],
+      "hint": "The products are of rates measured inside one group.",
+      "solution": "Multiplying ratios assumes independence within each class. It is called naive Bayes.",
+      "next": "Try it on the test"
+    },
+    {
+      "type": "step",
+      "id": "two-positives",
+      "title": "Two positive tests",
+      "review": true,
+      "why": "The medical test again: how much does a second, independent positive help?",
+      "prompt": "1% of people are sick. A test is positive for 90% of the sick and 5% of the healthy. Someone has two positive results from independent repeats (independent given sick or healthy). Find $P(\\text{sick})$. Give a fraction.",
+      "answer": {
+        "fields": [
+          {
+            "name": "p",
+            "label": "$P(\\text{sick})$ =",
+            "key": "36/47"
+          }
+        ],
+        "verify": "(prev/(1-prev)*(sens/fpr)^2)/(1+prev/(1-prev)*(sens/fpr)^2)",
+        "slips": [
+          {
+            "detect": "known",
+            "when": {
+              "p": "2/13"
+            },
+            "say": "That counts one positive. Multiply by the ratio 18 a second time."
+          },
+          {
+            "detect": "known",
+            "when": {
+              "p": "36/11"
+            },
+            "say": "That is the odds. Convert with $\\frac{\\text{odds}}{1 + \\text{odds}}$."
+          }
+        ]
+      },
+      "hints": [
+        "Prior odds $\\frac{1}{99}$, ratio 18 each time.",
+        "Posterior odds $\\frac{1}{99} \\times 18 \\times 18 = \\frac{36}{11}$.",
+        "$\\frac{36}{36 + 11}$."
+      ],
+      "solution": "Two positives take $\\frac{2}{13}$ to $\\frac{36}{47}$, about 77%. Run the same sample twice and the errors repeat, so the repeats are not independent and the multiplication would be wrong.",
+      "next": "Finish the course"
+    }
+  ]
+}

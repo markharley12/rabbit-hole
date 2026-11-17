@@ -1,0 +1,85 @@
+{
+  "format": 1,
+  "nodeId": "60Axx",
+  "resources": [
+    {
+      "id": "3b1b-bayes-theorem",
+      "title": "Bayes' theorem (3Blue1Brown lesson)",
+      "by": "Grant Sanderson",
+      "kind": "video",
+      "url": "https://www.3blue1brown.com/lessons/bayes-theorem",
+      "about": "A visual lesson on Bayes' theorem built from a worked example in which new evidence updates a prior belief.",
+      "use": "When you want a picture of why a prior must be kept and updated, not replaced.",
+      "free": true,
+      "checked": "2026-11-17",
+      "topics": [
+        "Bayes",
+        "prior",
+        "evidence"
+      ]
+    },
+    {
+      "id": "wikipedia-bayes-theorem",
+      "title": "Bayes' theorem (Wikipedia)",
+      "by": "Wikipedia contributors",
+      "kind": "article",
+      "url": "https://en.wikipedia.org/wiki/Bayes%27_theorem",
+      "about": "The statement of Bayes' theorem, its odds form, and worked drug-test and symptom examples.",
+      "use": "As a reference for the formula, the odds form and the base-rate surprise.",
+      "free": true,
+      "checked": "2026-11-17",
+      "topics": [
+        "Bayes",
+        "odds",
+        "base rate"
+      ]
+    },
+    {
+      "id": "probabilitycourse-conditional",
+      "title": "Conditional probability (Introduction to Probability, Statistics, and Random Processes)",
+      "by": "Hossein Pishro-Nik",
+      "kind": "book",
+      "url": "https://www.probabilitycourse.com/chapter1/1_4_0_conditional_probability.php",
+      "about": "A textbook section defining conditional probability as shrinking the sample space, with the chain rule and worked examples.",
+      "use": "For the definition of conditional probability and more practice problems.",
+      "free": true,
+      "checked": "2026-11-17",
+      "topics": [
+        "conditional probability",
+        "chain rule"
+      ]
+    },
+    {
+      "id": "mit-18-05",
+      "title": "Introduction to Probability and Statistics (MIT 18.05, Spring 2022)",
+      "by": "Jeremy Orloff and Jennifer French Kamrin",
+      "kind": "course",
+      "url": "https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2022/",
+      "about": "A free undergraduate MIT course on probability and statistics that includes Bayesian inference.",
+      "use": "When you want a full course after the basics, with notes and problems.",
+      "free": true,
+      "checked": "2026-11-17",
+      "topics": [
+        "probability",
+        "Bayesian inference",
+        "statistics"
+      ]
+    },
+    {
+      "id": "seeing-theory-bayesian",
+      "title": "Seeing Theory: Bayesian Inference",
+      "by": "Brown University",
+      "kind": "article",
+      "url": "https://seeing-theory.brown.edu/bayesian-inference/index.html",
+      "about": "An interactive page where you set a disease's prevalence and a test's accuracy and see P(disease | positive).",
+      "use": "To play with base rates and test accuracy and watch the posterior move.",
+      "free": true,
+      "checked": "2026-11-17",
+      "topics": [
+        "Bayes",
+        "interactive",
+        "medical test"
+      ]
+    }
+  ]
+}
