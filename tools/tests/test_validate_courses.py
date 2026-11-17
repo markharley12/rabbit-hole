@@ -113,7 +113,9 @@ class Content(unittest.TestCase):
 
     def assertFails(self, needle):
         errors = self.errors()
-        self.assertTrue(any(needle in e for e in errors), f"no error containing {needle!r} in {errors}")
+        # jsonschema words an empty list differently across versions.
+        needles = (needle, "should be non-empty") if needle == "is too short" else (needle,)
+        self.assertTrue(any(n in e for e in errors for n in needles), f"no error containing {needle!r} in {errors}")
 
     def test_the_real_course_passes(self):
         self.assertEqual(self.errors(), [])
@@ -501,7 +503,9 @@ class Quizzes(unittest.TestCase):
 
     def assertFails(self, needle):
         errors = self.errors()
-        self.assertTrue(any(needle in e for e in errors), f"no error containing {needle!r} in {errors}")
+        # jsonschema words an empty list differently across versions.
+        needles = (needle, "should be non-empty") if needle == "is too short" else (needle,)
+        self.assertTrue(any(n in e for e in errors for n in needles), f"no error containing {needle!r} in {errors}")
 
     @staticmethod
     def choice(**change):
@@ -703,7 +707,9 @@ class Reading(unittest.TestCase):
 
     def assertFails(self, needle):
         errors = self.errors()
-        self.assertTrue(any(needle in e for e in errors), f"no error containing {needle!r} in {errors}")
+        # jsonschema words an empty list differently across versions.
+        needles = (needle, "should be non-empty") if needle == "is too short" else (needle,)
+        self.assertTrue(any(n in e for e in errors for n in needles), f"no error containing {needle!r} in {errors}")
 
     def first(self, **fields):
         return lambda d: d["resources"][0].update(fields)
